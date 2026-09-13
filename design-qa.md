@@ -1,5 +1,10 @@
 # Theme Fidelity v4 Design QA
 
+> **Historical audit status.** The blocked result below describes the retained v4
+> comparison package and is not retroactively changed. Current normal-route UI/Xcode
+> remediation evidence is recorded in
+> [`docs/verification/ui-xcode-remediation/QualificationSummary.md`](docs/verification/ui-xcode-remediation/QualificationSummary.md).
+
 ## Visual authority reviewed
 
 - `/Users/jimdaley/projects/Rune-Scribe-Theme-Fidelity-Remediation-v4.0/04-ASSETS/00-CONTROLLING-GOLDENS/Norse/norse-codex-controlling-board.png`

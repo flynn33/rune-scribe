@@ -223,9 +223,6 @@ enum ThemeFidelityQualificationRoute {
         model: ThemeFidelityQualificationRenderModel,
         session: RuneScribeUISession
     ) throws -> AnyView {
-        let workspaceViewportWidth = qualificationWorkspaceViewportWidth(
-            for: launch.destination
-        )
         switch launch.surface {
         case .workspaceEmpty:
             return AnyView(RootView(
@@ -238,9 +235,7 @@ enum ThemeFidelityQualificationRoute {
                     composition: model.shortPlan,
                     presentation: model.presentation
                 ),
-                initialComposeCaptureLength: .short,
-                forcesScrollableWorkspaceLayout: true,
-                qualificationViewportWidth: workspaceViewportWidth
+                initialComposeCaptureLength: .short
             ))
         case .composeLong:
             return AnyView(ContentView(
@@ -248,9 +243,7 @@ enum ThemeFidelityQualificationRoute {
                     composition: model.longPlan,
                     presentation: model.presentation
                 ),
-                initialComposeCaptureLength: .long,
-                forcesScrollableWorkspaceLayout: true,
-                qualificationViewportWidth: workspaceViewportWidth
+                initialComposeCaptureLength: .long
             ))
         case .inscriptionPreview:
             return AnyView(ThemeInscriptionPreviewView(
@@ -380,18 +373,14 @@ enum ThemeFidelityQualificationRoute {
                 initialSettledArtifact: ContentViewSettledArtifactSeed(
                     composition: model.highContrastPlan,
                     presentation: model.presentation
-                ),
-                forcesScrollableWorkspaceLayout: true,
-                qualificationViewportWidth: workspaceViewportWidth
+                )
             ))
         case .reduceMotion:
             return AnyView(ContentView(
                 initialSettledArtifact: ContentViewSettledArtifactSeed(
                     composition: model.reduceMotionPlan,
                     presentation: model.presentation
-                ),
-                forcesScrollableWorkspaceLayout: true,
-                qualificationViewportWidth: workspaceViewportWidth
+                )
             ))
         case .largeText:
             return AnyView(ContentView(
@@ -399,25 +388,9 @@ enum ThemeFidelityQualificationRoute {
                     composition: model.shortPlan,
                     presentation: model.presentation
                 ),
-                initialViewport: .resultActions,
-                forcesScrollableWorkspaceLayout: true,
-                qualificationViewportWidth: workspaceViewportWidth
+                initialViewport: .resultActions
             ))
         }
-    }
-
-    private static func qualificationWorkspaceViewportWidth(
-        for destination: ThemeFidelityQualificationLaunch.Destination
-    ) -> CGFloat? {
-        #if os(macOS)
-        switch destination {
-        case .macOSStandard: 720
-        case .macOSResized: 980
-        case .iPhonePortrait, .iPadPortrait: nil
-        }
-        #else
-        nil
-        #endif
     }
 
     private static let receivedCipherID = UUID(

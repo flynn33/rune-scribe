@@ -42,13 +42,6 @@ enum CodexMessagePanelFormat: String, Equatable, Sendable {
         }
     }
 
-    var lineCountLabel: String {
-        switch self {
-        case .short: "2 Lines"
-        case .long: "6 Lines"
-        }
-    }
-
     var relicWidthFraction: CGFloat {
         switch self {
         case .short: 0.93
@@ -224,11 +217,17 @@ struct CodexMessagePanelModel: Equatable, Sendable {
         self.pageIndex = pageIndex
     }
 
-    var page: ShareArtifactRenderPage {
+    var page: ShareArtifactRenderPage? {
         guard composition.pages.indices.contains(pageIndex) else {
-            return composition.pages[0]
+            return composition.pages.first
         }
         return composition.pages[pageIndex]
+    }
+
+    var pageStatusLabel: String {
+        guard !composition.pages.isEmpty else { return "Preview unavailable" }
+        let boundedIndex = composition.pages.indices.contains(pageIndex) ? pageIndex : 0
+        return "Page \(boundedIndex + 1) of \(composition.pages.count)"
     }
 
     var requiredImageResourceIDs: Set<ThemeResourceID> {
@@ -260,9 +259,9 @@ struct CodexSharePreviewCardModel: Equatable, Sendable {
         self.pageIndex = pageIndex
     }
 
-    var page: ShareArtifactRenderPage {
+    var page: ShareArtifactRenderPage? {
         guard composition.pages.indices.contains(pageIndex) else {
-            return composition.pages[0]
+            return composition.pages.first
         }
         return composition.pages[pageIndex]
     }
@@ -805,14 +804,20 @@ struct CodexComposeWorkspacePanel: View {
         compact: Bool
     ) -> some View {
         Button { navigate(item) } label: {
-            VStack(spacing: 5 * scale) {
+            VStack(spacing: 5) {
                 Image(systemName: item.systemImage)
-                    .font(.system(size: (compact ? 14 : 21) * scale, weight: .medium))
+                    .font(compact ? .caption : .body)
                 Text(item.rawValue)
-                    .font(.runic((compact ? 9 : 12) * scale))
+                    .font(.caption)
             }
             .foregroundStyle(item == .compose ? Color.runeTextPrimary : Color.runeSilver)
-            .frame(maxWidth: .infinity, minHeight: (compact ? 36 : 62) * scale)
+            .frame(
+                maxWidth: .infinity,
+                minHeight: max(
+                    minimumInteractiveDimension,
+                    (compact ? 36 : 62) * scale
+                )
+            )
             .background {
                 if item == .compose {
                     RoundedRectangle(cornerRadius: 8 * scale, style: .continuous)
@@ -860,9 +865,9 @@ struct CodexComposeWorkspacePanel: View {
 
             Button(action: performPrimaryAction) {
                 Text(model.primaryActionTitle)
-                    .font(.runic(17 * scale))
+                    .font(.headline)
                     .foregroundStyle(Color.runeTextPrimary)
-                    .frame(maxWidth: .infinity, minHeight: 45 * scale)
+                    .frame(maxWidth: .infinity, minHeight: minimumInteractiveDimension)
                     .background(Color.runeAccentSecondary.opacity(0.54))
                     .overlay { ThemeChromeImage(slot: .primaryButton).opacity(0.36) }
                     .clipShape(RoundedRectangle(cornerRadius: 8 * scale, style: .continuous))
@@ -881,7 +886,7 @@ struct CodexComposeWorkspacePanel: View {
     ) -> some View {
         HStack(spacing: 10 * scale) {
             Text(title)
-                .font(.runic(15 * scale))
+                .font(.callout.weight(.semibold))
                 .foregroundStyle(Color.runeTextPrimary)
                 .frame(width: 75 * scale, alignment: .leading)
             Button(action: action) {
@@ -895,9 +900,9 @@ struct CodexComposeWorkspacePanel: View {
                     Image(systemName: "chevron.down")
                         .font(.caption2.weight(.semibold))
                 }
-                .font(.runic(14 * scale))
+                .font(.body)
                 .foregroundStyle(Color.runeTextPrimary)
-                .frame(maxWidth: .infinity, minHeight: 43 * scale)
+                .frame(maxWidth: .infinity, minHeight: minimumInteractiveDimension)
                 .padding(.horizontal, 12 * scale)
                 .background(Color.runeParchment.opacity(0.82))
                 .clipShape(RoundedRectangle(cornerRadius: 7 * scale, style: .continuous))
@@ -905,6 +910,14 @@ struct CodexComposeWorkspacePanel: View {
             }
             .buttonStyle(.plain)
         }
+    }
+
+    private var minimumInteractiveDimension: CGFloat {
+        #if os(iOS)
+        44
+        #else
+        28
+        #endif
     }
 }
 
@@ -976,7 +989,7 @@ struct CodexMessagePanel: View {
                                 fontName: model.composition.fontPostScriptName
                             ))
                             .fontWidth(.compressed)
-                        Text("(\(model.format.lineCountLabel.uppercased()))")
+                        Text("(\(model.pageStatusLabel.uppercased()))")
                             .font(.runic(
                                 geometry.size.width
                                     * model.format.headingSubtitleFontWidthFraction,
@@ -987,20 +1000,27 @@ struct CodexMessagePanel: View {
                     .foregroundStyle(Color.runeTextPrimary.opacity(0.84))
                     .multilineTextAlignment(.center)
 
-                    CodexRelicMessageCanvas(
-                        composition: model.composition,
-                        page: model.page,
-                        image: image,
-                        sizing: .fillComponentSlot
-                    )
-                    .frame(
-                        width: geometry.size.width * model.format.relicWidthFraction,
-                        height: geometry.size.height * model.format.relicHeightFraction
-                    )
-                    .offset(
-                        y: geometry.size.height
-                            * model.format.artworkVerticalOffsetFraction
-                    )
+                    if let page = model.page {
+                        CodexRelicMessageCanvas(
+                            composition: model.composition,
+                            page: page,
+                            image: image,
+                            sizing: .fillComponentSlot
+                        )
+                        .frame(
+                            width: geometry.size.width * model.format.relicWidthFraction,
+                            height: geometry.size.height * model.format.relicHeightFraction
+                        )
+                        .offset(
+                            y: geometry.size.height
+                                * model.format.artworkVerticalOffsetFraction
+                        )
+                    } else {
+                        ThemeVisualPlaceholder(
+                            systemImage: "photo.artframe",
+                            label: "Artifact preview unavailable"
+                        )
+                    }
 
                     Spacer(minLength: 0)
                 }
@@ -1013,7 +1033,7 @@ struct CodexMessagePanel: View {
             .overlay { CodexAssemblyBorder(inset: 4) }
         }
         .accessibilityElement(children: .contain)
-        .accessibilityLabel("\(model.format.title), \(model.format.lineCountLabel)")
+        .accessibilityLabel("\(model.format.title), \(model.pageStatusLabel)")
         .accessibilityIdentifier("theme.artifact-preview")
         .runtimeViewportFrameProbe("theme.artifact-preview")
     }
@@ -1114,20 +1134,22 @@ struct CodexSharePreviewCard: View {
                         y: geometry.size.height * 0.060
                     )
 
-                CodexRelicMessageCanvas(
-                    composition: model.composition,
-                    page: model.page,
-                    image: image,
-                    sizing: .fillComponentSlot
-                )
-                .frame(
-                    width: geometry.size.width * 0.70,
-                    height: geometry.size.height * 0.516
-                )
-                .position(
-                    x: geometry.size.width * 0.55,
-                    y: geometry.size.height * 0.504
-                )
+                if let page = model.page {
+                    CodexRelicMessageCanvas(
+                        composition: model.composition,
+                        page: page,
+                        image: image,
+                        sizing: .fillComponentSlot
+                    )
+                    .frame(
+                        width: geometry.size.width * 0.70,
+                        height: geometry.size.height * 0.516
+                    )
+                    .position(
+                        x: geometry.size.width * 0.55,
+                        y: geometry.size.height * 0.504
+                    )
+                }
 
                 Image(systemName: "checkmark")
                     .font(.system(size: unit * 0.042, weight: .semibold))

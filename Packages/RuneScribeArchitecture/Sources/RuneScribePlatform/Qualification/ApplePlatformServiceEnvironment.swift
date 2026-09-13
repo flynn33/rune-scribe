@@ -46,15 +46,27 @@ public struct ApplePlatformServiceEnvironment: Sendable {
                 "RuneScribeThemeFidelity-\(ProcessInfo.processInfo.processIdentifier)-\(UUID().uuidString)",
                 isDirectory: true
             )
-        return Self(
+        return isolatedEnvironment(
+            root: root,
             secureValues: IsolatedSecureValueStore(),
+            inboundFiles: IsolatedInboundFileReader()
+        )
+    }
+
+    @MainActor private static func isolatedEnvironment(
+        root: URL,
+        secureValues: any SecureValueStore,
+        inboundFiles: any InboundFileReader
+    ) -> Self {
+        return Self(
+            secureValues: secureValues,
             protectedFiles: AppleProtectedFileStore(
                 applicationSupportDirectory: root.appendingPathComponent(
                     "ApplicationSupport",
                     isDirectory: true
                 )
             ),
-            inboundFiles: IsolatedInboundFileReader(),
+            inboundFiles: inboundFiles,
             shareArtifacts: AppleShareArtifactStore(temporaryDirectory: root),
             contacts: IsolatedContactAccessService(),
             cloudSync: IsolatedCloudSyncTransport(),
@@ -70,6 +82,43 @@ public struct ApplePlatformServiceEnvironment: Sendable {
                 )
             )
         )
+    }
+
+    @_spi(ThemeFidelityQualification)
+    @MainActor public static func normalRoute(
+        processEnvironment: [String: String],
+        moduleStateStore: @autoclosure () -> (any ModuleStateStore)?,
+        inboundFiles: @autoclosure () -> any InboundFileReader,
+        cloudSync: (any CloudSyncTransport)?
+    ) -> Self {
+        if usesIsolatedNormalRoute(processEnvironment) {
+            let identity = Bundle.main.bundleIdentifier ?? "unknown"
+            let root = FileManager.default.temporaryDirectory.appendingPathComponent(
+                "RuneScribeNormalRoute-\(identity)",
+                isDirectory: true
+            )
+            return .isolatedEnvironment(
+                root: root,
+                secureValues: IsolatedPersistentSecureValueStore(
+                    fileURL: root.appendingPathComponent("secure-values.json")
+                ),
+                inboundFiles: inboundFiles()
+            )
+        }
+        return Self(
+            moduleStateStore: moduleStateStore(),
+            inboundFiles: inboundFiles(),
+            cloudSync: cloudSync
+        )
+    }
+
+    @_spi(ThemeFidelityQualification)
+    public static func usesIsolatedNormalRoute(_ environment: [String: String]) -> Bool {
+        #if DEBUG
+        environment["RUNESCRIBE_ISOLATED_NORMAL_ROUTE"] == "1"
+        #else
+        false
+        #endif
     }
 
     private init(
@@ -122,6 +171,50 @@ private actor IsolatedSecureValueStore: SecureValueStore {
             service: service,
             account: account
         ))
+    }
+}
+
+private actor IsolatedPersistentSecureValueStore: SecureValueStore {
+    private let fileURL: URL
+
+    init(fileURL: URL) {
+        self.fileURL = fileURL
+    }
+
+    func data(service: String, account: String) async throws -> Data? {
+        guard let encoded = try values()[key(service: service, account: account)] else {
+            return nil
+        }
+        return Data(base64Encoded: encoded)
+    }
+
+    func set(_ data: Data, service: String, account: String) async throws {
+        var stored = try values()
+        stored[key(service: service, account: account)] = data.base64EncodedString()
+        try persist(stored)
+    }
+
+    func delete(service: String, account: String) async throws {
+        var stored = try values()
+        stored.removeValue(forKey: key(service: service, account: account))
+        try persist(stored)
+    }
+
+    private func key(service: String, account: String) -> String {
+        Data("\(service)\u{0}\(account)".utf8).base64EncodedString()
+    }
+
+    private func values() throws -> [String: String] {
+        guard FileManager.default.fileExists(atPath: fileURL.path) else { return [:] }
+        return try JSONDecoder().decode([String: String].self, from: Data(contentsOf: fileURL))
+    }
+
+    private func persist(_ values: [String: String]) throws {
+        try FileManager.default.createDirectory(
+            at: fileURL.deletingLastPathComponent(),
+            withIntermediateDirectories: true
+        )
+        try JSONEncoder().encode(values).write(to: fileURL, options: .atomic)
     }
 }
 

@@ -348,8 +348,8 @@ errors << "platform marketing versions differ" unless marketing_versions.uniq.le
 errors << "platform build numbers differ" unless build_versions.uniq.length == 1
 errors << "marketing version is malformed" unless marketing_versions.first.to_s.match?(/\A\d+(?:\.\d+){1,2}\z/)
 errors << "build number is malformed" unless build_versions.first.to_s.match?(/\A\d+\z/)
-errors << "built marketing version differs from frozen 1.0.40" unless marketing_versions == ["1.0.40", "1.0.40"]
-errors << "built build number differs from frozen 40" unless build_versions == ["40", "40"]
+errors << "built marketing version differs from current 1.0.41" unless marketing_versions == ["1.0.41", "1.0.41"]
+errors << "built build number differs from current 41" unless build_versions == ["41", "41"]
 
 puts errors
 exit(errors.empty? ? 0 : 1)
@@ -942,7 +942,7 @@ expected = {
   ],
   "module-manifest.json" => [
     2494,
-    "565c942da781bbfd868a6c2f1e2fc904b5cadfc70eb9c0a04efe9b5ef0501af6"
+    "34588066f7788a350354d6efd92094129dba12b9cbf95bb0f1e5e9c47e9c34a9"
   ]
 }
 
@@ -1238,7 +1238,7 @@ non_theme_resource_contracts = {
     files: {
       "module-manifest.json" => [
         3_084,
-        "5d52a770e501dc1539080d4039bcd6aba2c974cb739b172aa8583558adc0a073"
+        "83742169d2ed6c3468304d9a952bb70a90ba74c068bd3c6c278d2c8c6923e77e"
       ]
     }
   }
@@ -2116,9 +2116,9 @@ errors << "project.yml package declarations differ" unless project.fetch("packag
 
 base_settings = project.dig("settings", "base")
 unless base_settings.is_a?(Hash) &&
-    base_settings["MARKETING_VERSION"] == "1.0.40" &&
-    base_settings["CURRENT_PROJECT_VERSION"] == "40"
-  errors << "project.yml version/build differ from frozen 1.0.40 (40)"
+    base_settings["MARKETING_VERSION"] == "1.0.41" &&
+    base_settings["CURRENT_PROJECT_VERSION"] == "41"
+  errors << "project.yml version/build differ from current 1.0.41 (41)"
 end
 
 expected_macos_entitlements = {
@@ -2575,9 +2575,9 @@ end
 
 configurations_for(objects, project_object, "generated project", errors).each do |configuration|
   settings = configuration.fetch("buildSettings", {})
-  unless settings["MARKETING_VERSION"] == "1.0.40" &&
-      settings["CURRENT_PROJECT_VERSION"] == "40"
-    errors << "generated project #{configuration['name']} version/build differ from frozen 1.0.40 (40)"
+  unless settings["MARKETING_VERSION"] == "1.0.41" &&
+      settings["CURRENT_PROJECT_VERSION"] == "41"
+    errors << "generated project #{configuration['name']} version/build differ from current 1.0.41 (41)"
   end
   forbidden_build_settings.each do |setting|
     errors << "generated project #{configuration['name']} injects #{setting}" if settings.key?(setting)

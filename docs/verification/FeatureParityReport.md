@@ -5,6 +5,9 @@
 > policy. They do not affect acceptance, completion, blocker status, residual work,
 > PASS/FAIL, or pull-request readiness. Current status is governed by the
 > [Forsetti supersession index](../architecture/ForsettiSupersessionIndex.md).
+> Current UI/Xcode remediation and normal-route device evidence are recorded in
+> [`ui-xcode-remediation/QualificationSummary.md`](ui-xcode-remediation/QualificationSummary.md);
+> this snapshot is not relabeled as current-source evidence.
 
 ## Result
 

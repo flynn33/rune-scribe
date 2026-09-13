@@ -1,7 +1,12 @@
 # Rune Scribe Support
 
-**Current product source:** version 1.0.40 (build 40)
-**Publication boundary:** repository-qualified release candidate; not shipped
+**Current product source:** version 1.0.41 (build 41)
+**Publication boundary:** current UI/Xcode remediation candidate; not shipped
+
+Current source-bound results and screenshots are indexed in the
+[UI/Xcode remediation qualification](verification/ui-xcode-remediation/QualificationSummary.md).
+The version 1.0.40 counts below are retained historical context and are not evidence for
+the new candidate.
 
 Final-source qualification passes the Swift and Python suites, the executable 17-ratchet
 architecture guard, roadmap/documentation guards, exact-resource validators, and
@@ -25,6 +30,9 @@ superseded v4.3 package audit is noncontrolling verification history.
 - After encoding, **Quick Share** uses the current validated per-Codex defaults. Use
   **Customize Share** to choose a Codex, Relic, optional Seal/Frame, and effects policy
   for that operation without changing the cipher or re-encrypting the message.
+- Long themed output is presented in the canonical Artifact preview with truthful
+  `Page n of m` navigation. Use Previous and Next to review every page; rotating an
+  iPhone/iPad or resizing the Mac window preserves the selected page.
 - On iOS, a Messages attachment can open directly in Rune Scribe. macOS does not claim
   automatic Messages import; use the file, Import, or a `runescribe://` link.
 - A first-delivery message can show a decrypted preview, but its embedded cipher and
@@ -68,6 +76,10 @@ local progression, or product shippability.
 App Lock uses a four-digit PIN. Rune Scribe cannot reveal a forgotten PIN. Follow the
 in-app reset flow only after understanding its local-data effect. Repeated incorrect
 attempts trigger an escalating delay that persists across relaunches.
+
+Received plaintext remains complete, selectable, and reflows within the available
+width. Rune Scribe does not label a message with a false line count or hide the rest
+behind an inactive disclosure control.
 
 If a themed preview cannot be rendered, Rune Scribe preserves the underlying secure
 share and clearly reports that the standard legacy appearance was used. If an import

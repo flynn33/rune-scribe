@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "1.0",
+  "status": "COMPLETE_PENDING_PUBLICATION_IDENTITY",
+  "candidate": "1.0.41 (41)",
+  "repositoryDocuments": [
+    {"path": "README.md", "disposition": "CHANGED", "reason": "current version, schemes, repaired workflow, qualification link and shipment boundary"},
+    {"path": "CHANGELOG.md", "disposition": "CHANGED", "reason": "user-visible fixes and qualified regression scope"},
+    {"path": "design-qa.md", "disposition": "CHANGED", "reason": "historical result distinguished from current source-bound qualification"},
+    {"path": "docs/APP_STORE_SUBMISSION.md", "disposition": "CHANGED", "reason": "candidate facts and explicit owner-only submission boundary"},
+    {"path": "docs/PRIVACY.md", "disposition": "CHANGED", "reason": "factual App Lock and local import clarification"},
+    {"path": "docs/SUPPORT.md", "disposition": "CHANGED", "reason": "current preview paging, selection, receive and sharing behavior"},
+    {"path": "docs/platform-notes.md", "disposition": "CHANGED", "reason": "responsive behavior and platform-specific verification"},
+    {"path": "docs/architecture/ModuleGraph.md", "disposition": "CHANGED", "reason": "layout and runtime ownership responsibilities"},
+    {"path": "docs/architecture/RoadmapAlignment.md", "disposition": "CHANGED", "reason": "current remediation status and evidence link"},
+    {"path": "docs/architecture/ForsettiCompliance.md", "disposition": "CHANGED", "reason": "report-only P11 boundary recorded"},
+    {"path": "docs/product-roadmap/Rune-Scribe-UI-Xcode-Remediation-Amendment-2026-09.md", "disposition": "ADDED", "reason": "dated remediation mapping without rewriting locked historical specifications"},
+    {"path": "docs/verification/BuildAndTestReport.md", "disposition": "CHANGED", "reason": "current source-bound report link"},
+    {"path": "docs/verification/FeatureParityReport.md", "disposition": "CHANGED", "reason": "current source-bound report link"},
+    {"path": "docs/verification/roadmap-alignment.json", "disposition": "CHANGED", "reason": "supported current remediation evidence fields"},
+    {"path": "project.yml", "disposition": "CHANGED", "reason": "version/build, macOS UI test target and scheme wiring"},
+    {"path": "RuneScrib.xcodeproj/project.pbxproj", "disposition": "CHANGED", "reason": "deterministically generated project matches project.yml"},
+    {"path": "RuneScrib.xcodeproj/xcshareddata/xcschemes/RuneScrib-macOS.xcscheme", "disposition": "CHANGED", "reason": "shipping macOS UI test target included"}
+  ],
+  "wikiPages": [
+    {"path": "Home.md", "disposition": "CHANGED", "reason": "candidate status and qualification link"},
+    {"path": "Getting-Started.md", "disposition": "CHANGED", "reason": "current supported workflow and five Codices"},
+    {"path": "Sending-Messages.md", "disposition": "CHANGED", "reason": "full-payload paging and sharing"},
+    {"path": "Sharing-and-Decoding.md", "disposition": "CHANGED", "reason": "receive/share behavior and key disclosure"},
+    {"path": "App-Lock.md", "disposition": "CHANGED", "reason": "protected-content removal and draft restoration"},
+    {"path": "Architecture.md", "disposition": "CHANGED", "reason": "single responsive production layout responsibility"},
+    {"path": "Building-and-Releasing.md", "disposition": "CHANGED", "reason": "current Xcode schemes, version and owner-only shipment"},
+    {"path": "Roadmap.md", "disposition": "CHANGED", "reason": "remediation closure status"},
+    {"path": "FAQ.md", "disposition": "CHANGED", "reason": "paging and platform behavior"}
+  ],
+  "reviewedNoChange": [
+    {"path": "docs/product-roadmap/v1.0-Roadmap.md", "reason": "locked historical roadmap preserved"},
+    {"path": "docs/architecture/FORSETTI_CONTROLLING_POLICY.md", "reason": "controlling policy preserved unchanged"},
+    {"path": "Config/RuneScrib-iOS-Info.plist", "reason": "version inherits project settings and remains aligned"},
+    {"path": "Config/RuneScrib-macOS-Info.plist", "reason": "version inherits project settings and remains aligned"},
+    {"path": "Config/RuneScrib-iOS.entitlements", "reason": "shipping entitlements preserved"},
+    {"path": "Config/RuneScrib-macOS.entitlements", "reason": "shipping entitlements preserved"}
+  ],
+  "publication": {"mainRepository": "PENDING_FINAL_INTEGRATION", "wiki": "PENDING_FINAL_PUSH"}
+}

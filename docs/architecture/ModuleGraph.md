@@ -1,5 +1,9 @@
 # Rune Scribe Module Graph
 
+Current Core, Progression, and UI module version `1.0.41` matches the application
+candidate. Theme provider versions remain independently governed by their accepted
+resource contracts.
+
 > **Superseded architecture snapshot:** This graph records the pre-remediation layout. The [controlling Forsetti policy](FORSETTI_CONTROLLING_POLICY.md) governs current boundaries; historical target, build, and test observations remain evidence.
 
 ## Graph conventions

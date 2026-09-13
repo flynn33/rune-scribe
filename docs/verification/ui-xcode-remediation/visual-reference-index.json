@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "1.0",
+  "sourceCommitC": "735b0e70f0dda5d22fe5e57ce48d7998ba308629",
+  "sourceFingerprintD": "f2a028d520420996a3037099542eecea445afdc422782377aff29a6b0b5b049a",
+  "inspection": "PASS",
+  "notes": "Images were inspected for artwork identity, readable hierarchy, one canonical result surface, truthful paging and complete framing. Approved artwork was unchanged.",
+  "captures": [
+    {"codex": "Gloamthorn", "platform": "iPhone 17 Pro Simulator", "scenario": "compose-long", "path": "screenshots/gloamthorn-compose-long-iphone.png", "pixelSize": "1206x2622", "sha256": "c343fe5de6a4d670ac7dcf728bd810fb6b41f0c897c6c97df62228351cd32a40", "reference": "docs/verification/theme-fidelity-v4-3/inventory/recipes/Gloamthorn-Accepted-Source-Master-Recipe-v4.3.json"},
+    {"codex": "Wildwood", "platform": "iPhone 17 Pro Simulator", "scenario": "compose-long", "path": "screenshots/wildwood-compose-long-iphone.png", "pixelSize": "1206x2622", "sha256": "dcd13186a799d7618b2baf2879655d6cef8c22f89852f69fcc2ee826fba26d04", "reference": "docs/verification/theme-fidelity-v4-3/inventory/recipes/Wildwood-Accepted-Source-Master-Recipe-v4.3.json"},
+    {"codex": "Sunspire", "platform": "iPhone 17 Pro Simulator", "scenario": "compose-long", "path": "screenshots/sunspire-compose-long-iphone.png", "pixelSize": "1206x2622", "sha256": "880e75b7b76fa58d6906e2b95b754a04077ad76848b24e9332396633112467df", "reference": "docs/verification/theme-fidelity-v4-3/inventory/recipes/Sunspire-Accepted-Source-Master-Recipe-v4.3.json"},
+    {"codex": "Moonleaf", "platform": "iPhone 17 Pro Simulator", "scenario": "compose-long", "path": "screenshots/moonleaf-compose-long-iphone.png", "pixelSize": "1206x2622", "sha256": "e758c3e7d983f01b41eb7d0bd74891f38646e6179b21ac211938dfce1a9f7e1f", "reference": "docs/verification/theme-fidelity-v4-3/inventory/recipes/Moonleaf-Accepted-Source-Master-Recipe-v4.3.json"},
+    {"codex": "Norse", "platform": "iPhone 17 Pro Simulator", "scenario": "compose-long", "path": "screenshots/norse-compose-long-iphone.png", "pixelSize": "1206x2622", "sha256": "11025e4b7191ccc8f17e741a75981f7ea760dbb668a5e7e37acb3fbec6e5946a", "reference": "docs/verification/theme-fidelity-v4/source-masters/norse/runestone-tablet-authoring.png"},
+    {"codex": "Norse", "platform": "iPad (A16) Simulator", "scenario": "share-renderer-output", "path": "screenshots/norse-share-builder-ipad.png", "pixelSize": "1200x900", "sha256": "93694c0605e6a44e9e18e6c682f965479a6e31e1abc57120770d2d02133316df", "reference": "docs/verification/theme-fidelity-v4-3/source-masters/norse/runestone-tablet-message-static-extraction.json"},
+    {"codex": "Norse", "platform": "macOS", "scenario": "compose-long", "path": "screenshots/norse-compose-long-macos.png", "pixelSize": "720x900", "sha256": "cbc40d35a5d3a466c08d0024eaecc2f455a1f5177ee89a7e8f9425cbe2044790", "reference": "docs/verification/theme-fidelity-v4/source-masters/norse/runestone-tablet-authoring.png"}
+  ]
+}

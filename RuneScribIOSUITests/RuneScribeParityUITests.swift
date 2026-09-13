@@ -66,6 +66,7 @@ final class RuneScribeParityUITests: XCTestCase {
 
     func testNorseVisualPresentationAndScreenshots() throws {
         let app = XCUIApplication()
+        app.launchEnvironment["RUNESCRIBE_ISOLATED_NORMAL_ROUTE"] = "1"
         app.launch()
 
         let skipIntro = app.buttons["Skip intro"]
@@ -327,6 +328,92 @@ final class RuneScribeParityUITests: XCTestCase {
         keepScreenshot(app, named: isPad ? "ipad-vault-norse" : "iphone-vault-norse")
     }
 
+    func testLongArtifactPagesRemainContainedAcrossPagingAndRotation() {
+        let app = XCUIApplication()
+        app.launchEnvironment["RUNESCRIBE_ISOLATED_NORMAL_ROUTE"] = "1"
+        app.launch()
+
+        let skipIntro = app.buttons["Skip intro"]
+        if skipIntro.waitForExistence(timeout: 12) {
+            skipIntro.tap()
+        }
+
+        let relicThumbnail = app.descendants(matching: .any)[
+            "theme.artifact-thumbnail.relic.norse.runestone-tablet"
+        ].firstMatch
+        XCTAssertTrue(relicThumbnail.waitForExistence(timeout: 15), app.debugDescription)
+
+        let editor = app.textViews.matching(
+            NSPredicate(format: "label == %@", "Message to encode")
+        ).firstMatch
+        XCTAssertTrue(editor.waitForExistence(timeout: 8), app.debugDescription)
+        editor.tap()
+        editor.typeText(String(repeating: "A", count: 300))
+
+        let encode = app.buttons["RUNE SCRIBE"]
+        XCTAssertTrue(encode.waitForExistence(timeout: 8), app.debugDescription)
+        encode.tap()
+
+        let preview = app.descendants(matching: .any)["theme.artifact-preview"].firstMatch
+        let relicPreview = app.descendants(matching: .any)[
+            "theme.artifact-preview.relic.norse.runestone-tablet"
+        ].firstMatch
+        XCTAssertTrue(preview.waitForExistence(timeout: 15), app.debugDescription)
+        XCTAssertTrue(relicPreview.waitForExistence(timeout: 15), app.debugDescription)
+        assertFourByThree(relicPreview)
+        assertHorizontallyContained(relicPreview, in: app.windows.firstMatch.frame)
+
+        let firstPage = app.staticTexts.matching(
+            NSPredicate(format: "label BEGINSWITH %@", "Page 1 of ")
+        ).firstMatch
+        XCTAssertTrue(firstPage.waitForExistence(timeout: 8), app.debugDescription)
+        let nextPage = app.buttons["theme.artifact-preview.next-page"]
+        let previousPage = app.buttons["theme.artifact-preview.previous-page"]
+        XCTAssertTrue(nextPage.waitForExistence(timeout: 5), app.debugDescription)
+        XCTAssertTrue(previousPage.waitForExistence(timeout: 5), app.debugDescription)
+        assertUsableHitRegion(nextPage)
+        assertUsableHitRegion(previousPage)
+        XCTAssertFalse(previousPage.isEnabled)
+
+        nextPage.tap()
+        let secondPage = app.staticTexts.matching(
+            NSPredicate(format: "label BEGINSWITH %@", "Page 2 of ")
+        ).firstMatch
+        XCTAssertTrue(secondPage.waitForExistence(timeout: 5), app.debugDescription)
+        XCTAssertTrue(previousPage.isEnabled)
+
+        let isPad = app.windows.firstMatch.frame.width >= 700
+        keepScreenshot(
+            app,
+            named: isPad ? "ipad-long-artifact-page-2" : "iphone-long-artifact-page-2"
+        )
+
+        XCUIDevice.shared.orientation = .landscapeLeft
+        let landscapeWindow = app.windows.firstMatch
+        let rotationDeadline = Date().addingTimeInterval(5)
+        while landscapeWindow.frame.width <= landscapeWindow.frame.height,
+              Date() < rotationDeadline {
+            RunLoop.current.run(until: Date().addingTimeInterval(0.1))
+        }
+        XCTAssertGreaterThan(
+            landscapeWindow.frame.width,
+            landscapeWindow.frame.height,
+            app.debugDescription
+        )
+        scrollUntilVisible(preview, in: app)
+        XCTAssertTrue(secondPage.exists, app.debugDescription)
+        assertFourByThree(relicPreview)
+        assertHorizontallyContained(relicPreview, in: landscapeWindow.frame)
+        assertUsableHitRegion(nextPage)
+        assertUsableHitRegion(previousPage)
+        keepScreenshot(
+            app,
+            named: isPad
+                ? "ipad-long-artifact-landscape"
+                : "iphone-long-artifact-landscape"
+        )
+    }
+
     func testShareBuilderControlsExposeStableAccessibilityState() throws {
         let app = XCUIApplication()
         app.launch()
@@ -416,7 +503,6 @@ final class RuneScribeParityUITests: XCTestCase {
 
         XCTAssertTrue(app.buttons["Settings"].waitForExistence(timeout: 15), app.debugDescription)
         openCipherLibrary(in: app)
-        dismissContactsPromptIfPresent(in: app)
 
         let share = app.buttons.matching(identifier: "cipher.primary-share").firstMatch
         let customize = app.buttons.matching(identifier: "cipher.customize-share").firstMatch
@@ -428,14 +514,34 @@ final class RuneScribeParityUITests: XCTestCase {
         assertUsableHitRegion(customize)
     }
 
+    func testIsolatedNormalRouteReadsInboundCipherFiles() throws {
+        let app = XCUIApplication()
+        app.launchEnvironment["RUNESCRIBE_ISOLATED_NORMAL_ROUTE"] = "1"
+        app.open(try makeCipherFixtureFile())
+        dismissSplashIfPresent(in: app)
+
+        XCTAssertTrue(
+            app.staticTexts["SHARED CIPHER"].waitForExistence(timeout: 8),
+            app.debugDescription
+        )
+        XCTAssertEqual(app.textFields["Cipher name"].value as? String, "Imported Cipher")
+        app.buttons["Import"].tap()
+        XCTAssertTrue(app.buttons["Active cipher: Imported Cipher"].waitForExistence(timeout: 8))
+
+        app.open(Self.legacyImportURL)
+        dismissSplashIfPresent(in: app)
+        XCTAssertTrue(app.staticTexts["SHARED CIPHER"].waitForExistence(timeout: 8))
+        app.buttons["Import"].tap()
+        XCTAssertTrue(app.buttons["Active cipher: Baseline Legacy"].waitForExistence(timeout: 8))
+        openCipherLibrary(in: app)
+        XCTAssertTrue(app.staticTexts["3 ciphers"].waitForExistence(timeout: 8), app.debugDescription)
+    }
+
     func testFreshInstallExercisesPrimaryProductFlows() throws {
         let app = XCUIApplication()
+        app.launchEnvironment["RUNESCRIBE_ISOLATED_NORMAL_ROUTE"] = "1"
         app.open(Self.customImportURL)
-
-        let skipIntro = app.buttons["Skip intro"]
-        if skipIntro.waitForExistence(timeout: 12) {
-            skipIntro.tap()
-        }
+        dismissSplashIfPresent(in: app)
 
         XCTAssertTrue(app.staticTexts["SHARED CIPHER"].waitForExistence(timeout: 8))
         XCTAssertEqual(app.textFields["Cipher name"].value as? String, "Baseline Custom")
@@ -524,6 +630,17 @@ final class RuneScribeParityUITests: XCTestCase {
         enterPIN("1234", in: app)
         XCTAssertTrue(app.staticTexts["PIN set"].waitForExistence(timeout: 8))
 
+        tapCloseControl(in: app)
+        let protectedDraft = app.textViews.matching(
+            NSPredicate(format: "label == %@", "Message to encode")
+        ).firstMatch
+        XCTAssertTrue(protectedDraft.waitForExistence(timeout: 8), app.debugDescription)
+        replaceText(in: protectedDraft, with: "Protected draft")
+        let doneAfterDraft = app.buttons.matching(
+            identifier: "workspace.keyboard.done"
+        ).firstMatch
+        if doneAfterDraft.exists { doneAfterDraft.tap() }
+
         XCUIDevice.shared.press(.home)
         let backgroundDeadline = Date().addingTimeInterval(8)
         while app.state != .runningBackground, Date() < backgroundDeadline {
@@ -536,8 +653,24 @@ final class RuneScribeParityUITests: XCTestCase {
             app.staticTexts["Enter PIN"].waitForExistence(timeout: 8),
             app.debugDescription
         )
+        XCTAssertFalse(app.buttons["Settings"].exists, app.debugDescription)
+        XCTAssertFalse(
+            app.textViews.matching(
+                NSPredicate(format: "label == %@", "Message to encode")
+            ).firstMatch.exists,
+            app.debugDescription
+        )
         enterPIN("1234", in: app)
         XCTAssertTrue(app.buttons["Settings"].waitForExistence(timeout: 8))
+        let restoredDraft = app.textViews.matching(
+            NSPredicate(format: "label == %@", "Message to encode")
+        ).firstMatch
+        XCTAssertEqual(restoredDraft.value as? String, "Protected draft")
+        replaceText(in: restoredDraft, with: "")
+        let doneAfterRestore = app.buttons.matching(
+            identifier: "workspace.keyboard.done"
+        ).firstMatch
+        if doneAfterRestore.exists { doneAfterRestore.tap() }
         app.buttons["Settings"].tap()
         XCTAssertTrue(app.staticTexts["SETTINGS"].waitForExistence(timeout: 5))
         let changePIN = app.buttons["Change PIN"]
@@ -562,7 +695,6 @@ final class RuneScribeParityUITests: XCTestCase {
         tapCloseControl(in: app)
 
         openCipherLibrary(in: app)
-        dismissContactsPromptIfPresent(in: app)
         XCTAssertTrue(app.staticTexts["CIPHER LIBRARY"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.buttons["Import…"].exists)
         XCTAssertTrue(app.buttons["Scan QR Code"].exists)
@@ -646,6 +778,7 @@ final class RuneScribeParityUITests: XCTestCase {
 
         let firstDeliveryShare = app.buttons["message.customize-share"]
         XCTAssertTrue(firstDeliveryShare.waitForExistence(timeout: 12), app.debugDescription)
+        scrollUntilVisible(firstDeliveryShare, in: app, direction: .towardBottom)
         XCTAssertTrue(firstDeliveryShare.isHittable, app.debugDescription)
         firstDeliveryShare.tap()
         let firstDeliveryIsPad = app.windows.firstMatch.frame.width >= 700
@@ -706,6 +839,7 @@ final class RuneScribeParityUITests: XCTestCase {
                 establishedDeliveryShare.waitForExistence(timeout: 12),
                 app.debugDescription
             )
+            scrollUntilVisible(establishedDeliveryShare, in: app, direction: .towardBottom)
             XCTAssertTrue(establishedDeliveryShare.isHittable, app.debugDescription)
             establishedDeliveryShare.tap()
             try assertShareBuilder(
@@ -722,6 +856,7 @@ final class RuneScribeParityUITests: XCTestCase {
                 clearEstablishedDelivery.waitForExistence(timeout: 8),
                 app.debugDescription
             )
+            scrollUntilVisible(clearEstablishedDelivery, in: app, direction: .towardBottom)
             XCTAssertTrue(clearEstablishedDelivery.isHittable, app.debugDescription)
             clearEstablishedDelivery.tap()
         }
@@ -767,11 +902,13 @@ final class RuneScribeParityUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Settings"].waitForExistence(timeout: 8))
 
         app.open(Self.malformedImportURL)
+        dismissSplashIfPresent(in: app)
         let importFailure = app.alerts["Import Failed"]
         XCTAssertTrue(importFailure.waitForExistence(timeout: 8), app.debugDescription)
         importFailure.buttons["OK"].tap()
 
         app.open(Self.legacyImportURL)
+        dismissSplashIfPresent(in: app)
         XCTAssertTrue(app.staticTexts["SHARED CIPHER"].waitForExistence(timeout: 8))
         XCTAssertEqual(app.textFields["Cipher name"].value as? String, "Baseline Legacy")
         try auditAccessibility(in: app)
@@ -784,6 +921,7 @@ final class RuneScribeParityUITests: XCTestCase {
 
         let cipherFile = try makeCipherFixtureFile()
         app.open(cipherFile)
+        dismissSplashIfPresent(in: app)
         XCTAssertTrue(app.staticTexts["SHARED CIPHER"].waitForExistence(timeout: 8), app.debugDescription)
         XCTAssertEqual(app.textFields["Cipher name"].value as? String, "Imported Cipher")
         app.buttons["Import"].tap()
@@ -795,6 +933,7 @@ final class RuneScribeParityUITests: XCTestCase {
 
         let customFontFile = try makeCustomFontFixtureFile(validFontBytes: true)
         app.open(customFontFile)
+        dismissSplashIfPresent(in: app)
         XCTAssertTrue(app.staticTexts["SHARED CIPHER"].waitForExistence(timeout: 8), app.debugDescription)
         XCTAssertEqual(app.textFields["Cipher name"].value as? String, "Imported Cipher")
         app.buttons["Import"].tap()
@@ -810,6 +949,7 @@ final class RuneScribeParityUITests: XCTestCase {
 
         let invalidFontFile = try makeCustomFontFixtureFile(validFontBytes: false)
         app.open(invalidFontFile)
+        dismissSplashIfPresent(in: app)
         XCTAssertTrue(app.staticTexts["SHARED CIPHER"].waitForExistence(timeout: 8), app.debugDescription)
         XCTAssertEqual(app.textFields["Cipher name"].value as? String, "Imported Cipher")
         app.buttons["Import"].tap()
@@ -847,6 +987,7 @@ final class RuneScribeParityUITests: XCTestCase {
 
         let messageFile = try makeMessageFixtureFile()
         app.open(messageFile)
+        dismissSplashIfPresent(in: app)
         XCTAssertTrue(app.staticTexts["DECODED MESSAGE"].waitForExistence(timeout: 8), app.debugDescription)
         XCTAssertTrue(app.staticTexts["LOCALLY STORED CIPHER"].exists)
         XCTAssertTrue(app.staticTexts["Imported Cipher"].exists)
@@ -1548,6 +1689,7 @@ final class RuneScribeParityUITests: XCTestCase {
             file: file,
             line: line
         )
+        dismissContactsPromptIfPresent(in: app)
     }
 
     private func dismissContactsPromptIfPresent(in app: XCUIApplication) {
@@ -1667,6 +1809,13 @@ final class RuneScribeParityUITests: XCTestCase {
         try app.performAccessibilityAudit(
             for: [.sufficientElementDescription, .hitRegion, .trait, .textClipped]
         )
+    }
+
+    private func dismissSplashIfPresent(in app: XCUIApplication) {
+        let skipIntro = app.buttons["Skip intro"]
+        if skipIntro.waitForExistence(timeout: 12) {
+            skipIntro.tap()
+        }
     }
 
     private func dismissSystemShareSheet(

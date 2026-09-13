@@ -288,7 +288,7 @@ require("## 🗺 Implementation roadmap" in readme, "README lacks the implementa
 readme_roadmap = readme.split("## 🗺 Implementation roadmap", 1)[-1].split("## 🔐 Security & privacy", 1)[0]
 normalized_readme_roadmap = re.sub(r"\s+", " ", readme_roadmap)
 require(
-    f"Version {marketing} build {build} is the repository-qualified release candidate"
+    f"Version {marketing} build {build} is the current UI/Xcode remediation candidate"
     in normalized_readme_roadmap,
     "README roadmap version differs from the project version",
 )
@@ -297,20 +297,24 @@ require(
     in readme_roadmap,
     "README Wave 6 roadmap scope differs",
 )
-require("tests-1238%20package" in readme, "README package-test badge is stale")
 require(
-    "**1238 package tests** (1101 XCTest cases and 137 Swift Testing cases)"
-    in normalized_readme,
-    "README package-test inventory is stale",
+    re.search(r"tests-\d+%20package", readme) is not None,
+    "README package-test badge is missing",
 )
 require(
-    "1,238/1,238 Swift tests" in normalized_readme_roadmap
+    "tests-1242%20package" in readme
+    and "**1242 package tests** (1105 XCTest cases and" in normalized_readme,
+    "README current package-test inventory differs from the qualified candidate",
+)
+require(
+    "Version 1.0.40 build 40 remains a retained historical repository-qualification record"
+    in normalized_readme_roadmap
+    and "1,238/1,238 Swift tests" in normalized_readme_roadmap
     and "255/255 Python tests" in normalized_readme_roadmap
     and "101/101" in normalized_readme_roadmap
-    and "Retained prior headless iPhone 17 Pro UI qualification" in normalized_readme_roadmap
-    and "iPad Pro 13-inch (M5) qualification on iOS 26.5 passes 5 tests" in normalized_readme_roadmap
-    and "skips 3 phone-specific tests by design, and fails 0" in normalized_readme_roadmap,
-    "README lacks the final-source qualification result or retained iPad evidence",
+    and "Those historical results are not relabeled as source-bound evidence for 1.0.41"
+    in normalized_readme_roadmap,
+    "README lacks the current report link or historical qualification boundary",
 )
 require(
     "| P12 | Full Xcode, parity, device" not in readme_roadmap,
@@ -354,11 +358,12 @@ require(
     "App Store packet lacks the noncontrolling legacy-package boundary",
 )
 require(
-    "repository-qualified release candidate" in submission
+    f"version {marketing} build {build} is the current UI/Xcode remediation"
+    in re.sub(r"\s+", " ", submission)
     and "101/101" in submission
     and "- [x] Retained prior iPad Pro 13-inch (M5) headless UI qualification passes on iOS 26.5"
     in submission,
-    "App Store packet lacks the repository-qualified, built-product, or retained iPad result",
+    "App Store packet lacks the current candidate, historical built-product, or retained iPad boundary",
 )
 privacy = read("docs/PRIVACY.md")
 support = read("docs/SUPPORT.md")
@@ -421,7 +426,6 @@ require("Phase C is PASS / MERGED TO MAIN" in roadmap, "roadmap lacks the merged
 require(
     f"Version {marketing} build {build} carries the source-complete authorized roadmap baseline"
     in roadmap
-    and "repository-qualified release candidate" in roadmap
     and "**NOT SHIPPED**" in roadmap
     and "**IPAD HEADLESS UI QUALIFICATION PASS**" in roadmap,
     "roadmap lacks the current source-complete qualification and shipment boundary",
@@ -434,51 +438,58 @@ require(
 )
 require("Keep Elven Series Phase C blocked" not in roadmap, "roadmap retains superseded Phase C blocker")
 
-qualification_summary = read("docs/verification/release-1.0.40/QualificationSummary.md")
-qualification_evidence = json.loads(
+historical_qualification_summary = read("docs/verification/release-1.0.40/QualificationSummary.md")
+historical_qualification_evidence = json.loads(
     read("docs/verification/release-1.0.40/QualificationEvidence.json")
 )
 require(
-    "**Status:** Repository-qualified release candidate — not shipped" in qualification_summary,
-    "release qualification summary has a stale status",
+    "**Status:** Repository-qualified release candidate — not shipped" in historical_qualification_summary,
+    "historical release qualification summary has a stale status",
 )
 require(
-    "**1,238/1,238 Swift tests**" in qualification_summary
-    and "**255/255 Python tests**" in qualification_summary
-    and "**101/101 checks**" in qualification_summary
-    and "Retained prior evidence records the headless iPhone 17 Pro UI run" in qualification_summary
-    and "Retained prior evidence records the headless iPad Pro 13-inch (M5) UI run" in qualification_summary
+    "**1,238/1,238 Swift tests**" in historical_qualification_summary
+    and "**255/255 Python tests**" in historical_qualification_summary
+    and "**101/101 checks**" in historical_qualification_summary
+    and "Retained prior evidence records the headless iPhone 17 Pro UI run" in historical_qualification_summary
+    and "Retained prior evidence records the headless iPad Pro 13-inch (M5) UI run" in historical_qualification_summary
     and "Neither retained run is represented as current-candidate source-bound evidence"
-    in qualification_summary,
-    "release qualification summary lacks final-source evidence",
+    in historical_qualification_summary,
+    "historical release qualification summary lacks its final-source evidence",
 )
 require(
-    "- [ ]" not in qualification_summary
-    and "## Repository qualification" in qualification_summary
-    and "All repository-controlled release gates pass." in qualification_summary,
-    "release qualification summary lacks the completed repository gate result",
+    "- [ ]" not in historical_qualification_summary
+    and "## Repository qualification" in historical_qualification_summary
+    and "All repository-controlled release gates pass." in historical_qualification_summary,
+    "historical release qualification summary lacks its completed repository gate result",
 )
 require(
-    qualification_evidence.get("release", {}).get("marketingVersion") == marketing
-    and qualification_evidence.get("release", {}).get("build") == build
-    and qualification_evidence.get("qualifiedCandidateRevision")
+    historical_qualification_evidence.get("release", {}).get("marketingVersion") == "1.0.40"
+    and historical_qualification_evidence.get("release", {}).get("build") == "40"
+    and historical_qualification_evidence.get("qualifiedCandidateRevision")
     == "d1754b250429c17d885401388cb17ec32f1bde59"
-    and qualification_evidence.get("regressionSuites", {})
+    and historical_qualification_evidence.get("regressionSuites", {})
     .get("swiftPackage", {})
     .get("total")
     == 1238
-    and qualification_evidence.get("regressionSuites", {})
+    and historical_qualification_evidence.get("regressionSuites", {})
     .get("python", {})
     .get("total")
     == 255
-    and qualification_evidence.get("releaseProducts", {}).get("inspectionPassed")
+    and historical_qualification_evidence.get("releaseProducts", {}).get("inspectionPassed")
     == 101
-    and qualification_evidence.get("releaseProducts", {}).get("inspectionFailures")
+    and historical_qualification_evidence.get("releaseProducts", {}).get("inspectionFailures")
     == 0
-    and qualification_evidence.get("forsettiP11", {}).get("mode") == "report-only"
-    and qualification_evidence.get("externalDistribution", {}).get("status")
+    and historical_qualification_evidence.get("forsettiP11", {}).get("mode") == "report-only"
+    and historical_qualification_evidence.get("externalDistribution", {}).get("status")
     == "UNASSESSED",
-    "release qualification evidence is stale or overclaims qualification",
+    "historical release qualification evidence is stale or overclaims qualification",
+)
+require(
+    "docs/verification/ui-xcode-remediation/QualificationSummary.md" in readme
+    and "verification/ui-xcode-remediation/QualificationSummary.md" in support
+    and "verification/ui-xcode-remediation/QualificationSummary.md" in submission
+    and "verification/ui-xcode-remediation/QualificationSummary.md" in roadmap,
+    "active documentation does not link the current UI/Xcode qualification report",
 )
 current_release_documents = {
     "README.md": readme,
@@ -490,22 +501,23 @@ current_release_documents = {
     "docs/verification/roadmap-alignment.json": read(
         "docs/verification/roadmap-alignment.json"
     ),
-    "docs/verification/release-1.0.40/QualificationSummary.md": qualification_summary,
+    "docs/product-roadmap/Rune-Scribe-UI-Xcode-Remediation-Amendment-2026-09.md": read(
+        "docs/product-roadmap/Rune-Scribe-UI-Xcode-Remediation-Amendment-2026-09.md"
+    ),
 }
 stale_shipping_claim = "97/101"
 for relative, content in current_release_documents.items():
     normalized_content = re.sub(r"\s+", " ", content).lower()
     require(
-        stale_shipping_claim not in content and "101/101" in content,
-        f"{relative} has a stale or missing built-product qualification result",
+        stale_shipping_claim not in content,
+        f"{relative} has a stale built-product qualification result",
     )
     require(
-        "repository-qualified" in normalized_content
-        and "ipad pro 13-inch (m5)" in normalized_content
-        and "source-bound evidence" in normalized_content
+        marketing in content
+        and ("not shipped" in normalized_content or "shipment" in normalized_content)
         and "final ipad ui run remains pending" not in normalized_content
         and "ipad ui qualification pending" not in normalized_content,
-        f"{relative} lacks the repository-qualified or retained-UI boundary",
+        f"{relative} lacks the current version or shipment boundary",
     )
 
 content_view = read(
@@ -1208,6 +1220,8 @@ for relative in filter(None, tracked):
     if any(token in lowered_name for token in publication_tokens) or any(pattern.search(relative) for pattern in named_package_patterns):
         ERRORS.append(f"publication-sensitive name: {relative}")
     if path.suffix.lower() not in text_suffixes and path.name not in {"README", "CHANGELOG"}:
+        continue
+    if relative == ".github/workflows/ai-attribution-guard.yml":
         continue
     try:
         content = path.read_text(encoding="utf-8")

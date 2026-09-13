@@ -233,19 +233,26 @@ struct RuneHeader: View {
                     .opacity(0.88)
                     .allowsHitTesting(false)
             }
+            .accessibilityHidden(true)
         }
         .overlay(alignment: .topLeading) {
-            ThemeChromeImage(slot: .cornerOrnament)
-                .frame(width: 52, height: 52)
-                .opacity(0.72)
-                .allowsHitTesting(false)
+            ZStack {
+                ThemeChromeImage(slot: .cornerOrnament)
+                    .frame(width: 52, height: 52)
+                    .opacity(0.72)
+                    .allowsHitTesting(false)
+            }
+            .accessibilityHidden(true)
         }
         .overlay(alignment: .topTrailing) {
-            ThemeChromeImage(slot: .cornerOrnament)
-                .scaleEffect(x: -1, y: 1)
-                .frame(width: 52, height: 52)
-                .opacity(0.72)
-                .allowsHitTesting(false)
+            ZStack {
+                ThemeChromeImage(slot: .cornerOrnament)
+                    .scaleEffect(x: -1, y: 1)
+                    .frame(width: 52, height: 52)
+                    .opacity(0.72)
+                    .allowsHitTesting(false)
+            }
+            .accessibilityHidden(true)
         }
     }
 

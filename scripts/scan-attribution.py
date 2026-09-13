@@ -21,6 +21,7 @@ BINARY_METADATA_SUFFIXES = {
 }
 EXCLUDED_CONTENT_PARTS = {".git", ".build", "DerivedData", "artifacts"}
 EXCLUDED_PATH_PARTS = {".git", ".build", "DerivedData"}
+SELF_MATCHING_POLICY_FILES = {Path(".github/workflows/ai-attribution-guard.yml")}
 IMMUTABLE_HISTORICAL_EVIDENCE_ROOTS = (
     Path("docs/verification/theme-fidelity-v4"),
     Path("docs/verification/theme-fidelity-v4-1"),
@@ -77,6 +78,8 @@ def text_files(root: Path):
         if not path.is_file() or path.suffix.lower() not in TEXT_SUFFIXES:
             continue
         if any(part in EXCLUDED_CONTENT_PARTS for part in path.parts):
+            continue
+        if path.relative_to(root) in SELF_MATCHING_POLICY_FILES:
             continue
         yield path
 

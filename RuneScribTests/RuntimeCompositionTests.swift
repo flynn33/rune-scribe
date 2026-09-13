@@ -1,7 +1,7 @@
 import Foundation
 @_spi(ThemeFidelityQualification) import RuneScribeContracts
 import RuneScribeCoreModule
-import RuneScribePlatform
+@_spi(ThemeFidelityQualification) import RuneScribePlatform
 @_spi(RuntimeTesting) @testable import RuneScribeRuntimeCore
 import RuneScribeTestSupport
 import RuneScribeUIRuntime
@@ -10,6 +10,31 @@ import XCTest
 
 @MainActor
 final class RuntimeCompositionTests: XCTestCase {
+    func testNormalRouteIsolationMarkerIsExactAndSkipsProductionStoreCreation() {
+        XCTAssertTrue(
+            ApplePlatformServiceEnvironment.usesIsolatedNormalRoute([
+                "RUNESCRIBE_ISOLATED_NORMAL_ROUTE": "1",
+            ])
+        )
+        XCTAssertFalse(
+            ApplePlatformServiceEnvironment.usesIsolatedNormalRoute([
+                "RUNESCRIBE_ISOLATED_NORMAL_ROUTE": "true",
+            ])
+        )
+        XCTAssertFalse(ApplePlatformServiceEnvironment.usesIsolatedNormalRoute([:]))
+
+        var stateStoreFactoryWasCalled = false
+        func makeStateStore() -> any ModuleStateStore {
+            stateStoreFactoryWasCalled = true
+            return InMemoryModuleStateStore()
+        }
+        _ = RuneScribeRuntimeComposition(
+            processEnvironment: ["RUNESCRIBE_ISOLATED_NORMAL_ROUTE": "1"],
+            moduleStateStore: makeStateStore()
+        )
+        XCTAssertFalse(stateStoreFactoryWasCalled)
+    }
+
     func testQualificationLaunchParsingAndAdapterFactoriesFailClosed() async throws {
         let validEnvironment = [
             "RUNESCRIBE_QUALIFICATION": "theme-fidelity-v4.2",

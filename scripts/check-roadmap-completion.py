@@ -386,13 +386,14 @@ def validate_host() -> None:
             if required not in host:
                 error(f"host lacks {required}")
     for required in (
-        "ApplePlatformServiceEnvironment(",
+        "platformEnvironment = .normalRoute(",
         "RuneScribeServiceKeys.cloudSyncTransport",
         "RuneScribeServiceKeys.gameCenterReporting",
     ):
         if required not in host:
             error(f"host lacks runtime-owned platform integration: {required}")
     for required in (
+        "@MainActor public init(",
         "AppleCloudKitProgressionTransport()",
         "AppleGameCenterReportingAdapter()",
     ):
@@ -561,9 +562,9 @@ def validate_sharing_boundary() -> None:
 
 def validate_version() -> None:
     project = (ROOT / "project.yml").read_text(encoding="utf-8")
-    if 'MARKETING_VERSION: "1.0.40"' not in project:
+    if 'MARKETING_VERSION: "1.0.41"' not in project:
         error("marketing version changed")
-    if 'CURRENT_PROJECT_VERSION: "40"' not in project:
+    if 'CURRENT_PROJECT_VERSION: "41"' not in project:
         error("build number changed")
 
 
