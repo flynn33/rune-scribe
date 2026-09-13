@@ -42,5 +42,5 @@
     {"path": "Config/RuneScrib-iOS.entitlements", "reason": "shipping entitlements preserved"},
     {"path": "Config/RuneScrib-macOS.entitlements", "reason": "shipping entitlements preserved"}
   ],
-  "publication": {"mainRepository": "PENDING_FINAL_INTEGRATION", "wiki": "PENDING_FINAL_PUSH", "appStoreConnect": "OWNER_UPLOAD_NOT_PERFORMED"}
+  "publication": {"mainRepository": "SYNCHRONIZED", "wiki": "SYNCHRONIZED", "appStoreConnect": "OWNER_UPLOAD_NOT_PERFORMED"}
 }
