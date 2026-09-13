@@ -13,7 +13,7 @@ final class RuneScribeParityUITests: XCTestCase {
     }
 
     func testEmergencyBaseThemeLaunchShowsAccessibleNonblockingWarning() throws {
-        let app = XCUIApplication()
+        let app = makeIsolatedApplication()
         app.launchEnvironment[
             "RUNESCRIBE_QUALIFICATION_BASE_RESOURCE_FAILURE"
         ] = "missing-norse-font"
@@ -65,8 +65,7 @@ final class RuneScribeParityUITests: XCTestCase {
     }
 
     func testNorseVisualPresentationAndScreenshots() throws {
-        let app = XCUIApplication()
-        app.launchEnvironment["RUNESCRIBE_ISOLATED_NORMAL_ROUTE"] = "1"
+        let app = makeIsolatedApplication()
         app.launch()
 
         let skipIntro = app.buttons["Skip intro"]
@@ -329,8 +328,7 @@ final class RuneScribeParityUITests: XCTestCase {
     }
 
     func testLongArtifactPagesRemainContainedAcrossPagingAndRotation() {
-        let app = XCUIApplication()
-        app.launchEnvironment["RUNESCRIBE_ISOLATED_NORMAL_ROUTE"] = "1"
+        let app = makeIsolatedApplication()
         app.launch()
 
         let skipIntro = app.buttons["Skip intro"]
@@ -415,7 +413,7 @@ final class RuneScribeParityUITests: XCTestCase {
     }
 
     func testShareBuilderControlsExposeStableAccessibilityState() throws {
-        let app = XCUIApplication()
+        let app = makeIsolatedApplication()
         app.launch()
 
         let skipIntro = app.buttons["Skip intro"]
@@ -493,7 +491,7 @@ final class RuneScribeParityUITests: XCTestCase {
     }
 
     func testCipherLibraryShareActionsExposeUsableHitRegions() {
-        let app = XCUIApplication()
+        let app = makeIsolatedApplication()
         app.launch()
 
         let skipIntro = app.buttons["Skip intro"]
@@ -515,8 +513,7 @@ final class RuneScribeParityUITests: XCTestCase {
     }
 
     func testIsolatedNormalRouteReadsInboundCipherFiles() throws {
-        let app = XCUIApplication()
-        app.launchEnvironment["RUNESCRIBE_ISOLATED_NORMAL_ROUTE"] = "1"
+        let app = makeIsolatedApplication()
         app.open(try makeCipherFixtureFile())
         dismissSplashIfPresent(in: app)
 
@@ -538,8 +535,7 @@ final class RuneScribeParityUITests: XCTestCase {
     }
 
     func testFreshInstallExercisesPrimaryProductFlows() throws {
-        let app = XCUIApplication()
-        app.launchEnvironment["RUNESCRIBE_ISOLATED_NORMAL_ROUTE"] = "1"
+        let app = makeIsolatedApplication()
         app.open(Self.customImportURL)
         dismissSplashIfPresent(in: app)
 
@@ -1006,7 +1002,7 @@ final class RuneScribeParityUITests: XCTestCase {
     func testOptionalProviderMaintainsSettingsAndVaultRootBackgroundContinuity()
         throws
     {
-        let app = XCUIApplication()
+        let app = makeIsolatedApplication()
         app.launchEnvironment["RUNESCRIBE_QUALIFICATION_UNLOCK_CODEX"] = "moonleaf"
         app.launch()
 
@@ -1089,7 +1085,7 @@ final class RuneScribeParityUITests: XCTestCase {
     func testAccessibility5HighContrastReducedMotionKeepsLayoutAndRenderedOutputUsable()
         throws
     {
-        let app = XCUIApplication()
+        let app = makeIsolatedApplication()
         app.launchEnvironment["RUNESCRIBE_QUALIFICATION_ACCESSIBILITY"] =
             "accessibility5-high-contrast-reduced-motion"
         app.launch()
@@ -1249,7 +1245,7 @@ final class RuneScribeParityUITests: XCTestCase {
     }
 
     func testAccessibility5WorkspacePreviewFitsIPadViewport() throws {
-        let app = XCUIApplication()
+        let app = makeIsolatedApplication()
         app.launchEnvironment["RUNESCRIBE_QUALIFICATION_ACCESSIBILITY"] =
             "accessibility5-high-contrast-reduced-motion"
         app.launch()
@@ -1302,6 +1298,12 @@ final class RuneScribeParityUITests: XCTestCase {
         XCTAssertGreaterThanOrEqual(preview.frame.minY, scrollFrame.minY - 1)
         XCTAssertLessThanOrEqual(preview.frame.maxY, scrollFrame.maxY + 1)
         keepScreenshot(app, named: "ipad-accessibility5-workspace-preview")
+    }
+
+    private func makeIsolatedApplication() -> XCUIApplication {
+        let app = XCUIApplication()
+        app.launchEnvironment["RUNESCRIBE_ISOLATED_NORMAL_ROUTE"] = "1"
+        return app
     }
 
     private func assertShareBuilder(
