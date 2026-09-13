@@ -1303,6 +1303,7 @@ final class RuneScribeParityUITests: XCTestCase {
     private func makeIsolatedApplication() -> XCUIApplication {
         let app = XCUIApplication()
         app.launchEnvironment["RUNESCRIBE_ISOLATED_NORMAL_ROUTE"] = "1"
+        app.launchEnvironment["RUNESCRIBE_ISOLATED_NORMAL_ROUTE_ID"] = UUID().uuidString
         return app
     }
 
@@ -1456,6 +1457,7 @@ final class RuneScribeParityUITests: XCTestCase {
         defer { XCUIDevice.shared.orientation = .portrait }
         XCTAssertTrue(builder.waitForExistence(timeout: 8), app.debugDescription)
         let rotatedWindow = app.windows.firstMatch
+        waitForWindowRotation(rotatedWindow, landscape: true)
         XCTAssertGreaterThan(rotatedWindow.frame.width, rotatedWindow.frame.height)
         XCTAssertGreaterThanOrEqual(
             builder.frame.minX,
@@ -1474,12 +1476,28 @@ final class RuneScribeParityUITests: XCTestCase {
         keepScreenshot(app, named: "\(screenshotName)-landscape")
         XCUIDevice.shared.orientation = .portrait
         let restoredWindow = app.windows.firstMatch
+        waitForWindowRotation(restoredWindow, landscape: false)
         XCTAssertGreaterThan(
             restoredWindow.frame.height,
             restoredWindow.frame.width,
             file: file,
             line: line
         )
+    }
+
+    private func waitForWindowRotation(
+        _ window: XCUIElement,
+        landscape: Bool,
+        timeout: TimeInterval = 8
+    ) {
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            let frame = window.frame
+            if landscape ? frame.width > frame.height : frame.height > frame.width {
+                return
+            }
+            RunLoop.current.run(until: Date().addingTimeInterval(0.1))
+        }
     }
 
     private func assertFourByThree(

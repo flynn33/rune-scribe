@@ -92,7 +92,11 @@ public struct ApplePlatformServiceEnvironment: Sendable {
         cloudSync: (any CloudSyncTransport)?
     ) -> Self {
         if usesIsolatedNormalRoute(processEnvironment) {
-            let identity = Bundle.main.bundleIdentifier ?? "unknown"
+            let identity = processEnvironment["RUNESCRIBE_ISOLATED_NORMAL_ROUTE_ID"]
+                .flatMap(UUID.init(uuidString:))?
+                .uuidString
+                ?? Bundle.main.bundleIdentifier
+                ?? "unknown"
             let root = FileManager.default.temporaryDirectory.appendingPathComponent(
                 "RuneScribeNormalRoute-\(identity)",
                 isDirectory: true
