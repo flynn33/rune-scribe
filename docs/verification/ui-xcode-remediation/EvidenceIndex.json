@@ -1,10 +1,11 @@
 {
   "schemaVersion": "1.0",
   "candidate": {"marketingVersion": "1.0.41", "build": "41"},
-  "status": "READY_FOR_OWNER_SHIPMENT",
-  "scope": "source-ui-build-handoff",
+  "status": "READY_FOR_APP_STORE_UPLOAD",
+  "scope": "source-ui-build-and-app-store-export-handoff",
   "sourceCommitC": "735b0e70f0dda5d22fe5e57ce48d7998ba308629",
   "sourceFingerprintD": "f2a028d520420996a3037099542eecea445afdc422782377aff29a6b0b5b049a",
+  "appStoreQualificationCommitS": "119fca69b90ac75774468a104abfc00d0186966d",
   "rawEvidenceRoot": "/Users/jimdaley/Projects/RuneScribe/ui-xcode-run.CwlJbz",
   "toolchain": {
     "xcode": "26.6 (17F113)",
@@ -21,9 +22,12 @@
     {"id": "macos-real-app-smoke", "status": "PASS", "route": "real-shipping-app-debug-binary", "assertions": ["long-message encoding", "page 1 of 4", "next page", "resize persistence", "keyboard navigation", "all five settings codices", "version 1.0.41 (41)"], "evidence": "native visual and accessibility inspection; screenshot: screenshots/norse-compose-long-macos.png"},
     {"id": "iphone-fresh-install-primary-flow", "status": "PASS", "counts": {"passed": 1, "failed": 0, "skipped": 0}, "route": "normal-production-app-route", "durationSeconds": 589.680, "evidence": "ios-normal-route/iphone-fresh-final-19"},
     {"id": "iphone-entitled-followup", "status": "PASS", "counts": {"passed": 5, "failed": 0, "skipped": 1}, "skipReason": "one iPad-only scenario", "route": "normal-production-app-route", "evidence": "final/xcode/iphone-production-entitled"},
-    {"id": "ipad-hosted-and-normal-route", "status": "PASS_WITH_DIAGNOSTIC_NOTE", "counts": {"hostedPassed": 29, "uiPassed": 3, "uiSkipped": 1, "productAssertionFailures": 0}, "skipReason": "one phone-only scenario", "diagnostic": "The complete primary flow reached its final rotate-back check before Simulator window geometry settled; all preceding product assertions passed. Standalone inbound persistence passed.", "route": "hosted-and-normal-production-app-route", "evidence": ["final/xcode/ipad-production-blocking", "final/xcode/ipad-inbound-isolated"]},
+    {"id": "iphone-unentitled-isolation-followup", "status": "PASS", "counts": {"passed": 6, "failed": 0, "skipped": 1}, "skipReason": "one iPad-only scenario", "route": "unique-isolated-normal-route-with-shipping-entitlements-deliberately-stripped", "evidence": "/Users/jimdaley/Projects/RuneScribe/UIIsolationQualification-1.0.41-20260913/iphone-isolated.xcresult"},
+    {"id": "superseded-iphone-unentitled-aggregate", "status": "SUPERSEDED_TEST_CONFIGURATION_FAILURE", "counts": {"cloudKitTerminations": 6, "otherFailures": 2}, "cause": "Six UI tests omitted the isolated normal-route marker while the command deliberately stripped shipping entitlements.", "resolution": "All UI tests now receive a unique isolated persistent root from the central application launcher; the affected unsigned suite passes without CloudKit or Keychain access.", "evidence": "final/xcode/iphone-production-blocking"},
+    {"id": "ipad-hosted-and-normal-route", "status": "PASS", "counts": {"hostedPassed": 29, "uiPassed": 3, "uiSkipped": 1, "primaryFlowPassed": 1, "primaryFlowFailed": 0}, "skipReason": "one phone-only scenario in the earlier aggregate", "route": "hosted-and-normal-production-app-route", "evidence": ["final/xcode/ipad-production-blocking", "final/xcode/ipad-inbound-isolated", "/Users/jimdaley/Projects/RuneScribe/UIIsolationQualification-1.0.41-20260913/ipad/ipad-primary-flow.xcresult"]},
     {"id": "theme-matrices", "status": "PASS", "counts": {"iphoneAttachments": 211, "ipadAttachments": 211, "macosAttachments": 422}, "route": "canonical-production-components", "evidence": ["final/xcode/iphone-theme-matrix", "final/xcode/ipad-theme-matrix", "final/xcode/macos-parity"]},
     {"id": "release-product-qualification", "status": "PASS", "counts": {"passed": 101, "failed": 0}, "route": "fresh-clean-committed-release-products", "products": ["macOS arm64", "iOS Simulator arm64", "iOS Simulator x86_64"], "evidence": ["final/release-qualification", "final/release-products"]},
+    {"id": "app-store-archive-export", "status": "PASS", "route": "fresh-archives-and-store-exports", "products": ["iOS App Store ipa", "Mac App Store pkg"], "checks": ["Apple distribution signing", "Store provisioning profiles", "production CloudKit", "Game Center", "get-task-allow false", "Hardened Runtime", "sandbox", "architectures", "privacy manifests", "installer signature", "SHA-256"], "evidence": "/Users/jimdaley/Projects/RuneScribe/AppStoreQualification-1.0.41-20260913"},
     {"id": "iphoneos-device-sdk-release", "status": "PASS", "route": "unsigned-device-sdk-compile", "evidence": "final/xcode/ios-device-release"},
     {"id": "forsetti-p11", "status": "REPORT_ONLY", "finding": "known FG-006 legacy authority mapping", "evidence": "final/diagnostic-forsetti"}
   ],
@@ -35,8 +39,9 @@
     "rawIPadAttachments": "final/xcode/ipad-matrix-attachments/manifest.json"
   },
   "distribution": {
-    "status": "NOT_PERFORMED",
+    "status": "EXPORTED_NOT_UPLOADED",
     "ownerOperated": true,
-    "excluded": ["distribution signing", "provisioning", "archive", "export", "notarization", "upload", "submission", "release tag", "shipment"]
+    "exportedProducts": ["RuneScrib.ipa", "RuneScrib.pkg"],
+    "excluded": ["App Store Connect validation", "upload", "submission", "release tag", "rollout", "shipment"]
   }
 }

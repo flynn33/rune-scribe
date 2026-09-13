@@ -315,8 +315,9 @@ that source passed 1,238/1,238 Swift tests, 255/255 Python tests, 60 Norse seman
 25/25 Norse mutations, 18/18 legacy mutations, 28/28 shipping negative mutations,
 27/27 evidence-hardening tests, and 101/101 local built-product checks. Those historical
 results are not relabeled as source-bound evidence for 1.0.41. The current candidate is
-**not shipped**; distribution identity, provisioning, archive, export, notarization,
-upload, and rollout remain owner-operated publication work.
+**not shipped**. Fresh iOS and macOS archives have been exported for App Store Connect
+with matching distribution identities, profiles, versions, and production entitlements;
+upload, submission, release, and rollout remain owner-operated publication work.
 
 | Wave | Scope | Source status |
 |---|---|---|
@@ -326,7 +327,7 @@ upload, and rollout remain owner-operated publication work.
 | 4 | Themed Artifact sharing, receiving, Encounters, provenance | Complete |
 | 5A | Local-first private iCloud progression synchronization | Complete; live provisioning is a separate external-service action |
 | 5B | Optional Game Center catalog, mapping, outbox, status | Complete; live records and sandbox access are separate external-service actions |
-| 6 | Production Elven providers, hardening, evidence, no-ship handoff | Repository-qualified release candidate; not shipped |
+| 6 | Production Elven providers, hardening, evidence, no-ship handoff | App Store upload-ready candidate; not shipped |
 | 7 | Limited/singular collectible program | Deferred separate program |
 
 The corrected Elven v3.1 corpus (56 logical resources and 184 shipping outputs) remains
@@ -341,9 +342,10 @@ clean tests, iPhone/iPad/macOS Release builds, deterministic UI smoke coverage,
 accessibility/privacy/security checks, signing and entitlements, and no known
 release-blocking defects. Manual hardware observations and package self-binding
 bookkeeping are superseded and nonblocking. The repository-controlled final-source gates
-and supported UI runs pass with no known release-blocking defects. Distribution signing,
-archive, export, notarization, upload, and rollout are external publication work rather
-than source-qualification gates.
+and supported UI runs pass with no known release-blocking defects. The repository's
+`scripts/qualify-app-store-archives.sh` gate also creates and inspects fresh iOS and
+Mac App Store exports without uploading them. App Store Connect validation, upload,
+submission, and rollout remain owner-operated publication work.
 
 All nine Elven Series recovery findings pass simultaneously. Recovery is PASS / CLOSED,
 the corrected v3.1 package is ACCEPTED, and Phase C is PASS / MERGED TO MAIN via PR #45 at
@@ -355,9 +357,11 @@ The machine-readable [roadmap ledger](docs/verification/roadmap-alignment.json) 
 124 tasks. `BAS-006`, `SHR-001`, and `SHR-015` are the only
 `simulator-replacement-complete` rows; `REL-011` is `non-gating-external` and cannot
 denote rollout or shipment. `BAS-005` is not applicable because no approved scrubbed
-real-user fixture was supplied. External-device, live-service, signing, archive/export,
-notarization, upload, rollout, and shipment work is recorded in the
+real-user fixture was supplied. External-device and live-service work from the historical
+baseline is recorded in the
 [no-ship owner handoff](docs/verification/roadmap-completion/OwnerTestAndNoShipHandoff.md).
+Current signed archive/export evidence and the remaining upload boundary are recorded in
+the [UI/Xcode remediation qualification](docs/verification/ui-xcode-remediation/QualificationSummary.md).
 
 Current architecture and dependency authority lives in the
 [controlling Forsetti policy](docs/architecture/FORSETTI_CONTROLLING_POLICY.md),
@@ -492,6 +496,9 @@ xcodebuild -project RuneScrib.xcodeproj -scheme RuneScrib-iOS \
 
 # Reproduce both local Release builds and the 101-check product inspection
 scripts/qualify-release-products.sh
+
+# Create and inspect fresh iOS and Mac App Store exports without uploading
+scripts/qualify-app-store-archives.sh
 ```
 
 Two app targets — **RuneScrib-macOS** (macOS 15) and **RuneScrib-iOS** (iOS 17) —
@@ -500,8 +507,9 @@ share the thin host sources and link the same local package products, built in *
 for Mac App Store distribution. Debug and Simulator qualification use ad-hoc signing so
 automated checks do not require a login-Keychain password.
 The Release-product qualifier retains its logs and local app bundles under a unique
-temporary evidence directory; its 101 checks do not assess distribution identity,
-provisioning, archive, notarization, or upload.
+temporary evidence directory. The separate App Store qualifier retains signed archives,
+exports, entitlements, profiles, signature reports, and hashes; it does not validate or
+upload through App Store Connect.
 
 Both targets register the **`runescribe://`** URL scheme and a single exported
 **`com.runescribe.runescribe`** document type — the `.runescribe` cipher/message file,
@@ -539,7 +547,8 @@ Named final-source, mutation, and built-product guards pass. Retained prior iPho
 headless UI run passes 7 tests with 1 iPad-only skip and 0 failures. The iPad Pro 13-inch (M5)
 headless UI run on iOS 26.5 passes 5 tests with 3 phone-specific skips by design and 0
 failures. Those UI runs are not represented as current-candidate source-bound evidence.
-Distribution signing and publication remain external. Every result stays labeled by the
+Signed Store archive/export qualification passes. App Store Connect validation, upload,
+submission, and publication remain external. Every result stays labeled by the
 environment in which it was observed.
 
 ---

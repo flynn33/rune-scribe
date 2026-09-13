@@ -28,5 +28,6 @@ The current decision and exact evidence are maintained in
 Earlier qualification, parity, and Theme Fidelity records remain historical evidence
 for the source they measured. They are not relabeled as current-source results.
 
-Distribution signing, provisioning, archive, export, notarization, App Store upload,
-rollout, and shipment are not part of this amendment and were not performed.
+Fresh distribution-signed iOS and macOS archives and App Store exports were qualified
+after the source repair. App Store Connect validation, upload, submission, rollout, and
+shipment remain outside this amendment and were not performed.

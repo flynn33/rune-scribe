@@ -1,12 +1,12 @@
 {
   "schemaVersion": "1.0",
-  "status": "COMPLETE_PENDING_PUBLICATION_IDENTITY",
+  "status": "COMPLETE_PENDING_OWNER_UPLOAD",
   "candidate": "1.0.41 (41)",
   "repositoryDocuments": [
-    {"path": "README.md", "disposition": "CHANGED", "reason": "current version, schemes, repaired workflow, qualification link and shipment boundary"},
-    {"path": "CHANGELOG.md", "disposition": "CHANGED", "reason": "user-visible fixes and qualified regression scope"},
+    {"path": "README.md", "disposition": "CHANGED", "reason": "current version, schemes, repaired workflow, Store export qualification link and shipment boundary"},
+    {"path": "CHANGELOG.md", "disposition": "CHANGED", "reason": "user-visible fixes, isolated UI qualification, and signed Store exports"},
     {"path": "design-qa.md", "disposition": "CHANGED", "reason": "historical result distinguished from current source-bound qualification"},
-    {"path": "docs/APP_STORE_SUBMISSION.md", "disposition": "CHANGED", "reason": "candidate facts and explicit owner-only submission boundary"},
+    {"path": "docs/APP_STORE_SUBMISSION.md", "disposition": "CHANGED", "reason": "candidate facts, reproducible Store export command, and owner-only upload boundary"},
     {"path": "docs/PRIVACY.md", "disposition": "CHANGED", "reason": "factual App Lock and local import clarification"},
     {"path": "docs/SUPPORT.md", "disposition": "CHANGED", "reason": "current preview paging, selection, receive and sharing behavior"},
     {"path": "docs/platform-notes.md", "disposition": "CHANGED", "reason": "responsive behavior and platform-specific verification"},
@@ -19,7 +19,9 @@
     {"path": "docs/verification/roadmap-alignment.json", "disposition": "CHANGED", "reason": "supported current remediation evidence fields"},
     {"path": "project.yml", "disposition": "CHANGED", "reason": "version/build, macOS UI test target and scheme wiring"},
     {"path": "RuneScrib.xcodeproj/project.pbxproj", "disposition": "CHANGED", "reason": "deterministically generated project matches project.yml"},
-    {"path": "RuneScrib.xcodeproj/xcshareddata/xcschemes/RuneScrib-macOS.xcscheme", "disposition": "CHANGED", "reason": "shipping macOS UI test target included"}
+    {"path": "RuneScrib.xcodeproj/xcshareddata/xcschemes/RuneScrib-macOS.xcscheme", "disposition": "CHANGED", "reason": "shipping macOS UI test target included"},
+    {"path": "Config/AppStoreExportOptions.plist", "disposition": "ADDED", "reason": "repeatable App Store Connect export policy"},
+    {"path": "scripts/qualify-app-store-archives.sh", "disposition": "ADDED", "reason": "fresh signed archive, export, and package inspection without upload"}
   ],
   "wikiPages": [
     {"path": "Home.md", "disposition": "CHANGED", "reason": "candidate status and qualification link"},
@@ -28,8 +30,8 @@
     {"path": "Sharing-and-Decoding.md", "disposition": "CHANGED", "reason": "receive/share behavior and key disclosure"},
     {"path": "App-Lock.md", "disposition": "CHANGED", "reason": "protected-content removal and draft restoration"},
     {"path": "Architecture.md", "disposition": "CHANGED", "reason": "single responsive production layout responsibility"},
-    {"path": "Building-and-Releasing.md", "disposition": "CHANGED", "reason": "current Xcode schemes, version and owner-only shipment"},
-    {"path": "Roadmap.md", "disposition": "CHANGED", "reason": "remediation closure status"},
+    {"path": "Building-and-Releasing.md", "disposition": "CHANGED", "reason": "current Xcode schemes, Store qualification command, and owner-only upload"},
+    {"path": "Roadmap.md", "disposition": "CHANGED", "reason": "remediation and Store export closure status"},
     {"path": "FAQ.md", "disposition": "CHANGED", "reason": "paging and platform behavior"}
   ],
   "reviewedNoChange": [
@@ -40,5 +42,5 @@
     {"path": "Config/RuneScrib-iOS.entitlements", "reason": "shipping entitlements preserved"},
     {"path": "Config/RuneScrib-macOS.entitlements", "reason": "shipping entitlements preserved"}
   ],
-  "publication": {"mainRepository": "PENDING_FINAL_INTEGRATION", "wiki": "PENDING_FINAL_PUSH"}
+  "publication": {"mainRepository": "PENDING_FINAL_INTEGRATION", "wiki": "PENDING_FINAL_PUSH", "appStoreConnect": "OWNER_UPLOAD_NOT_PERFORMED"}
 }

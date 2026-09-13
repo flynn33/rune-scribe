@@ -5,12 +5,15 @@ Keep this file in sync when shipping a new marketing version.
 
 **Last prepared for:** 1.0.41 (build 41) — 2026-09-13
 
-> **Publication boundary:** version 1.0.41 build 41 is the current UI/Xcode remediation
+> **Publication boundary:** version 1.0.41 build 41 is the current App Store upload-ready
 > candidate and is not shipped. Current-source qualification is recorded in
 > [`verification/ui-xcode-remediation/QualificationSummary.md`](verification/ui-xcode-remediation/QualificationSummary.md).
-> Distribution signing and archive-entitlement inspection require a matching profile
-> and identity; archive, export, notarization, upload, and rollout remain external
-> owner-operated publication actions.
+> Fresh iOS and macOS archives and Store exports pass distribution-signature, profile,
+> version, architecture, privacy-manifest, Hardened Runtime, and production-entitlement
+> inspection. Validation, upload, submission, release, and rollout remain owner-operated.
+
+The record confirms that version 1.0.41 build 41 is the current UI/Xcode remediation
+result and App Store upload-ready candidate.
 
 ---
 
@@ -215,9 +218,15 @@ Info.plist highlights (`Config/RuneScrib-*-Info.plist` / `project.yml`):
 
 ## Archive & upload checklist
 
-This is an external publication checklist for use when the required credentials and
-services are available. No item in the archive, export, signing, notarization, upload,
-record-creation, or rollout sequence is implied by product release qualification.
+The repository command below rebuilds, exports, and inspects both Store packages without
+validating or uploading them:
+
+```bash
+scripts/qualify-app-store-archives.sh
+```
+
+It uses `Config/AppStoreExportOptions.plist` and requires access to the configured Apple
+team. The remaining steps are owner-operated publication actions.
 
 ### iOS
 
@@ -231,11 +240,11 @@ record-creation, or rollout sequence is implied by product release qualification
 1. Scheme: **RuneScrib-macOS**
 2. Archive for **Mac App Store** distribution (sandbox required)
 3. Confirm App Sandbox + Hardened Runtime in the archive’s entitlements
-4. Upload via Organizer / Transporter / `xcrun altool` / `notarytool` path you use for MAS
+4. Upload the exported package through Organizer or Transporter
 
 ### Before upload
 
-- [ ] Version and build match App Store Connect (`1.0.41` / `41` for this packet)
+- [ ] Version and build match the configured App Store Connect record (`1.0.41` / `41` for this packet)
 - [x] Core user flows and clean automated tests pass against the final source
 - [x] iOS Simulator and arm64-only unsigned macOS Release builds pass
 - [x] Retained prior iPhone 17 Pro headless UI qualification passes on iOS 26.5
@@ -246,8 +255,8 @@ record-creation, or rollout sequence is implied by product release qualification
   required-reason declarations
 - [x] Local ad-hoc content, resource, privacy, signature, Hardened Runtime, and
   entitlement inspection passes 101/101 checks
-- [ ] Distribution signing and archive entitlement inspection passes with a matching
-  profile and identity
+- [x] iOS and macOS Store exports pass distribution identity, Store provisioning profile,
+  architecture, production entitlement, privacy manifest, and package signature inspection
 - [x] No known release-blocking defects remain
 - [ ] Release notes pasted (What’s New)
 - [ ] Review notes pasted
@@ -268,9 +277,9 @@ record-creation, or rollout sequence is implied by product release qualification
 Manual hardware observations are superseded by repository-controlled Simulator, hosted,
 and deterministic equivalents and are not a product-shippability requirement. Legacy
 package audit and self-binding mechanics are noncontrolling verification history. The
-source is repository-qualified. Retained prior headless UI results are not represented
-as current-candidate source-bound evidence. Distribution signing, archive, export,
-notarization, upload, and rollout remain external.
+source and exported packages are qualified for owner upload. Retained prior headless UI
+results are not represented as current-candidate source-bound evidence. App Store Connect
+validation, upload, submission, release, and rollout remain external.
 
 ---
 
@@ -289,14 +298,15 @@ Internal release summary; this is **not a shipment claim**:
    negative mutations, and 27/27 evidence-hardening tests
 8. The iOS Release and arm64-only unsigned macOS Release builds pass; local ad-hoc
    built-product content, resource, privacy, signature, Hardened Runtime, and entitlement
-   inspection passes 101/101 checks. Distribution identity and provisioning are unassessed
+   inspection passes 101/101 checks. Fresh iOS and macOS Store exports pass distribution
+   identity, profile, production-entitlement, architecture, and package-signature checks
 9. Retained prior evidence records the iPhone 17 Pro iOS 26.5 UI run with 7 passed, 1
    iPad-only skipped, and 0 failed, and the iPad Pro 13-inch (M5) iOS 26.5 UI run with 5
    passed, 3 phone-specific skipped by design, and 0 failed. These runs are not
    current-candidate source-bound evidence
 10. The superseded v4.3 package audit is retained as noncontrolling verification history
-11. Marketing version **1.0.41**, build **41** is not shipped;
-    distribution signing, archive, export, notarization, upload, and rollout remain external
+11. Marketing version **1.0.41**, build **41** is not shipped; the signed Store packages
+    are ready for owner validation and upload, while submission and rollout remain external
 
 Platform-specific import notes: [`platform-notes.md`](platform-notes.md)
 

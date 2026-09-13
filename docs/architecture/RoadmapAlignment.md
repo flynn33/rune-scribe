@@ -51,8 +51,9 @@ retained version 1.0.40 source qualification passed 1,238/1,238 Swift
 tests, 255/255 Python tests, architecture, roadmap, documentation, resource, mutation,
 named source and mutation gates. The iOS Release build and arm64-only unsigned macOS
 Release build pass. Local ad-hoc built-product content, resource, privacy, signature,
-Hardened Runtime, and entitlement inspection passes 101/101 checks; distribution identity
-and provisioning are explicitly unassessed.
+Hardened Runtime, and entitlement inspection passes 101/101 checks. Fresh iOS and macOS
+archives also export for App Store Connect with matching Apple distribution identities,
+Store profiles, production entitlements, architectures, and package signatures.
 Those 1.0.40 results remain historical rather than evidence for the new source. The
 1.0.41 candidate is deliberately **NOT SHIPPED**; its repository-qualification decision
 is made only by the current report. The repository now contains:
@@ -83,9 +84,8 @@ prior evidence records the iPhone 17 Pro headless UI run on iOS 26.5 with 7 pass
 iPad-only skipped, and 0 failed and the iPad Pro 13-inch (M5) run with 5 passed, 3
 phone-specific skipped by design, and 0 failed. Those results are regression context,
 not current-candidate source-bound evidence. Manual hardware observations are superseded by supported
-Simulator, hosted, and deterministic equivalents. Distribution signing and entitlement
-inspection remain external because no matching profile or distribution identity is
-available.
+Simulator, hosted, and deterministic equivalents. App Store Connect validation, upload,
+submission, and rollout remain owner-operated.
 
 ### Retained package-audit history
 
@@ -105,10 +105,9 @@ rewrite that history.
 Automated and supported-host evidence establishes only the checks it actually ran.
 Repository-controlled Simulator, hosted, and deterministic equivalents fully replace
 direct-device observations in the current qualification bar. Live iCloud/Game Center
-configuration, App Store Connect, distribution signing, archive/export, notarization,
-upload, rollout, and release are
-separate external actions performed only when their credentials and services are
-available; their absence does not determine product shippability.
+configuration and App Store Connect record setup remain separate external actions. The
+signed archive/export gate is complete; validation, upload, submission, rollout, and
+release remain owner-operated.
 
 ## App-owned runtime and Forsetti scope
 
@@ -238,11 +237,11 @@ The version 1.0.41 build 41 candidate uses the same product acceptance boundary:
 - **REPOSITORY-QUALIFIED RELEASE CANDIDATE**
 - **IPHONE HEADLESS UI QUALIFICATION PASS**
 - **IPAD HEADLESS UI QUALIFICATION PASS**
-- **DISTRIBUTION SIGNING AND ENTITLEMENT CHECKS EXTERNAL**
+- **APP STORE ARCHIVE AND EXPORT QUALIFICATION PASS**
 - **NOT SHIPPED**
 
 Repository-controlled Simulator, hosted, and deterministic checks replace physical or
 manual validation for Messages/share destinations, camera/QR fixtures, Contacts,
-accessibility, performance, account-state policy, and service failure handling. Signing,
-archive/export, notarization, App Store metadata, upload, and rollout remain distinct
-external publication actions; none is implied by product release qualification.
+accessibility, performance, account-state policy, and service failure handling. App Store
+metadata confirmation, validation, upload, submission, and rollout remain distinct
+owner-operated publication actions; none was performed by product qualification.
