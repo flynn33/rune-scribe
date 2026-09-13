@@ -293,7 +293,7 @@ require(
     "README roadmap version differs from the project version",
 )
 require(
-    "| 6 | Production Elven providers, hardening, evidence, no-ship handoff | Repository-qualified release candidate; not shipped |"
+    "| 6 | Production Elven providers, hardening, evidence, no-ship handoff | App Store upload-ready candidate; not shipped |"
     in readme_roadmap,
     "README Wave 6 roadmap scope differs",
 )

@@ -8,6 +8,14 @@ release work and reviewed against the project version before merge. The format f
 <!-- NEW ENTRIES BELOW -->
 ## [Unreleased]
 
+- Isolate every normal-route UI test's persistent state while preserving state across
+  relaunches within the test, preventing unsigned aggregate runs from sharing CloudKit,
+  Keychain, or inbound-file fixtures.
+- Add a reproducible App Store archive qualification command and export options. Fresh
+  iOS and macOS archives now export with Apple distribution signing, Store profiles,
+  production entitlements, Hardened Runtime, and matching version 1.0.41 build 41.
+  Upload, submission, release, and rollout remain owner-operated and were not performed.
+
 ## [1.0.41] - 2026-09-13
 
 - Make the normal compose and result workspace responsive at compact iPhone, iPad,
@@ -21,9 +29,8 @@ release work and reviewed against the project version before merge. The format f
 - Add normal-route iPhone, iPad, and macOS application coverage for long messages,
   paging, rotation/resizing, control dimensions, fresh-install lock behavior, and the
   five existing Codices without adding product features or replacing approved artwork.
-- Advance the repository candidate to version 1.0.41 build 41. Distribution signing,
-  archive, export, notarization, upload, and shipment remain owner-operated and were not
-  performed.
+- Advance the repository candidate to version 1.0.41 build 41. This source/UI checkpoint
+  preceded the later signed Store archive qualification recorded under Unreleased.
 
 ## [1.0.40] - 2026-08-31
 

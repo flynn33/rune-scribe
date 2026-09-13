@@ -2,11 +2,13 @@
 
 **Candidate:** version 1.0.41 build 41
 
-**Status:** `READY_FOR_OWNER_SHIPMENT` — source/UI/build handoff only; not shipped
+**Status:** `READY_FOR_APP_STORE_UPLOAD` — signed export handoff; not uploaded or shipped
 
 **Source commit C:** `735b0e70f0dda5d22fe5e57ce48d7998ba308629`
 
 **Input digest D:** `f2a028d520420996a3037099542eecea445afdc422782377aff29a6b0b5b049a`
+
+**Store qualification source S:** `a1ef420f7a4ef3140aa862543cf63b74e7566c7e`
 
 This is the source-bound qualification entry point for the September 2026 UI and
 Xcode remediation. The candidate uses one responsive production layout on macOS,
@@ -32,7 +34,13 @@ target. Simulator runs used iPhone 17 Pro
 - The clean committed release-product qualification passed all 101 inspections.
   It built fresh macOS arm64 and iOS Simulator arm64/x86_64 Release products and
   inspected versions, architectures, embedded resources, privacy manifests,
-  entitlements, linkage, and the absence of test/reference payloads.
+  entitlements, linkage, and the absence of test/reference payloads. The final rerun
+  was source-bound to Store qualification source S.
+- Fresh iOS and macOS archives exported successfully for App Store Connect. The iOS
+  `.ipa` and macOS `.pkg` use Apple distribution signing, matching Store provisioning
+  profiles, production CloudKit entitlements, Game Center, version 1.0.41 build 41, and
+  `get-task-allow=false`. The Mac app is sandboxed, uses Hardened Runtime, is universal
+  arm64/x86_64, and its installer package signature verifies.
 - An unsigned iPhoneOS device-SDK Release compile passed with the shipping
   entitlements preserved.
 - The macOS hosted blocking suite passed 26 tests. A native run of the real app
@@ -44,17 +52,29 @@ target. Simulator runs used iPhone 17 Pro
   restoration, sharing, three inbound cipher imports, and accessibility. The
   configured-entitlements follow-up passed five applicable tests and skipped one
   iPad-only case.
+- The formerly affected unsigned/unentitled iPhone isolation lane passed six applicable
+  tests with one intentional iPad-only skip and no failures. Each test now receives a
+  distinct persistent root without losing relaunch continuity inside that test.
 - The iPad hosted tests passed 29 of 29. Three applicable normal-route UI tests
-  passed and one phone-only case skipped. The full flow completed every product
-  assertion; its final immediate rotate-back frame read observed the still-landscape
-  window (820 by 1180 instead of 1180 by 820), a Simulator timing diagnostic rather
-  than a product failure. Standalone inbound persistence passed afterward.
+  passed and one phone-only case skipped. After making the rotation assertion wait for
+  settled window geometry, the complete fresh-install primary flow passed in 565.772
+  seconds with zero failures and zero skips. Standalone inbound persistence also passed.
 - Dedicated theme matrices passed on iPhone and iPad, each capturing 211 attachments
   across all five Codices. The macOS fidelity matrix passed its canonical theme
   capture (422 attachments). Sanitized representative images and their approved
   reference mapping are in `visual-reference-index.json`.
 
 ## Diagnostic boundaries
+
+An earlier aggregate iPhone command deliberately stripped the shipping entitlements to
+exercise the isolated application route. Six UI tests that did not set the isolation
+marker reached the real CloudKit adapter and terminated in `CKContainer` initialization;
+two additional aggregate assertions also failed. That command is retained as a
+superseded test-configuration failure, not represented as a product pass. The central
+isolated-app launcher now gives every UI test a unique persistent root, while preserving
+state across relaunches inside that test, and the affected unsigned tests pass without
+CloudKit or Keychain access. The configured-entitlements follow-up remains independently
+green.
 
 The full macOS parity aggregate retained three diagnostic-only failures: host
 automation could not establish focus for offscreen keyboard targets, a 900-point
@@ -77,9 +97,22 @@ contacts. No user data, credentials, or distribution secrets are included.
 
 ## Shipment boundary
 
-Distribution signing, provisioning, archive, export, notarization, App Store upload,
-rollout, and shipment were not performed. Those actions remain with the owner.
+Distribution signing, provisioning-profile resolution, archive, export, and local
+package inspection were performed without uploading. App Store Connect validation,
+upload, submission, release tagging, rollout, and shipment were not performed and remain
+with the owner.
 
 Raw commands, logs, result bundles, extracted attachments and candidate manifests are
 preserved under `/Users/jimdaley/Projects/RuneScribe/ui-xcode-run.CwlJbz`. The compact
-machine-readable record is `EvidenceIndex.json`.
+machine-readable record is `EvidenceIndex.json`. Signed archive/export evidence is
+preserved under
+`/Users/jimdaley/Projects/RuneScribe/AppStoreQualification-1.0.41-20260913-r2`.
+The exported package SHA-256 values are
+`7a727e324829f03235be4008c503c4805ddd88d8ad6ba47d8487ed40d340eb43`
+for `RuneScrib.ipa` and
+`c1fd5803b8f55af0dff236701aa8356e48df369c512cb82124f476b09bc1fa81`
+for `RuneScrib.pkg`.
+The repaired iPhone isolation and iPad primary-flow results are under
+`/Users/jimdaley/Projects/RuneScribe/UIIsolationQualification-1.0.41-20260913`.
+The final local Release-product evidence is under
+`/var/folders/tz/42vs04ls56q51168sddqb5940000gn/T/RuneScribe-release-products.ge62Xu`.
