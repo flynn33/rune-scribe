@@ -47,7 +47,7 @@ final class MoonleafThemeProviderTests: XCTestCase {
         )
         XCTAssertEqual(
             script.rightsID.rawValue,
-            "prov.Source.Masters.Glyphs.moonleaf.glyph.master.json"
+            "prov.Project.Script.Calligraphic.moonleaf.v1"
         )
 
         XCTAssertEqual(
@@ -187,12 +187,12 @@ final class MoonleafThemeProviderTests: XCTestCase {
 
         let acceptedLayouts = descriptor.codex.relics.flatMap(\.layouts)
         XCTAssertEqual(try canonicalSHA256(acceptedLayouts), "099de96c04f178e69f00ad4af110c1e13ced3d3cf8f31064498ec9efd69ee151")
-        XCTAssertEqual(try canonicalSHA256(descriptor.rights), "3b392baea1484da2ee3d5674125d6f003f6db59f237d6cd28b897befaead9f0f")
+        XCTAssertEqual(try canonicalSHA256(descriptor.rights), "1463af1c508ba2732beb03978fdbfc6916dc8fcf36fdf4fb22e39f1d06681cd8")
         XCTAssertEqual(descriptor.rights.count, 16)
         let acceptedMasterRightsID = ThemeProvenanceID(
             rawValue: "prov.Production.Sources.moonleaf.accepted.source.masters.recipe.json"
         )!
-        XCTAssertTrue(descriptor.rights.filter { $0.id != acceptedMasterRightsID }.dropLast().allSatisfy {
+        XCTAssertTrue(descriptor.rights.filter { $0.id != acceptedMasterRightsID && $0.id != script.rightsID }.dropLast().allSatisfy {
             $0.creationDate == "2026-08-21"
                 && $0.origin == .derived
                 && $0.rightsOwner == "Raven Forge Software"
@@ -209,11 +209,13 @@ final class MoonleafThemeProviderTests: XCTestCase {
         )
         XCTAssertTrue(acceptedMasterRights.exportSettings.contains("\"ownerReview\":\"PENDING\""))
         let scriptRights = try XCTUnwrap(descriptor.rights.first { $0.id == script.rightsID })
-        XCTAssertEqual(scriptRights.id.rawValue, "prov.Source.Masters.Glyphs.moonleaf.glyph.master.json")
+        XCTAssertEqual(scriptRights.id.rawValue, "prov.Project.Script.Calligraphic.moonleaf.v1")
         XCTAssertNotEqual(scriptRights.id.rawValue, scriptRights.id.rawValue.lowercased())
-        XCTAssertEqual(scriptRights.creatorTool, "macOS byte-preserving canonicalization with Python 3.9.6 hashing")
-        XCTAssertEqual(scriptRights.sourceReference, "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-master.json")
-        XCTAssertEqual(scriptRights.exportSettings, "{\"deterministic\":true,\"pipeline\":\"scripts/build-elven-production-assets.py\",\"pipelineSHA256\":\"3dd388a70763603b2f90e04ecf7de7115e050ba3bb4da69a96b35fcf727e2307\",\"toolVersions\":{\"fontTools\":\"4.60.2\",\"pillow\":\"11.3.0\",\"python\":\"3.9.6\",\"sips\":\"sips-316\"}}")
+        XCTAssertEqual(scriptRights.creatorTool, "Python 3 with fontTools 4.60.2 and Pillow 11.3.0")
+        XCTAssertEqual(scriptRights.creationDate, "2026-09-15")
+        XCTAssertEqual(scriptRights.sourceReference, "scripts/make-elven-calligraphic-fonts.py")
+        XCTAssertEqual(scriptRights.exportSettings, "{\"deterministic\":true,\"pipeline\":\"scripts/make-elven-calligraphic-fonts.py\",\"styleReference\":\"owner-supplied visual reference, 2026-09-15\"}")
+        XCTAssertEqual(scriptRights.licenseNotice, "Owner-supplied visual direction and proprietary project-local outlines")
         let receivedRights = try XCTUnwrap(descriptor.rights.last)
         XCTAssertEqual(
             receivedRights.id.rawValue,

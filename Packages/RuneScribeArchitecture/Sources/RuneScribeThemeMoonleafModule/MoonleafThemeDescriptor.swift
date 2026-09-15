@@ -347,7 +347,7 @@ public enum MoonleafThemeDescriptorFactory {
               "noColorOnlyState": true,
               "dynamicTypeSafe": true
             },
-            "rightsID": "prov.Source.Masters.Glyphs.moonleaf.glyph.master.json"
+        "rightsID": "prov.Project.Script.Calligraphic.moonleaf.v1"
           }
         ],
         "relics": [
@@ -1063,14 +1063,14 @@ public enum MoonleafThemeDescriptorFactory {
       "defaultLocaleIdentifier": "en-US",
       "rights": [
         {
-          "id": "prov.Source.Masters.Glyphs.moonleaf.glyph.master.json",
-          "creatorTool": "macOS byte-preserving canonicalization with Python 3.9.6 hashing",
-          "creationDate": "2026-08-21",
+          "id": "prov.Project.Script.Calligraphic.moonleaf.v1",
+          "creatorTool": "Python 3 with fontTools 4.60.2 and Pillow 11.3.0",
+          "creationDate": "2026-09-15",
           "origin": "derived",
           "rightsOwner": "Raven Forge Software",
-          "sourceReference": "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/moonleaf/glyph-master.json",
-          "exportSettings": "{\"deterministic\":true,\"pipeline\":\"scripts/build-elven-production-assets.py\",\"pipelineSHA256\":\"3dd388a70763603b2f90e04ecf7de7115e050ba3bb4da69a96b35fcf727e2307\",\"toolVersions\":{\"fontTools\":\"4.60.2\",\"pillow\":\"11.3.0\",\"python\":\"3.9.6\",\"sips\":\"sips-316\"}}",
-          "licenseNotice": "Owner-supplied proprietary source and approved recovery authority"
+          "sourceReference": "scripts/make-elven-calligraphic-fonts.py",
+          "exportSettings": "{\"deterministic\":true,\"pipeline\":\"scripts/make-elven-calligraphic-fonts.py\",\"styleReference\":\"owner-supplied visual reference, 2026-09-15\"}",
+          "licenseNotice": "Owner-supplied visual direction and proprietary project-local outlines"
         },
         {
           "id": "prov.Production.Sources.moonleaf.moonleaf.background.recipe.json",

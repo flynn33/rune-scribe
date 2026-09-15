@@ -230,29 +230,29 @@
     },
     {
       "path": "Production/script/moonleaf-script-primary.ttf",
-      "bytes": 111892,
-      "sha256": "7fa08b061fbbe897e4305dea1bf456ec87b491a2c34e2df4cf2f6845647f0f3e",
+      "bytes": 43752,
+      "sha256": "d7ddae122fbfcfe35bb0b54545ff1d16857bd4075bc777e468e2beac5c845a09",
       "resourceID": "resource.script.moonleaf.output.script-font",
       "role": "script.font"
     },
     {
       "path": "Production/script/moonleaf-script-specimen-high-contrast.png",
-      "bytes": 98130,
-      "sha256": "6c53a2990afccdfabd4bd643add2ae87864efbaaee1c41cfb65046b56fb1c58c",
+      "bytes": 57577,
+      "sha256": "afa923cdf784b86f4ead6c3722d789a1b6bd2cf91256802156bc91b6d0d42560",
       "resourceID": "resource.script.moonleaf.output.script-specimen-high-contrast",
       "role": "script.specimen-high-contrast"
     },
     {
       "path": "Production/script/moonleaf-script-specimen.png",
-      "bytes": 101288,
-      "sha256": "3e18db8ca4a6da82c1c921bd89bda65b8b75afef843b544913f9f20d5166dddd",
+      "bytes": 70896,
+      "sha256": "bbe074d3ccc024a986b9739bc0fa12f64b507c697f57fc25c3de678ed19323a9",
       "resourceID": "resource.script.moonleaf.output.script-specimen-standard",
       "role": "script.specimen-standard"
     },
     {
       "path": "Production/script/moonleaf-script-static-fallback.png",
-      "bytes": 101288,
-      "sha256": "3e18db8ca4a6da82c1c921bd89bda65b8b75afef843b544913f9f20d5166dddd",
+      "bytes": 70896,
+      "sha256": "bbe074d3ccc024a986b9739bc0fa12f64b507c697f57fc25c3de678ed19323a9",
       "resourceID": "resource.script.moonleaf.output.script-static-fallback",
       "role": "script.static-fallback"
     },

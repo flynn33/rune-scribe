@@ -2,11 +2,11 @@ import Foundation
 import RuneScribeContracts
 
 enum SunspireV43ResourcePins {
-    static let integrityManifestByteCount = 18753
-    static let integrityManifestSHA256Hex = "c749b9eb4c441622199f30a5cad9d649cf5722374782df7dec2d474a61ba9863"
+    static let integrityManifestByteCount = 18750
+    static let integrityManifestSHA256Hex = "3db7e3af75cf4a39d900281078d9e5d92d41fad08b20f5aac262c322ea982b07"
     static let moduleManifestByteCount = 13097
     static let moduleManifestSHA256Hex = "9f95540db36d5e432716c528398db66f9da5da96ad1f1f2fec89a73df7d22136"
-    static let productionShippingByteCount = 76176567
+    static let productionShippingByteCount = 76011959
 
     static let productionDefinitions: [SunspireThemeResourceDefinition] = [
         SunspireThemeResourceDefinition(
@@ -394,12 +394,12 @@ enum SunspireV43ResourcePins {
             role: ThemeResourceRoleID(rawValue: "script.font")!,
             mediaType: .ttf,
             requirement: .required,
-            sha256Hex: "af4394a11b37bbd0a7cfa276e727a26a505a2712a6a54847488a38f2f4ca79ab",
-            byteCount: 96648,
+            sha256Hex: "2d812981e0ddf4c4acf5956b769c4103f8e9e8ffd7e2bae8e9b07c0b06d1a8f2",
+            byteCount: 43704,
             maximumByteCount: 8388608,
             pixelWidth: nil,
             pixelHeight: nil,
-            rightsID: ThemeProvenanceID(rawValue: "prov.Source.Masters.Glyphs.sunspire.glyph.master.json")!
+            rightsID: ThemeProvenanceID(rawValue: "prov.Project.Script.Calligraphic.sunspire.v1")!
         ),
         SunspireThemeResourceDefinition(
             id: ThemeResourceID(rawValue: "resource.script.sunspire.output.script-specimen-high-contrast")!,
@@ -408,12 +408,12 @@ enum SunspireV43ResourcePins {
             role: ThemeResourceRoleID(rawValue: "script.specimen-high-contrast")!,
             mediaType: .png,
             requirement: .required,
-            sha256Hex: "2cd4d6cdcff2b09ea5942e13eb9ed72e903006e64761579fd833f10535fc435a",
-            byteCount: 113338,
+            sha256Hex: "053057ea2e9f617c7801f80fe6c3addc9f507f45efcb6129d20c635347557104",
+            byteCount: 61312,
             maximumByteCount: 8388608,
             pixelWidth: 1600,
             pixelHeight: 600,
-            rightsID: ThemeProvenanceID(rawValue: "prov.Source.Masters.Glyphs.sunspire.glyph.master.json")!
+            rightsID: ThemeProvenanceID(rawValue: "prov.Project.Script.Calligraphic.sunspire.v1")!
         ),
         SunspireThemeResourceDefinition(
             id: ThemeResourceID(rawValue: "resource.script.sunspire.output.script-specimen-standard")!,
@@ -422,12 +422,12 @@ enum SunspireV43ResourcePins {
             role: ThemeResourceRoleID(rawValue: "script.specimen-standard")!,
             mediaType: .png,
             requirement: .required,
-            sha256Hex: "face0b05e48e8cf560b44d06ea6f64b07386e57ebe954f6d6a181e6937237822",
-            byteCount: 106351,
+            sha256Hex: "4edfe99825b6b49a39d56f40cdb111bb5d2204c6c3dabb8bf3eca4cd27a01fa8",
+            byteCount: 76532,
             maximumByteCount: 8388608,
             pixelWidth: 1600,
             pixelHeight: 600,
-            rightsID: ThemeProvenanceID(rawValue: "prov.Source.Masters.Glyphs.sunspire.glyph.master.json")!
+            rightsID: ThemeProvenanceID(rawValue: "prov.Project.Script.Calligraphic.sunspire.v1")!
         ),
         SunspireThemeResourceDefinition(
             id: ThemeResourceID(rawValue: "resource.script.sunspire.output.script-static-fallback")!,
@@ -436,12 +436,12 @@ enum SunspireV43ResourcePins {
             role: ThemeResourceRoleID(rawValue: "script.static-fallback")!,
             mediaType: .png,
             requirement: .required,
-            sha256Hex: "face0b05e48e8cf560b44d06ea6f64b07386e57ebe954f6d6a181e6937237822",
-            byteCount: 106351,
+            sha256Hex: "4edfe99825b6b49a39d56f40cdb111bb5d2204c6c3dabb8bf3eca4cd27a01fa8",
+            byteCount: 76532,
             maximumByteCount: 8388608,
             pixelWidth: 1600,
             pixelHeight: 600,
-            rightsID: ThemeProvenanceID(rawValue: "prov.Source.Masters.Glyphs.sunspire.glyph.master.json")!
+            rightsID: ThemeProvenanceID(rawValue: "prov.Project.Script.Calligraphic.sunspire.v1")!
         ),
         SunspireThemeResourceDefinition(
             id: ThemeResourceID(rawValue: "resource.seal.sunspire.dawnflower.output.seal-color-master")!,

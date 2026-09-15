@@ -1948,9 +1948,9 @@ final class RuneScribeMacParityTests: XCTestCase {
         SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
     }
 
-    private static let moonleafFontByteCount = 111_892
+    private static let moonleafFontByteCount = 43752
     private static let moonleafFontSHA256Hex =
-        "7fa08b061fbbe897e4305dea1bf456ec87b491a2c34e2df4cf2f6845647f0f3e"
+        "d7ddae122fbfcfe35bb0b54545ff1d16857bd4075bc777e468e2beac5c845a09"
     private static let moonleafPostScriptName = "RavenForgeMoonleafScript-Regular"
 }
 

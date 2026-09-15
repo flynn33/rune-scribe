@@ -199,13 +199,17 @@ struct RootView: View {
         // Theme background. A background receives the resolved root bounds
         // without contributing its renderer's ideal size to workspace layout.
         .background {
-            RuntimeMetalBackground()
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .ignoresSafeArea()
-                .clipped()
-                .accessibilityIdentifier(rootBackgroundAccessibilityIdentifier)
-                .runtimeViewportFrameProbe(rootBackgroundAccessibilityIdentifier)
-                .themeCaptureViewportIdentifier(rootBackgroundCaptureIdentifier)
+            ZStack {
+                RuntimeMetalBackground()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .clipped()
+
+                RuneAtmosphericBackgroundTreatment()
+            }
+            .ignoresSafeArea()
+            .accessibilityIdentifier(rootBackgroundAccessibilityIdentifier)
+            .runtimeViewportFrameProbe(rootBackgroundAccessibilityIdentifier)
+            .themeCaptureViewportIdentifier(rootBackgroundCaptureIdentifier)
         }
         .animation(.easeInOut(duration: 0.25), value: session.isLocked)
         .animation(.easeInOut(duration: 0.2), value: showsEmergencyThemeWarning)

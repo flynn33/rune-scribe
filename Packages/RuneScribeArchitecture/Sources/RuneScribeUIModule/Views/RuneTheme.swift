@@ -28,6 +28,122 @@ enum RuneMetrics {
     static let corner: CGFloat = 12
 }
 
+// MARK: - Visual Depth
+
+/// Shared, provider-neutral depth treatment. Theme artwork supplies identity;
+/// these surfaces supply contemporary hierarchy and legibility without baking
+/// a particular theme's ornament into application chrome.
+struct RuneGlassSurface: View {
+    var cornerRadius: CGFloat = RuneMetrics.corner
+    var accent: Color = .runeGold
+    var tintOpacity: Double = 0.72
+    var shadowRadius: CGFloat = 18
+    var shadowY: CGFloat = 9
+
+    @Environment(\.colorSchemeContrast) private var colorSchemeContrast
+
+    var body: some View {
+        let increasedContrast = colorSchemeContrast == .increased
+        let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+
+        ZStack {
+            shape.fill(.thinMaterial)
+            shape.fill(
+                LinearGradient(
+                    colors: [
+                        Color.runeSurfaceElevated.opacity(
+                            increasedContrast ? min(0.96, tintOpacity + 0.18) : tintOpacity
+                        ),
+                        Color.runeNavy.opacity(
+                            increasedContrast ? 0.94 : max(0.42, tintOpacity - 0.18)
+                        ),
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+            shape.fill(
+                LinearGradient(
+                    colors: [
+                        Color.white.opacity(increasedContrast ? 0.12 : 0.09),
+                        Color.clear,
+                        accent.opacity(increasedContrast ? 0.10 : 0.06),
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottomTrailing
+                )
+            )
+        }
+        .overlay {
+            shape.strokeBorder(
+                LinearGradient(
+                    colors: [
+                        Color.white.opacity(increasedContrast ? 0.30 : 0.18),
+                        accent.opacity(increasedContrast ? 0.58 : 0.34),
+                        Color.white.opacity(0.06),
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                ),
+                lineWidth: increasedContrast ? 1.5 : 1
+            )
+        }
+        .shadow(
+            color: Color.black.opacity(increasedContrast ? 0.38 : 0.28),
+            radius: shadowRadius,
+            y: shadowY
+        )
+    }
+}
+
+/// Grades busy scene artwork into a cinematic backdrop while preserving the
+/// authored image and palette for every Theme.
+struct RuneAtmosphericBackgroundTreatment: View {
+    @Environment(\.colorSchemeContrast) private var colorSchemeContrast
+
+    var body: some View {
+        let increasedContrast = colorSchemeContrast == .increased
+
+        ZStack {
+            LinearGradient(
+                colors: [
+                    Color.runeNavy.opacity(increasedContrast ? 0.62 : 0.42),
+                    Color.runeNavy.opacity(increasedContrast ? 0.22 : 0.06),
+                    Color.runeBackgroundSecondary.opacity(
+                        increasedContrast ? 0.76 : 0.48
+                    ),
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+
+            RadialGradient(
+                colors: [
+                    Color.runeGold.opacity(increasedContrast ? 0.15 : 0.22),
+                    Color.clear,
+                ],
+                center: .topLeading,
+                startRadius: 10,
+                endRadius: 560
+            )
+            .blendMode(.screen)
+
+            RadialGradient(
+                colors: [
+                    Color.runeAccentSecondary.opacity(increasedContrast ? 0.12 : 0.18),
+                    Color.clear,
+                ],
+                center: .bottomTrailing,
+                startRadius: 20,
+                endRadius: 620
+            )
+            .blendMode(.screen)
+        }
+        .accessibilityHidden(true)
+        .allowsHitTesting(false)
+    }
+}
+
 // MARK: - Platform Frames
 
 extension View {
@@ -167,16 +283,29 @@ private struct RuneHeaderActionView: View {
     var body: some View {
         Button(action: button.action) {
             Image(systemName: button.systemImage)
-                .font(.system(size: 12, weight: .bold))
-                .foregroundColor(.runeSilver)
-                .frame(width: 28, height: 28)
-                .background(Circle().fill(Color.runeNavy.opacity(0.55)))
-                .overlay(
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(Color.runeTextPrimary)
+                .frame(width: 34, height: 34)
+                .background {
+                    ZStack {
+                        Circle().fill(.ultraThinMaterial)
+                        Circle().fill(Color.runeNavy.opacity(0.44))
+                    }
+                }
+                .overlay {
                     Circle().strokeBorder(
-                        Color.runeSilver.opacity(0.30),
+                        LinearGradient(
+                            colors: [
+                                Color.white.opacity(0.28),
+                                Color.runeGold.opacity(0.42),
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
                         lineWidth: 1
                     )
-                )
+                }
+                .shadow(color: Color.black.opacity(0.24), radius: 8, y: 4)
                 .frame(width: 44, height: 44)
                 .contentShape(Circle())
         }
@@ -202,13 +331,25 @@ struct RuneHeader: View {
 
     var body: some View {
         ZStack {
+            Rectangle().fill(.ultraThinMaterial)
             Color.runeNavy.opacity(0.24)
 
             // Scrim: preserves wordmark legibility over the root Theme background.
             LinearGradient(
-                colors: [Color.runeNavy.opacity(0.10), Color.runeNavy.opacity(0.62)],
-                startPoint: .top,
-                endPoint: .bottom
+                colors: [
+                    Color.white.opacity(0.08),
+                    Color.runeNavy.opacity(0.18),
+                    Color.runeBackgroundSecondary.opacity(0.72),
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+
+            RadialGradient(
+                colors: [Color.runeGold.opacity(0.18), Color.clear],
+                center: .topLeading,
+                startRadius: 0,
+                endRadius: 320
             )
 
             if trailingButtons.isEmpty {
@@ -230,7 +371,7 @@ struct RuneHeader: View {
                 ThemeChromeImage(slot: .divider)
                     .frame(maxWidth: .infinity)
                     .frame(height: 18)
-                    .opacity(0.88)
+                    .opacity(0.46)
                     .allowsHitTesting(false)
             }
             .accessibilityHidden(true)
@@ -239,7 +380,7 @@ struct RuneHeader: View {
             ZStack {
                 ThemeChromeImage(slot: .cornerOrnament)
                     .frame(width: 52, height: 52)
-                    .opacity(0.72)
+                    .opacity(0.42)
                     .allowsHitTesting(false)
             }
             .accessibilityHidden(true)
@@ -249,7 +390,7 @@ struct RuneHeader: View {
                 ThemeChromeImage(slot: .cornerOrnament)
                     .scaleEffect(x: -1, y: 1)
                     .frame(width: 52, height: 52)
-                    .opacity(0.72)
+                    .opacity(0.42)
                     .allowsHitTesting(false)
             }
             .accessibilityHidden(true)
@@ -368,11 +509,15 @@ struct RunePanel<Content: View>: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .background {
-            RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
-                .fill(Color.runeParchment)
+            RuneGlassSurface(
+                cornerRadius: RuneMetrics.corner,
+                accent: accent,
+                tintOpacity: 0.76
+            )
         }
         .overlay {
             ThemeChromeImage(slot: .panelBorder)
+                .opacity(0.40)
                 .allowsHitTesting(false)
         }
     }

@@ -38,7 +38,7 @@ final class WildwoodThemeProviderTests: XCTestCase {
         XCTAssertEqual(script.fontPostScriptName?.rawValue, "RavenForgeWildwoodScript-Regular")
         XCTAssertEqual(
             script.rightsID.rawValue,
-            "prov.Source.Masters.Glyphs.wildwood.glyph.master.json"
+            "prov.Project.Script.Calligraphic.wildwood.v1"
         )
 
         XCTAssertEqual(
@@ -178,12 +178,12 @@ final class WildwoodThemeProviderTests: XCTestCase {
 
         let acceptedLayouts = descriptor.codex.relics.flatMap(\.layouts)
         XCTAssertEqual(try canonicalSHA256(acceptedLayouts), "70bc7f08db68f15d444983e6a8f2244505608e66e8d3ddf08be87ce037940e7e")
-        XCTAssertEqual(try canonicalSHA256(descriptor.rights), "20db4632926c43f563f1aab9682b45fe7fc44a475aeab1ff4db9c1fa793bb8f7")
+        XCTAssertEqual(try canonicalSHA256(descriptor.rights), "9f8c0daba2e1aaae4fc1947f618eaef0adaed17b8b600155d84ce10ee96149b2")
         XCTAssertEqual(descriptor.rights.count, 15)
         let acceptedMasterRightsID = ThemeProvenanceID(
             rawValue: "prov.Production.Sources.wildwood.accepted.source.masters.recipe.json"
         )!
-        XCTAssertTrue(descriptor.rights.filter { $0.id != acceptedMasterRightsID }.allSatisfy {
+        XCTAssertTrue(descriptor.rights.filter { $0.id != acceptedMasterRightsID && $0.id != script.rightsID }.allSatisfy {
             $0.creationDate == "2026-08-21"
                 && $0.origin == .derived
                 && $0.rightsOwner == "Raven Forge Software"
@@ -196,11 +196,13 @@ final class WildwoodThemeProviderTests: XCTestCase {
         XCTAssertEqual(acceptedMasterRights.creationDate, "2026-08-27")
         XCTAssertTrue(acceptedMasterRights.exportSettings.contains("\"ownerReview\":\"PENDING\""))
         let scriptRights = try XCTUnwrap(descriptor.rights.first { $0.id == script.rightsID })
-        XCTAssertEqual(scriptRights.id.rawValue, "prov.Source.Masters.Glyphs.wildwood.glyph.master.json")
+        XCTAssertEqual(scriptRights.id.rawValue, "prov.Project.Script.Calligraphic.wildwood.v1")
         XCTAssertNotEqual(scriptRights.id.rawValue, scriptRights.id.rawValue.lowercased())
-        XCTAssertEqual(scriptRights.creatorTool, "macOS byte-preserving canonicalization with Python 3.9.6 hashing")
-        XCTAssertEqual(scriptRights.sourceReference, "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/wildwood/glyph-master.json")
-        XCTAssertEqual(scriptRights.exportSettings, "{\"deterministic\":true,\"pipeline\":\"scripts/build-elven-production-assets.py\",\"pipelineSHA256\":\"3dd388a70763603b2f90e04ecf7de7115e050ba3bb4da69a96b35fcf727e2307\",\"toolVersions\":{\"fontTools\":\"4.60.2\",\"pillow\":\"11.3.0\",\"python\":\"3.9.6\",\"sips\":\"sips-316\"}}")
+        XCTAssertEqual(scriptRights.creatorTool, "Python 3 with fontTools 4.60.2 and Pillow 11.3.0")
+        XCTAssertEqual(scriptRights.creationDate, "2026-09-15")
+        XCTAssertEqual(scriptRights.sourceReference, "scripts/make-elven-calligraphic-fonts.py")
+        XCTAssertEqual(scriptRights.exportSettings, "{\"deterministic\":true,\"pipeline\":\"scripts/make-elven-calligraphic-fonts.py\",\"styleReference\":\"owner-supplied visual reference, 2026-09-15\"}")
+        XCTAssertEqual(scriptRights.licenseNotice, "Owner-supplied visual direction and proprietary project-local outlines")
 
         XCTAssertEqual(descriptor.codex.relics.count, 3)
         XCTAssertEqual(descriptor.codex.seals.count, 6)

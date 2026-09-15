@@ -192,32 +192,32 @@
       "sha256": "3cbd1ffa83aee55d727350158a7112ffc6d2bfdbb97e8666017af09f57a89c39"
     },
     {
-      "bytes": 53648,
+      "bytes": 43460,
       "path": "Production/script/wildwood-script-primary.ttf",
       "resourceID": "resource.script.wildwood.output.script-font",
       "role": "script.font",
-      "sha256": "ad40e0285989a37f008be604de4e7a7687f016a0c8e97e709fd8848d1caf0093"
+      "sha256": "82be7a3cd2cf12dbde24fc0b9bce6926d2840006e60af06ec88d35e40c4a7584"
     },
     {
-      "bytes": 123863,
+      "bytes": 64902,
       "path": "Production/script/wildwood-script-specimen-high-contrast.png",
       "resourceID": "resource.script.wildwood.output.script-specimen-high-contrast",
       "role": "script.specimen-high-contrast",
-      "sha256": "4484ec11da796b08a41768250e3a28b295655391742ff4c95bb6e5b1cb2f4a17"
+      "sha256": "95436595cf9540518601fb3afc0e706c17cafc27e3a16d40afbebcccbe495602"
     },
     {
-      "bytes": 121172,
+      "bytes": 80456,
       "path": "Production/script/wildwood-script-specimen.png",
       "resourceID": "resource.script.wildwood.output.script-specimen-standard",
       "role": "script.specimen-standard",
-      "sha256": "4326dec956fc9d82f407feb80ea5a52658b0db1346da3a3dbc647700bf868b56"
+      "sha256": "c493ab596c5cab9bf799dcfc6378f4d6252aabc752b7334d5541221f95fea187"
     },
     {
-      "bytes": 121172,
+      "bytes": 80456,
       "path": "Production/script/wildwood-script-static-fallback.png",
       "resourceID": "resource.script.wildwood.output.script-static-fallback",
       "role": "script.static-fallback",
-      "sha256": "4326dec956fc9d82f407feb80ea5a52658b0db1346da3a3dbc647700bf868b56"
+      "sha256": "c493ab596c5cab9bf799dcfc6378f4d6252aabc752b7334d5541221f95fea187"
     },
     {
       "bytes": 2155495,

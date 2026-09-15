@@ -297,19 +297,68 @@ struct ThemeVisualPlaceholder: View {
     var body: some View {
         ZStack {
             LinearGradient(
-                colors: [Color.runeNavy.opacity(0.88), Color.runeBlue.opacity(0.18)],
+                colors: [
+                    Color.runeSurfaceElevated.opacity(0.94),
+                    Color.runeBlue.opacity(0.28),
+                ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
+            RadialGradient(
+                colors: [Color.runeGold.opacity(0.18), Color.clear],
+                center: .topLeading,
+                startRadius: 0,
+                endRadius: 70
+            )
             Image(systemName: systemImage)
-                .font(.system(size: 25, weight: .semibold))
-                .foregroundStyle(Color.runeSilver)
+                .font(.system(size: 23, weight: .medium))
+                .foregroundStyle(Color.runeTextPrimary)
+                .shadow(color: Color.black.opacity(0.28), radius: 4, y: 2)
         }
         .overlay {
             RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .strokeBorder(Color.runeSilver.opacity(0.22), lineWidth: 1)
+                .strokeBorder(
+                    LinearGradient(
+                        colors: [Color.white.opacity(0.24), Color.runeGold.opacity(0.34)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 1
+                )
         }
         .accessibilityLabel(label ?? "Artwork unavailable")
+    }
+}
+
+struct ThemeEmptyFrameArtwork: View {
+    var body: some View {
+        ZStack {
+            LinearGradient(
+                colors: [Color.runeSurfaceElevated, Color.runeAccentSecondary.opacity(0.38)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            RoundedRectangle(cornerRadius: 5, style: .continuous)
+                .strokeBorder(
+                    LinearGradient(
+                        colors: [Color.runeGold.opacity(0.88), Color.runeAccentSecondary],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 2
+                )
+                .padding(7)
+            RoundedRectangle(cornerRadius: 3, style: .continuous)
+                .strokeBorder(Color.runeGold.opacity(0.52), lineWidth: 1)
+                .padding(11)
+            Rectangle()
+                .fill(Color.runeGold)
+                .frame(width: 5, height: 5)
+                .rotationEffect(.degrees(45))
+                .offset(y: -14)
+                .shadow(color: Color.runeGold.opacity(0.45), radius: 3)
+        }
+        .accessibilityLabel("No frame selected")
     }
 }
 
@@ -375,6 +424,11 @@ struct ThemeCodexCardView<Artwork: View>: View {
                     }
                     .aspectRatio(16 / 9, contentMode: .fit)
                     .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            .strokeBorder(Color.white.opacity(0.14), lineWidth: 1)
+                    }
+                    .shadow(color: Color.black.opacity(0.28), radius: 10, y: 5)
                     .accessibilityHidden(true)
 
                     HStack(alignment: .bottom, spacing: 10) {
@@ -395,6 +449,20 @@ struct ThemeCodexCardView<Artwork: View>: View {
                             .foregroundStyle(
                                 state == .selected ? Color.runeSelected : Color.runeSilver
                             )
+                            .padding(.horizontal, 9)
+                            .padding(.vertical, 6)
+                            .background {
+                                Capsule()
+                                    .fill(Color.runeNavy.opacity(0.58))
+                                    .overlay {
+                                        Capsule().strokeBorder(
+                                            state == .selected
+                                                ? Color.runeSelected.opacity(0.48)
+                                                : Color.white.opacity(0.10),
+                                            lineWidth: 1
+                                        )
+                                    }
+                            }
                             .fixedSize(horizontal: true, vertical: false)
                     }
                 }
@@ -403,6 +471,15 @@ struct ThemeCodexCardView<Artwork: View>: View {
         }
         .buttonStyle(.plain)
         .disabled(!isEnabled)
+        .background {
+            RuneGlassSurface(
+                cornerRadius: RuneMetrics.corner,
+                accent: state == .selected ? .runeSelected : .runeAccentSecondary,
+                tintOpacity: 0.74,
+                shadowRadius: 14,
+                shadowY: 6
+            )
+        }
         .overlay {
             RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
                 .strokeBorder(
@@ -412,7 +489,7 @@ struct ThemeCodexCardView<Artwork: View>: View {
         }
         .overlay {
             ThemeChromeImage(slot: .panelBorder)
-                .opacity(0.72)
+                .opacity(0.34)
                 .clipped()
                 .allowsHitTesting(false)
         }
@@ -471,12 +548,18 @@ struct ThemeArtifactSelectionControl<Artwork: View>: View {
             HStack(spacing: 8) {
                 artwork
                     .frame(width: 42, height: 42)
-                    .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: 9, style: .continuous))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 9, style: .continuous)
+                            .strokeBorder(Color.white.opacity(0.16), lineWidth: 1)
+                    }
+                    .shadow(color: Color.black.opacity(0.24), radius: 5, y: 2)
                     .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(title.uppercased())
                         .font(.caption2.weight(.semibold))
-                        .foregroundStyle(Color.runeSilver)
+                        .tracking(0.8)
+                        .foregroundStyle(Color.runeGold)
                         .padding(.vertical, 1)
                         .fixedSize(horizontal: false, vertical: true)
                     Text(item?.name ?? (allowsNone ? "None" : "Unavailable"))
@@ -494,7 +577,7 @@ struct ThemeArtifactSelectionControl<Artwork: View>: View {
                         Label(state.rawValue, systemImage: state.systemImage)
                             .font(.caption2.weight(.semibold))
                             .foregroundStyle(
-                                state == .unavailable ? Color.runeWarning : Color.runeSilver
+                                state == .unavailable ? Color.runeWarning : Color.runeSelected
                             )
                             .padding(.vertical, 1)
                             .fixedSize(horizontal: false, vertical: true)
@@ -502,20 +585,29 @@ struct ThemeArtifactSelectionControl<Artwork: View>: View {
                 }
                 Spacer(minLength: 4)
                 Image(systemName: "chevron.down")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(Color.runeSilver)
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(Color.runeGold)
+                    .frame(width: 26, height: 26)
+                    .background(Circle().fill(Color.runeNavy.opacity(0.46)))
                     .accessibilityHidden(true)
             }
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
             .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
             .contentShape(Rectangle())
             .background {
                 ZStack {
-                    RoundedRectangle(cornerRadius: 7, style: .continuous)
-                        .fill(Color.runeBackgroundSecondary.opacity(0.88))
+                    RuneGlassSurface(
+                        cornerRadius: 11,
+                        accent: state == .selected ? .runeSelected : .runeAccentSecondary,
+                        tintOpacity: 0.62,
+                        shadowRadius: 7,
+                        shadowY: 3
+                    )
                     ThemeChromeImage(slot: .tabSelector)
-                        .opacity(0.72)
+                        .opacity(0.22)
                 }
-                .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: 11, style: .continuous))
             }
         }
         .buttonStyle(.plain)
@@ -804,10 +896,17 @@ struct ThemeArtifactSpecimenView<Artwork: View>: View {
             }
         }
         .background {
-            Color.runeNavy.opacity(0.97)
+            RuneGlassSurface(
+                cornerRadius: RuneMetrics.corner,
+                accent: Color.runeRarity(item.rarity),
+                tintOpacity: 0.86,
+                shadowRadius: 12,
+                shadowY: 5
+            )
         }
         .overlay {
             ThemeChromeImage(slot: .panelBorder)
+                .opacity(0.42)
                 .allowsHitTesting(false)
         }
         .aspectRatio(172 / 307, contentMode: .fit)
@@ -1042,6 +1141,7 @@ struct ThemeArtifactBrowserView<Artwork: View>: View {
             .padding(RuneMetrics.pad)
             .themeCaptureIdentifier(captureIdentifier)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .navigationTitle(title)
         .accessibilityIdentifier("theme.artifact-picker")
         .runtimeViewportFrameProbe("theme.artifact-picker")
