@@ -233,6 +233,7 @@ struct ContentView: View {
     /// One glyph size shared by the editor and the inscription so the text never
     /// changes size when it transforms — only the glyphs change.
     private let glyphSize: CGFloat = 20
+    private let initialViewport: ContentViewInitialViewport?
     private let initialViewportProbeID: String
     private let initialComposeCaptureLength: ThemeCaptureIdentifier.ComposeLength?
     private let onInputTextChange: @MainActor (String) -> Void
@@ -245,6 +246,7 @@ struct ContentView: View {
         initialComposeCaptureLength: ThemeCaptureIdentifier.ComposeLength? = nil,
         onInputTextChange: @escaping @MainActor (String) -> Void = { _ in }
     ) {
+        self.initialViewport = initialViewport
         self.initialViewportProbeID = initialViewportProbeID
         self.initialComposeCaptureLength = initialComposeCaptureLength
         self.onInputTextChange = onInputTextChange
@@ -436,6 +438,7 @@ struct ContentView: View {
                 workspaceBody(maximumCanvasWidth: maximumCanvasWidth)
                     .frame(minHeight: proxy.size.height, alignment: .top)
             }
+            .defaultScrollAnchor(initialViewport == nil ? .top : .bottom)
             .scrollPosition(id: $initialScrollTarget, anchor: .bottom)
             .scrollDismissesKeyboard(.immediately)
             .scrollBounceBehavior(.basedOnSize)
@@ -496,11 +499,7 @@ struct ContentView: View {
                 }
             }
 
-            Picker("Mode", selection: $mode) {
-                ForEach(Mode.allCases) { Text($0.rawValue).tag($0) }
-            }
-            .pickerStyle(.segmented)
-            .labelsHidden()
+            modePicker
 
             textFrame(maximumCanvasWidth: maximumCanvasWidth)
                 .frame(
@@ -543,7 +542,17 @@ struct ContentView: View {
                 .themeCaptureViewportIdentifier(screenCaptureIdentifier)
             )
         }
-        return AnyView(NavigationStack {
+        return AnyView(VStack(spacing: 0) {
+            RuneHeader(
+                slot: .frameBrowser,
+                subtitle: "Choose Frame",
+                trailingButtons: [
+                    RuneHeaderButton(systemImage: "xmark", help: "Close") {
+                        artifactBrowser = nil
+                    }
+                ]
+            )
+
             ThemeArtifactBrowserView(
                 title: "Choose \(browser.title)",
                 items: artifactBrowserItems(browser),
@@ -577,20 +586,23 @@ struct ContentView: View {
                     )
                 }
             )
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Close") { artifactBrowser = nil }
-                }
-            }
         }
+        .runeSheetFrame()
+        .runeSemanticPresentationSurface()
+        .preferredColorScheme(.dark)
         .task { await session.loadActiveThemeCatalogVisuals() }
         .themeCaptureViewportIdentifier(screenCaptureIdentifier))
     }
 
     private func textFrame(maximumCanvasWidth: CGFloat?) -> some View {
         ZStack(alignment: .topLeading) {
-            RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
-                .fill(Color.runeParchment)
+            RuneGlassSurface(
+                cornerRadius: RuneMetrics.corner,
+                accent: .runeGold,
+                tintOpacity: 0.82,
+                shadowRadius: 16,
+                shadowY: 7
+            )
 
             GeometryReader { geometry in
                 let protectedInsets = ThemeChromePanelContentGeometry.protectedInsets(
@@ -720,6 +732,7 @@ struct ContentView: View {
         .clipShape(RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous))
         .overlay {
             ThemeChromeImage(slot: .panelBorder)
+                .opacity(0.42)
                 .allowsHitTesting(false)
         }
         .runtimeViewportFrameProbe(initialViewportProbeID)
@@ -976,6 +989,62 @@ struct ContentView: View {
 
     // MARK: - Active Cipher Bar
 
+    private var modePicker: some View {
+        HStack(spacing: 4) {
+            ForEach(Mode.allCases) { option in
+                Button {
+                    withAnimation(.snappy(duration: 0.24)) {
+                        mode = option
+                    }
+                } label: {
+                    Label(
+                        option.rawValue,
+                        systemImage: option == .encode
+                            ? "character.book.closed.fill"
+                            : "text.viewfinder"
+                    )
+                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    .foregroundStyle(
+                        mode == option ? Color.runeTextInverse : Color.runeTextPrimary
+                    )
+                    .frame(maxWidth: .infinity, minHeight: 42)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .background {
+                    if mode == option {
+                        RoundedRectangle(cornerRadius: 11, style: .continuous)
+                            .fill(
+                                LinearGradient(
+                                    colors: [Color.runeGoldBright, Color.runeGold],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .overlay {
+                                RoundedRectangle(cornerRadius: 11, style: .continuous)
+                                    .strokeBorder(Color.white.opacity(0.28), lineWidth: 1)
+                            }
+                            .shadow(color: Color.runeGold.opacity(0.22), radius: 9, y: 4)
+                    }
+                }
+                .accessibilityAddTraits(mode == option ? .isSelected : [])
+            }
+        }
+        .padding(4)
+        .background {
+            RuneGlassSurface(
+                cornerRadius: 15,
+                accent: .runeAccentSecondary,
+                tintOpacity: 0.58,
+                shadowRadius: 8,
+                shadowY: 3
+            )
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Mode")
+    }
+
     private var activeCipherBar: some View {
         HStack(spacing: 10) {
             Image(systemName: "key.fill")
@@ -1026,9 +1095,15 @@ struct ContentView: View {
         .padding(.vertical, 0)
         .background {
             ZStack {
-                RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
-                    .fill(Color.runeParchment)
+                RuneGlassSurface(
+                    cornerRadius: RuneMetrics.corner,
+                    accent: .runeGold,
+                    tintOpacity: 0.70,
+                    shadowRadius: 10,
+                    shadowY: 4
+                )
                 ThemeChromeImage(slot: .tabSelector)
+                    .opacity(0.28)
                     .allowsHitTesting(false)
             }
         }
@@ -1042,12 +1117,6 @@ struct ContentView: View {
             : AnyLayout(HStackLayout(spacing: 10))
 
         return HStack(alignment: .top, spacing: 10) {
-            Image(systemName: "photo.artframe")
-                .font(.system(size: 12))
-                .foregroundColor(.runeBlue)
-                .accessibilityHidden(true)
-                .padding(.top, usesExpandedLayout ? 4 : 10)
-
             controlLayout {
                 artifactSelectionControl(
                     title: "Relic",
@@ -1080,9 +1149,15 @@ struct ContentView: View {
         .frame(minHeight: 44)
         .background {
             ZStack {
-                RoundedRectangle(cornerRadius: RuneMetrics.corner, style: .continuous)
-                    .fill(Color.runeParchment)
+                RuneGlassSurface(
+                    cornerRadius: RuneMetrics.corner,
+                    accent: .runeAccentSecondary,
+                    tintOpacity: 0.70,
+                    shadowRadius: 12,
+                    shadowY: 5
+                )
                 ThemeChromeImage(slot: .tabSelector)
+                    .opacity(0.24)
                     .allowsHitTesting(false)
             }
         }
@@ -1105,6 +1180,8 @@ struct ContentView: View {
         ) {
             if let selectedItem {
                 artifactArtwork(for: selectedItem.id, kind: browser.visualKind)
+            } else if browser == .frame {
+                AnyView(ThemeEmptyFrameArtwork())
             } else {
                 AnyView(ThemeVisualPlaceholder(
                     systemImage: browser.visualKind.systemImage,

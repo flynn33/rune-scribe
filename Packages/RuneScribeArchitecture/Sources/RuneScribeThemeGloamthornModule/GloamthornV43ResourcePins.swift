@@ -2,11 +2,11 @@ import Foundation
 import RuneScribeContracts
 
 enum GloamthornV43ResourcePins {
-    static let integrityManifestByteCount = 19067
-    static let integrityManifestSHA256Hex = "403ec2e256f9d9f253558081ae5e5b9ace53a79d86ac3ff04707fd57c2c38ad3"
+    static let integrityManifestByteCount = 19064
+    static let integrityManifestSHA256Hex = "23f348639a71daf33586511de2a6889db21af6f2b2dfd14ef60e274508ed20d2"
     static let moduleManifestByteCount = 13394
     static let moduleManifestSHA256Hex = "fdd254f26561b18803d3de6949e705abf5f2b23b7467dc250ba2c2b8bbd9930d"
-    static let productionShippingByteCount = 68428342
+    static let productionShippingByteCount = 68300382
 
     static let productionDefinitions: [GloamthornThemeResourceDefinition] = [
         GloamthornThemeResourceDefinition(
@@ -394,12 +394,12 @@ enum GloamthornV43ResourcePins {
             role: ThemeResourceRoleID(rawValue: "script.font")!,
             mediaType: .ttf,
             requirement: .required,
-            sha256Hex: "a2cf3dd18a4e1bbf4a11b3995307873820c8715a17f4e745cd61fae6f92a65b3",
-            byteCount: 44108,
+            sha256Hex: "1fabdb4562327a41dfdf205b56600668a5f936058b590e9a60703d9c0c31a165",
+            byteCount: 43860,
             maximumByteCount: 8388608,
             pixelWidth: nil,
             pixelHeight: nil,
-            rightsID: ThemeProvenanceID(rawValue: "prov.Source.Masters.Glyphs.gloamthorn.glyph.master.json")!
+            rightsID: ThemeProvenanceID(rawValue: "prov.Project.Script.Calligraphic.gloamthorn.v1")!
         ),
         GloamthornThemeResourceDefinition(
             id: ThemeResourceID(rawValue: "resource.script.gloamthorn.output.script-specimen-high-contrast")!,
@@ -408,12 +408,12 @@ enum GloamthornV43ResourcePins {
             role: ThemeResourceRoleID(rawValue: "script.specimen-high-contrast")!,
             mediaType: .png,
             requirement: .required,
-            sha256Hex: "ec67c56f07bac6e374c3a245d0a357d8cb95939b45ff70d30cf340e70265828a",
-            byteCount: 112192,
+            sha256Hex: "c0b8179b5e7d2bb5de8ba38ac2bdebc1ddb3e79733f44238283b1ab30ebdb25a",
+            byteCount: 58910,
             maximumByteCount: 8388608,
             pixelWidth: 1600,
             pixelHeight: 600,
-            rightsID: ThemeProvenanceID(rawValue: "prov.Source.Masters.Glyphs.gloamthorn.glyph.master.json")!
+            rightsID: ThemeProvenanceID(rawValue: "prov.Project.Script.Calligraphic.gloamthorn.v1")!
         ),
         GloamthornThemeResourceDefinition(
             id: ThemeResourceID(rawValue: "resource.script.gloamthorn.output.script-specimen-standard")!,
@@ -422,12 +422,12 @@ enum GloamthornV43ResourcePins {
             role: ThemeResourceRoleID(rawValue: "script.specimen-standard")!,
             mediaType: .png,
             requirement: .required,
-            sha256Hex: "6a6ddcf5621652d6b316120c5abccfee49cdf839273951e7f5561fe2af4c8f3f",
-            byteCount: 109610,
+            sha256Hex: "703d9a169fdc568fa38b6bf64fecf8f07167eacae8a1157c079e3c6926c8419c",
+            byteCount: 72395,
             maximumByteCount: 8388608,
             pixelWidth: 1600,
             pixelHeight: 600,
-            rightsID: ThemeProvenanceID(rawValue: "prov.Source.Masters.Glyphs.gloamthorn.glyph.master.json")!
+            rightsID: ThemeProvenanceID(rawValue: "prov.Project.Script.Calligraphic.gloamthorn.v1")!
         ),
         GloamthornThemeResourceDefinition(
             id: ThemeResourceID(rawValue: "resource.script.gloamthorn.output.script-static-fallback")!,
@@ -436,12 +436,12 @@ enum GloamthornV43ResourcePins {
             role: ThemeResourceRoleID(rawValue: "script.static-fallback")!,
             mediaType: .png,
             requirement: .required,
-            sha256Hex: "6a6ddcf5621652d6b316120c5abccfee49cdf839273951e7f5561fe2af4c8f3f",
-            byteCount: 109610,
+            sha256Hex: "703d9a169fdc568fa38b6bf64fecf8f07167eacae8a1157c079e3c6926c8419c",
+            byteCount: 72395,
             maximumByteCount: 8388608,
             pixelWidth: 1600,
             pixelHeight: 600,
-            rightsID: ThemeProvenanceID(rawValue: "prov.Source.Masters.Glyphs.gloamthorn.glyph.master.json")!
+            rightsID: ThemeProvenanceID(rawValue: "prov.Project.Script.Calligraphic.gloamthorn.v1")!
         ),
         GloamthornThemeResourceDefinition(
             id: ThemeResourceID(rawValue: "resource.seal.gloamthorn.echo-wisp.output.seal-color-master")!,

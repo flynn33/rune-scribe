@@ -490,6 +490,7 @@ enum ThemeHeadingSlot: String, CaseIterable, Sendable {
     case license
     case `import`
     case cipherLibrary = "cipher-library"
+    case frameBrowser = "frame-browser"
     case appLocked = "app-locked"
     case pinSet = "pin-set"
     case pinChange = "pin-change"
@@ -500,8 +501,27 @@ enum ThemeHeadingSlot: String, CaseIterable, Sendable {
 @MainActor
 enum RuneThemeHeadingInterpreter {
     private(set) static var current: [ThemeHeadingSlot: String] = [:]
+    private static var providerFallbacks: [ThemeHeadingSlot: String] = [:]
+    private static let fallbackWords: [ThemeHeadingSlot: String] = [
+        .workspace: "RUNE SCRIBE",
+        .settings: "SETTINGS",
+        .receivedMessage: "MESSAGE",
+        .contacts: "CONTACTS",
+        .qrScan: "SCAN",
+        .share: "SHARE",
+        .license: "LICENSE",
+        .import: "IMPORT",
+        .cipherLibrary: "CIPHERS",
+        .frameBrowser: "FRAME",
+        .appLocked: "RUNE LOCK",
+        .pinSet: "SET PIN",
+        .pinChange: "CHANGE",
+        .pinDisable: "DISABLE",
+        .vault: "VAULT",
+    ]
 
-    static func install(_ data: Data?) {
+    static func install(_ data: Data?, descriptor: ThemeDescriptor? = nil) {
+        providerFallbacks = descriptor.map(makeProviderFallbacks) ?? [:]
         guard let data,
               let object = try? JSONSerialization.jsonObject(with: data),
               let root = object as? [String: Any],
@@ -519,10 +539,46 @@ enum RuneThemeHeadingInterpreter {
     }
 
     static func value(for slot: ThemeHeadingSlot, fallback: String) -> String {
-        current[slot] ?? fallback
+        current[slot] ?? providerFallbacks[slot] ?? fallback
     }
 
-    static func reset() { current = [:] }
+    static func reset() {
+        current = [:]
+        providerFallbacks = [:]
+    }
+
+    private static func makeProviderFallbacks(
+        descriptor: ThemeDescriptor
+    ) -> [ThemeHeadingSlot: String] {
+        guard let script = descriptor.codex.scripts.first(where: {
+            $0.id == descriptor.codex.primaryScriptID
+        }) else { return [:] }
+        let glyphs = Dictionary(
+            uniqueKeysWithValues: script.glyphs.map { ($0.canonicalValue, $0.textToken) }
+        )
+        return Dictionary(uniqueKeysWithValues: fallbackWords.compactMap { slot, word in
+            makeProviderHeading(word, glyphs: glyphs).map { (slot, $0) }
+        })
+    }
+
+    private static func makeProviderHeading(
+        _ word: String,
+        glyphs: [UInt8: String]
+    ) -> String? {
+        var heading = ""
+        for scalar in word.unicodeScalars {
+            if scalar == " " {
+                heading.append(" ")
+                continue
+            }
+            guard scalar.value >= 65,
+                  scalar.value <= 90,
+                  let token = glyphs[UInt8(scalar.value - 65)]
+            else { return nil }
+            heading.append(token)
+        }
+        return heading
+    }
 }
 
 @MainActor

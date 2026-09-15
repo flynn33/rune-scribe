@@ -2,11 +2,11 @@ import Foundation
 import RuneScribeContracts
 
 enum MoonleafV43ResourcePins {
-    static let integrityManifestByteCount = 20221
-    static let integrityManifestSHA256Hex = "a7bfe8e9aa0e0a86e2d40ede5ef306b08be79c27612ec76d1364636f887d311e"
+    static let integrityManifestByteCount = 20218
+    static let integrityManifestSHA256Hex = "540cba0719cabc6d73639df18a420c623aa4fe4fb694cde7e4033ddde64fb4be"
     static let moduleManifestByteCount = 14061
     static let moduleManifestSHA256Hex = "8d205be32b619678c2c514a5fc17d87b8bf06e39b30149b8ef13d3329c82fd4d"
-    static let productionShippingByteCount = 70713288
+    static let productionShippingByteCount = 70543811
 
     static let productionDefinitions: [MoonleafThemeResourceDefinition] = [
         MoonleafThemeResourceDefinition(
@@ -464,12 +464,12 @@ enum MoonleafV43ResourcePins {
             role: ThemeResourceRoleID(rawValue: "script.font")!,
             mediaType: .ttf,
             requirement: .required,
-            sha256Hex: "7fa08b061fbbe897e4305dea1bf456ec87b491a2c34e2df4cf2f6845647f0f3e",
-            byteCount: 111892,
+            sha256Hex: "d7ddae122fbfcfe35bb0b54545ff1d16857bd4075bc777e468e2beac5c845a09",
+            byteCount: 43752,
             maximumByteCount: 8388608,
             pixelWidth: nil,
             pixelHeight: nil,
-            rightsID: ThemeProvenanceID(rawValue: "prov.Source.Masters.Glyphs.moonleaf.glyph.master.json")!
+            rightsID: ThemeProvenanceID(rawValue: "prov.Project.Script.Calligraphic.moonleaf.v1")!
         ),
         MoonleafThemeResourceDefinition(
             id: ThemeResourceID(rawValue: "resource.script.moonleaf.output.script-specimen-high-contrast")!,
@@ -478,12 +478,12 @@ enum MoonleafV43ResourcePins {
             role: ThemeResourceRoleID(rawValue: "script.specimen-high-contrast")!,
             mediaType: .png,
             requirement: .required,
-            sha256Hex: "6c53a2990afccdfabd4bd643add2ae87864efbaaee1c41cfb65046b56fb1c58c",
-            byteCount: 98130,
+            sha256Hex: "afa923cdf784b86f4ead6c3722d789a1b6bd2cf91256802156bc91b6d0d42560",
+            byteCount: 57577,
             maximumByteCount: 8388608,
             pixelWidth: 1600,
             pixelHeight: 600,
-            rightsID: ThemeProvenanceID(rawValue: "prov.Source.Masters.Glyphs.moonleaf.glyph.master.json")!
+            rightsID: ThemeProvenanceID(rawValue: "prov.Project.Script.Calligraphic.moonleaf.v1")!
         ),
         MoonleafThemeResourceDefinition(
             id: ThemeResourceID(rawValue: "resource.script.moonleaf.output.script-specimen-standard")!,
@@ -492,12 +492,12 @@ enum MoonleafV43ResourcePins {
             role: ThemeResourceRoleID(rawValue: "script.specimen-standard")!,
             mediaType: .png,
             requirement: .required,
-            sha256Hex: "3e18db8ca4a6da82c1c921bd89bda65b8b75afef843b544913f9f20d5166dddd",
-            byteCount: 101288,
+            sha256Hex: "bbe074d3ccc024a986b9739bc0fa12f64b507c697f57fc25c3de678ed19323a9",
+            byteCount: 70896,
             maximumByteCount: 8388608,
             pixelWidth: 1600,
             pixelHeight: 600,
-            rightsID: ThemeProvenanceID(rawValue: "prov.Source.Masters.Glyphs.moonleaf.glyph.master.json")!
+            rightsID: ThemeProvenanceID(rawValue: "prov.Project.Script.Calligraphic.moonleaf.v1")!
         ),
         MoonleafThemeResourceDefinition(
             id: ThemeResourceID(rawValue: "resource.script.moonleaf.output.script-static-fallback")!,
@@ -506,12 +506,12 @@ enum MoonleafV43ResourcePins {
             role: ThemeResourceRoleID(rawValue: "script.static-fallback")!,
             mediaType: .png,
             requirement: .required,
-            sha256Hex: "3e18db8ca4a6da82c1c921bd89bda65b8b75afef843b544913f9f20d5166dddd",
-            byteCount: 101288,
+            sha256Hex: "bbe074d3ccc024a986b9739bc0fa12f64b507c697f57fc25c3de678ed19323a9",
+            byteCount: 70896,
             maximumByteCount: 8388608,
             pixelWidth: 1600,
             pixelHeight: 600,
-            rightsID: ThemeProvenanceID(rawValue: "prov.Source.Masters.Glyphs.moonleaf.glyph.master.json")!
+            rightsID: ThemeProvenanceID(rawValue: "prov.Project.Script.Calligraphic.moonleaf.v1")!
         ),
         MoonleafThemeResourceDefinition(
             id: ThemeResourceID(rawValue: "resource.seal.moonleaf.crescentleaf.output.seal-color-master")!,

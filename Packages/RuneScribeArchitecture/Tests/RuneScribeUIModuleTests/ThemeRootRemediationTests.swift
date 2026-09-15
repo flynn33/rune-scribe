@@ -83,6 +83,36 @@ final class ThemeRootRemediationTests: XCTestCase {
         XCTAssertTrue(content.contains("Color.clear.ignoresSafeArea()"))
     }
 
+    func testEveryThemeUsesSharedContemporaryDepthAndControls() throws {
+        let views = viewsDirectory()
+        let root = try source("RootView.swift", in: views)
+        let theme = try source("RuneTheme.swift", in: views)
+        let content = try source("ContentView.swift", in: views)
+        let buttons = try source("RuneScribButtonStyle.swift", in: views)
+        let visualComponents = try source("ThemeVisualComponents.swift", in: views)
+
+        XCTAssertTrue(theme.contains("struct RuneGlassSurface: View"))
+        XCTAssertTrue(theme.contains("struct RuneAtmosphericBackgroundTreatment: View"))
+        XCTAssertTrue(root.contains("RuneAtmosphericBackgroundTreatment()"))
+        XCTAssertTrue(content.contains("private var modePicker: some View"))
+        XCTAssertFalse(content.contains("Picker(\"Mode\", selection: $mode)"))
+        XCTAssertTrue(buttons.contains("LinearGradient("))
+        XCTAssertTrue(buttons.contains(".fill(.thinMaterial)"))
+        XCTAssertTrue(content.contains("AnyView(ThemeEmptyFrameArtwork())"))
+        XCTAssertTrue(visualComponents.contains("struct ThemeEmptyFrameArtwork: View"))
+        XCTAssertGreaterThanOrEqual(
+            visualComponents.components(separatedBy: "RuneGlassSurface(").count - 1,
+            3
+        )
+
+        for themeID in ["norse", "moonleaf", "sunspire", "wildwood", "gloamthorn"] {
+            XCTAssertFalse(
+                theme.contains("if themeID == \"\(themeID)\""),
+                "Shared depth must remain provider neutral"
+            )
+        }
+    }
+
     func testEveryWorkspaceUsesTheSameGeometryDrivenScrollPolicyBelowAStableHeader() throws {
         let views = viewsDirectory()
         let content = try source("ContentView.swift", in: views)

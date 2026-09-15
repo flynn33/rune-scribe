@@ -38,7 +38,7 @@ final class SunspireThemeProviderTests: XCTestCase {
         XCTAssertEqual(script.fontPostScriptName?.rawValue, "RavenForgeSunspireScript-Regular")
         XCTAssertEqual(
             script.rightsID.rawValue,
-            "prov.Source.Masters.Glyphs.sunspire.glyph.master.json"
+            "prov.Project.Script.Calligraphic.sunspire.v1"
         )
 
         XCTAssertEqual(
@@ -178,12 +178,12 @@ final class SunspireThemeProviderTests: XCTestCase {
 
         let acceptedLayouts = descriptor.codex.relics.flatMap(\.layouts)
         XCTAssertEqual(try canonicalSHA256(acceptedLayouts), "39c9944c80f79d8b9d5d106ba9f70c1e343a75ee4a67d46141233dacbfc0592d")
-        XCTAssertEqual(try canonicalSHA256(descriptor.rights), "cba83fc9aa10f00ebddf71a3580a6b2630040c2186e28d289007fc380750e4fb")
+        XCTAssertEqual(try canonicalSHA256(descriptor.rights), "4450078a8bf3b77e6c19072405cf46dd402ab28711225e7e692db3493a428972")
         XCTAssertEqual(descriptor.rights.count, 15)
         let acceptedMasterRightsID = ThemeProvenanceID(
             rawValue: "prov.Production.Sources.sunspire.accepted.source.masters.recipe.json"
         )!
-        XCTAssertTrue(descriptor.rights.filter { $0.id != acceptedMasterRightsID }.allSatisfy {
+        XCTAssertTrue(descriptor.rights.filter { $0.id != acceptedMasterRightsID && $0.id != script.rightsID }.allSatisfy {
             $0.creationDate == "2026-08-21"
                 && $0.origin == .derived
                 && $0.rightsOwner == "Raven Forge Software"
@@ -196,11 +196,13 @@ final class SunspireThemeProviderTests: XCTestCase {
         XCTAssertEqual(acceptedMasterRights.creationDate, "2026-08-27")
         XCTAssertTrue(acceptedMasterRights.exportSettings.contains("\"ownerReview\":\"PENDING\""))
         let scriptRights = try XCTUnwrap(descriptor.rights.first { $0.id == script.rightsID })
-        XCTAssertEqual(scriptRights.id.rawValue, "prov.Source.Masters.Glyphs.sunspire.glyph.master.json")
+        XCTAssertEqual(scriptRights.id.rawValue, "prov.Project.Script.Calligraphic.sunspire.v1")
         XCTAssertNotEqual(scriptRights.id.rawValue, scriptRights.id.rawValue.lowercased())
-        XCTAssertEqual(scriptRights.creatorTool, "macOS byte-preserving canonicalization with Python 3.9.6 hashing")
-        XCTAssertEqual(scriptRights.sourceReference, "/Users/jimdaley/Documents/RavenForge/RuneScribe/Rune-Scribe-Elven-Series-Design-Package-v1.0/Source-Masters/Glyphs/sunspire/glyph-master.json")
-        XCTAssertEqual(scriptRights.exportSettings, "{\"deterministic\":true,\"pipeline\":\"scripts/build-elven-production-assets.py\",\"pipelineSHA256\":\"3dd388a70763603b2f90e04ecf7de7115e050ba3bb4da69a96b35fcf727e2307\",\"toolVersions\":{\"fontTools\":\"4.60.2\",\"pillow\":\"11.3.0\",\"python\":\"3.9.6\",\"sips\":\"sips-316\"}}")
+        XCTAssertEqual(scriptRights.creatorTool, "Python 3 with fontTools 4.60.2 and Pillow 11.3.0")
+        XCTAssertEqual(scriptRights.creationDate, "2026-09-15")
+        XCTAssertEqual(scriptRights.sourceReference, "scripts/make-elven-calligraphic-fonts.py")
+        XCTAssertEqual(scriptRights.exportSettings, "{\"deterministic\":true,\"pipeline\":\"scripts/make-elven-calligraphic-fonts.py\",\"styleReference\":\"owner-supplied visual reference, 2026-09-15\"}")
+        XCTAssertEqual(scriptRights.licenseNotice, "Owner-supplied visual direction and proprietary project-local outlines")
 
         XCTAssertEqual(descriptor.codex.relics.count, 3)
         XCTAssertEqual(descriptor.codex.seals.count, 6)

@@ -2,11 +2,11 @@ import Foundation
 import RuneScribeContracts
 
 enum WildwoodV43ResourcePins {
-    static let integrityManifestByteCount = 18769
-    static let integrityManifestSHA256Hex = "dccfc480cbcb64e7159c45fa5309cfc8890b4d276226c12716334870bbdcffc2"
+    static let integrityManifestByteCount = 18766
+    static let integrityManifestSHA256Hex = "faa22821ac0112c299e2d4ada68ac89329f9c5e160af39bcd39f376569b085b8"
     static let moduleManifestByteCount = 13108
     static let moduleManifestSHA256Hex = "7c615de5ca324236c64dfb0c2f78c7f89dbbf389896264976c268f19e4a03e02"
-    static let productionShippingByteCount = 85363508
+    static let productionShippingByteCount = 85212927
 
     static let productionDefinitions: [WildwoodThemeResourceDefinition] = [
         WildwoodThemeResourceDefinition(
@@ -394,12 +394,12 @@ enum WildwoodV43ResourcePins {
             role: ThemeResourceRoleID(rawValue: "script.font")!,
             mediaType: .ttf,
             requirement: .required,
-            sha256Hex: "ad40e0285989a37f008be604de4e7a7687f016a0c8e97e709fd8848d1caf0093",
-            byteCount: 53648,
+            sha256Hex: "82be7a3cd2cf12dbde24fc0b9bce6926d2840006e60af06ec88d35e40c4a7584",
+            byteCount: 43460,
             maximumByteCount: 8388608,
             pixelWidth: nil,
             pixelHeight: nil,
-            rightsID: ThemeProvenanceID(rawValue: "prov.Source.Masters.Glyphs.wildwood.glyph.master.json")!
+            rightsID: ThemeProvenanceID(rawValue: "prov.Project.Script.Calligraphic.wildwood.v1")!
         ),
         WildwoodThemeResourceDefinition(
             id: ThemeResourceID(rawValue: "resource.script.wildwood.output.script-specimen-high-contrast")!,
@@ -408,12 +408,12 @@ enum WildwoodV43ResourcePins {
             role: ThemeResourceRoleID(rawValue: "script.specimen-high-contrast")!,
             mediaType: .png,
             requirement: .required,
-            sha256Hex: "4484ec11da796b08a41768250e3a28b295655391742ff4c95bb6e5b1cb2f4a17",
-            byteCount: 123863,
+            sha256Hex: "95436595cf9540518601fb3afc0e706c17cafc27e3a16d40afbebcccbe495602",
+            byteCount: 64902,
             maximumByteCount: 8388608,
             pixelWidth: 1600,
             pixelHeight: 600,
-            rightsID: ThemeProvenanceID(rawValue: "prov.Source.Masters.Glyphs.wildwood.glyph.master.json")!
+            rightsID: ThemeProvenanceID(rawValue: "prov.Project.Script.Calligraphic.wildwood.v1")!
         ),
         WildwoodThemeResourceDefinition(
             id: ThemeResourceID(rawValue: "resource.script.wildwood.output.script-specimen-standard")!,
@@ -422,12 +422,12 @@ enum WildwoodV43ResourcePins {
             role: ThemeResourceRoleID(rawValue: "script.specimen-standard")!,
             mediaType: .png,
             requirement: .required,
-            sha256Hex: "4326dec956fc9d82f407feb80ea5a52658b0db1346da3a3dbc647700bf868b56",
-            byteCount: 121172,
+            sha256Hex: "c493ab596c5cab9bf799dcfc6378f4d6252aabc752b7334d5541221f95fea187",
+            byteCount: 80456,
             maximumByteCount: 8388608,
             pixelWidth: 1600,
             pixelHeight: 600,
-            rightsID: ThemeProvenanceID(rawValue: "prov.Source.Masters.Glyphs.wildwood.glyph.master.json")!
+            rightsID: ThemeProvenanceID(rawValue: "prov.Project.Script.Calligraphic.wildwood.v1")!
         ),
         WildwoodThemeResourceDefinition(
             id: ThemeResourceID(rawValue: "resource.script.wildwood.output.script-static-fallback")!,
@@ -436,12 +436,12 @@ enum WildwoodV43ResourcePins {
             role: ThemeResourceRoleID(rawValue: "script.static-fallback")!,
             mediaType: .png,
             requirement: .required,
-            sha256Hex: "4326dec956fc9d82f407feb80ea5a52658b0db1346da3a3dbc647700bf868b56",
-            byteCount: 121172,
+            sha256Hex: "c493ab596c5cab9bf799dcfc6378f4d6252aabc752b7334d5541221f95fea187",
+            byteCount: 80456,
             maximumByteCount: 8388608,
             pixelWidth: 1600,
             pixelHeight: 600,
-            rightsID: ThemeProvenanceID(rawValue: "prov.Source.Masters.Glyphs.wildwood.glyph.master.json")!
+            rightsID: ThemeProvenanceID(rawValue: "prov.Project.Script.Calligraphic.wildwood.v1")!
         ),
         WildwoodThemeResourceDefinition(
             id: ThemeResourceID(rawValue: "resource.seal.wildwood.acorn-knot.output.seal-color-master")!,

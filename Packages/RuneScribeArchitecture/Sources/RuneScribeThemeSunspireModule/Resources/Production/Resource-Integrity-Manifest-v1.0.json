@@ -192,32 +192,32 @@
       "sha256": "4b92ccbdbeadd34328cd9fa57e48c6496e1739ef34c0ad17ecbc3fbdc23d8401"
     },
     {
-      "bytes": 96648,
+      "bytes": 43704,
       "path": "Production/script/sunspire-script-primary.ttf",
       "resourceID": "resource.script.sunspire.output.script-font",
       "role": "script.font",
-      "sha256": "af4394a11b37bbd0a7cfa276e727a26a505a2712a6a54847488a38f2f4ca79ab"
+      "sha256": "2d812981e0ddf4c4acf5956b769c4103f8e9e8ffd7e2bae8e9b07c0b06d1a8f2"
     },
     {
-      "bytes": 113338,
+      "bytes": 61312,
       "path": "Production/script/sunspire-script-specimen-high-contrast.png",
       "resourceID": "resource.script.sunspire.output.script-specimen-high-contrast",
       "role": "script.specimen-high-contrast",
-      "sha256": "2cd4d6cdcff2b09ea5942e13eb9ed72e903006e64761579fd833f10535fc435a"
+      "sha256": "053057ea2e9f617c7801f80fe6c3addc9f507f45efcb6129d20c635347557104"
     },
     {
-      "bytes": 106351,
+      "bytes": 76532,
       "path": "Production/script/sunspire-script-specimen.png",
       "resourceID": "resource.script.sunspire.output.script-specimen-standard",
       "role": "script.specimen-standard",
-      "sha256": "face0b05e48e8cf560b44d06ea6f64b07386e57ebe954f6d6a181e6937237822"
+      "sha256": "4edfe99825b6b49a39d56f40cdb111bb5d2204c6c3dabb8bf3eca4cd27a01fa8"
     },
     {
-      "bytes": 106351,
+      "bytes": 76532,
       "path": "Production/script/sunspire-script-static-fallback.png",
       "resourceID": "resource.script.sunspire.output.script-static-fallback",
       "role": "script.static-fallback",
-      "sha256": "face0b05e48e8cf560b44d06ea6f64b07386e57ebe954f6d6a181e6937237822"
+      "sha256": "4edfe99825b6b49a39d56f40cdb111bb5d2204c6c3dabb8bf3eca4cd27a01fa8"
     },
     {
       "bytes": 2373362,

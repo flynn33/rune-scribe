@@ -547,7 +547,7 @@ struct ShareBuilderView: View {
         let token = updatedGeneration.begin(themeRevision: themeRevision)
         catalogLoadGeneration = updatedGeneration
         catalogLoadTask?.cancel()
-        isLoadingCatalog = true
+        isLoadingCatalog = catalog == nil
         catalogLoadTask = Task { @MainActor in
             await loadInitialCatalog(token: token)
             guard acceptsCatalogLoad(token) else { return }

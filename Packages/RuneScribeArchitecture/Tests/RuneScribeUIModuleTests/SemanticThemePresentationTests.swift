@@ -324,7 +324,8 @@ final class SemanticThemePresentationTests: XCTestCase {
         XCTAssertTrue(catalogCardSource.contains("ThemeChromeProtectedContentLayout("))
         XCTAssertTrue(catalogCardSource.contains("panelPixelSize: panelBorderPixelSize"))
         XCTAssertTrue(catalogCardSource.contains("GeometryReader { geometry in"))
-        XCTAssertTrue(catalogCardSource.contains("Color.runeNavy.opacity(0.97)"))
+        XCTAssertTrue(catalogCardSource.contains("RuneGlassSurface("))
+        XCTAssertFalse(catalogCardSource.contains("Color.runeNavy.opacity(0.97)"))
         XCTAssertTrue(catalogCardSource.contains("ThemeChromeImage(slot: .panelBorder)"))
         XCTAssertTrue(settingsSource.contains("ThemeCodexCardView("))
         XCTAssertTrue(vaultSource.contains("identifierPrefix: \"theme.vault\""))
@@ -455,6 +456,27 @@ final class SemanticThemePresentationTests: XCTestCase {
             RuneThemeHeadingInterpreter.value(for: .settings, fallback: "Settings"),
             "Settings"
         )
+
+        RuneThemeHeadingInterpreter.install(
+            nil,
+            descriptor: RuneScribeThemeMoonleafModuleBootstrap.discoveryDescriptor
+        )
+        let moonleafHeading = RuneThemeHeadingInterpreter.value(
+            for: .workspace,
+            fallback: "Rune Scribe"
+        )
+        XCTAssertNotEqual(moonleafHeading, "Rune Scribe")
+        XCTAssertTrue(moonleafHeading.unicodeScalars.allSatisfy {
+            $0 == " " || (0x16A0 ... 0x16FF).contains($0.value)
+        })
+        let frameHeading = RuneThemeHeadingInterpreter.value(
+            for: .frameBrowser,
+            fallback: "Choose Frame"
+        )
+        XCTAssertNotEqual(frameHeading, "Choose Frame")
+        XCTAssertTrue(frameHeading.unicodeScalars.allSatisfy {
+            (0x16A0 ... 0x16FF).contains($0.value)
+        })
     }
 
     func testUIModuleSourcesContainNoHardCodedRunicLiterals() throws {

@@ -833,7 +833,8 @@ final class RuneScribeUISession: ObservableObject {
         )
         RuneThemePaletteInterpreter.install(descriptor)
         RuneThemeHeadingInterpreter.install(
-            plan.decorativeHeadingResourceID.flatMap { resolved[$0]?.data }
+            plan.decorativeHeadingResourceID.flatMap { resolved[$0]?.data },
+            descriptor: descriptor
         )
         themeScriptPresentation = ThemeScriptPresentation(
             scriptID: plan.scriptID,
