@@ -2582,12 +2582,18 @@ final class RuneScribeUISessionTests: XCTestCase {
         )
         XCTAssertTrue(canonicalPreparation.contains("artifact = try await prepareMessageShare("))
         XCTAssertTrue(canonicalPreparation.contains("artifact = try await prepareCipherShare("))
+        XCTAssertTrue(canonicalPreparation.contains("representation: .link"))
         XCTAssertTrue(
             canonicalPreparation.contains(
                 "renderedPresentation: renderedPreview.presentation"
             )
         )
         XCTAssertTrue(canonicalPreparation.contains("transfer = try await shareTransfer("))
+        XCTAssertTrue(
+            canonicalPreparation.contains(
+                "previewImageData: renderedPreview.presentation.safePreviewData"
+            )
+        )
         let transferAcquisition = try XCTUnwrap(
             canonicalPreparation.range(of: "transfer = try await shareTransfer(")
         )
@@ -2621,6 +2627,10 @@ final class RuneScribeUISessionTests: XCTestCase {
                 "@MainActor\nprivate final class RuneScribeIOSActivityItemSource"
             )
         )
+        XCTAssertTrue(runtimeSource.contains("metadata.originalURL = url"))
+        XCTAssertTrue(runtimeSource.contains("metadata.url = url"))
+        XCTAssertTrue(runtimeSource.contains("UIImage(data: previewImageData)"))
+        XCTAssertTrue(runtimeSource.contains("metadata.imageProvider = NSItemProvider(object: image)"))
     }
 
     func testHeaderActionsRetainExplicitMainActorIsolation() throws {

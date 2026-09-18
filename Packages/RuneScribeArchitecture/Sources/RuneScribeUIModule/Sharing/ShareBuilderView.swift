@@ -412,23 +412,45 @@ struct ShareBuilderView: View {
                     }
                 )
             case .opaque:
-                RuneScribePreparedTextShareLauncher(
-                    transfer: preparedShare.transfer,
-                    launchID: shareLaunchID,
-                    onPresented: {
-                        markSharePresented(
-                            artifactID: preparedShare.artifact.id,
-                            launchID: shareLaunchID
-                        )
-                    },
-                    onFinish: {
-                        handleShareCompletion(
-                            $0,
-                            artifactID: preparedShare.artifact.id,
-                            launchID: shareLaunchID
-                        )
-                    }
-                )
+                if source.purpose == .cipherInvitation {
+                    RuneScribePreparedCipherLinkLauncher(
+                        transfer: preparedShare.transfer,
+                        cipherLabel: source.displayName,
+                        previewImageData: preparedShare.previewImageData,
+                        launchID: shareLaunchID,
+                        onPresented: {
+                            markSharePresented(
+                                artifactID: preparedShare.artifact.id,
+                                launchID: shareLaunchID
+                            )
+                        },
+                        onFinish: {
+                            handleShareCompletion(
+                                $0,
+                                artifactID: preparedShare.artifact.id,
+                                launchID: shareLaunchID
+                            )
+                        }
+                    )
+                } else {
+                    RuneScribePreparedTextShareLauncher(
+                        transfer: preparedShare.transfer,
+                        launchID: shareLaunchID,
+                        onPresented: {
+                            markSharePresented(
+                                artifactID: preparedShare.artifact.id,
+                                launchID: shareLaunchID
+                            )
+                        },
+                        onFinish: {
+                            handleShareCompletion(
+                                $0,
+                                artifactID: preparedShare.artifact.id,
+                                launchID: shareLaunchID
+                            )
+                        }
+                    )
+                }
             }
         }
     }

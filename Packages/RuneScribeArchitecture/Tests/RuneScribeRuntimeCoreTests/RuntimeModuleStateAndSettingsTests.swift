@@ -409,6 +409,7 @@ final class RuntimeModuleStateAndSettingsTests: XCTestCase {
         XCTAssertEqual(defaults.effectsPreference, .full)
         XCTAssertFalse(defaults.contactsImportPrompted)
         XCTAssertNil(defaults.splashLastShownAt)
+        XCTAssertEqual(defaults.tutorialCompletedVersion, 0)
         let stored = try await firstClient.set(
             SetRuntimeSettingCommand(
                 settingID: RuneScribeRuntimeSettings.unlockFeedbackSoundEnabled,
@@ -670,6 +671,11 @@ final class RuntimeModuleStateAndSettingsTests: XCTestCase {
             splash.value,
             try RuntimePresentationSettingCodec.splashLastShownValue(at: shownAt)
         )
+        let tutorial = try await primaryUIClient.setTutorialCompletedVersion(
+            1,
+            expectedRevision: 0
+        )
+        XCTAssertEqual(tutorial.value, .integer(1))
         do {
             _ = try await coordinatorClient.setContactsImportPrompted(true)
             XCTFail("Theme coordinator must not write UI presentation state")

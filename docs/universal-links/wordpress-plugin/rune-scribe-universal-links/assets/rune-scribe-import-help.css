@@ -1,0 +1,105 @@
+.rune-scribe-import-help {
+    align-items: flex-start;
+    background: linear-gradient(145deg, #171c25, #232b39);
+    border: 1px solid rgba(219, 178, 105, 0.6);
+    border-radius: 18px;
+    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
+    color: #f7f0e3;
+    display: flex;
+    gap: 1rem;
+    margin: 1.5rem auto 2rem;
+    max-width: 72rem;
+    padding: clamp(1.25rem, 3vw, 2rem);
+}
+
+.rune-scribe-import-help[hidden] {
+    display: none;
+}
+
+.rune-scribe-import-help__mark {
+    align-items: center;
+    background: rgba(219, 178, 105, 0.12);
+    border: 1px solid rgba(219, 178, 105, 0.45);
+    border-radius: 14px;
+    color: #e4bd78;
+    display: flex;
+    flex: 0 0 3.25rem;
+    font-size: 1.8rem;
+    height: 3.25rem;
+    justify-content: center;
+    line-height: 1;
+}
+
+.rune-scribe-import-help__content {
+    min-width: 0;
+}
+
+.rune-scribe-import-help h2 {
+    color: #fff8eb;
+    font-size: clamp(1.45rem, 4vw, 2rem);
+    line-height: 1.2;
+    margin: 0 0 0.75rem;
+}
+
+.rune-scribe-import-help p {
+    color: #eee4d4;
+    font-size: clamp(1rem, 2.4vw, 1.125rem);
+    line-height: 1.6;
+    margin: 0 0 1rem;
+}
+
+.rune-scribe-import-help__button {
+    background: #ddb469;
+    border: 2px solid #ddb469;
+    border-radius: 999px;
+    color: #15191f;
+    display: inline-block;
+    font-weight: 700;
+    line-height: 1.25;
+    padding: 0.8rem 1.25rem;
+    text-decoration: none;
+}
+
+.rune-scribe-import-help__button:hover {
+    background: #f0ca83;
+    border-color: #f0ca83;
+    color: #11151a;
+}
+
+.rune-scribe-import-help__button:focus-visible {
+    outline: 3px solid #ffffff;
+    outline-offset: 4px;
+}
+
+.rune-scribe-import-help .rune-scribe-import-help__note {
+    color: #cfc5b5;
+    font-size: 0.95rem;
+    margin-bottom: 0;
+}
+
+@media (max-width: 600px) {
+    .rune-scribe-import-help {
+        border-radius: 14px;
+        display: block;
+        margin-left: 0.75rem;
+        margin-right: 0.75rem;
+    }
+
+    .rune-scribe-import-help__mark {
+        margin-bottom: 1rem;
+    }
+
+    .rune-scribe-import-help__button {
+        box-sizing: border-box;
+        text-align: center;
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .rune-scribe-import-help,
+    .rune-scribe-import-help * {
+        scroll-behavior: auto;
+        transition: none;
+    }
+}

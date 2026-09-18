@@ -495,6 +495,27 @@ extension RuneScribeUISession {
         }
     }
 
+    func markTutorialCompleted(version: Int) async {
+        guard version > tutorialCompletedVersion,
+              let runtimeSettingsClientHandle
+        else { return }
+        let previous = tutorialCompletedVersion
+        tutorialCompletedVersion = version
+        let expectedRevision = runtimeSettingsSnapshot?.settings.first {
+            $0.settingID == RuneScribeRuntimeSettings.tutorialCompletedVersion
+        }?.revision
+        do {
+            _ = try await runtimeSettingsClientHandle.setTutorialCompletedVersion(
+                version,
+                expectedRevision: expectedRevision
+            )
+            settingsRailState = .available
+        } catch {
+            tutorialCompletedVersion = previous
+            settingsRailState = .degraded
+        }
+    }
+
     func setRevealBlocker(
         _ blocker: ProgressionRevealBlocker,
         active: Bool
@@ -598,6 +619,7 @@ extension RuneScribeUISession {
         unlockFeedbackPreferences = UnlockFeedbackPreferences(snapshot: snapshot)
         contactsImportPrompted = snapshot.contactsImportPrompted
         splashLastShownAt = snapshot.splashLastShownAt
+        tutorialCompletedVersion = snapshot.tutorialCompletedVersion
         runtimePresentationSettingsReady = true
         settingsRailState = .available
         reconcileThemeArtifactSelections()

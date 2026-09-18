@@ -8,6 +8,23 @@ struct PreparedShareBuilderArtifact {
     let themeRevision: ShareBuilderThemeAuthorityRevision
     let colorMode: ShareArtifactColorMode
     let systemReduceMotion: Bool
+    let previewImageData: Data?
+
+    init(
+        artifact: ShareArtifactDTO,
+        transfer: OpaqueShareTransfer,
+        themeRevision: ShareBuilderThemeAuthorityRevision,
+        colorMode: ShareArtifactColorMode,
+        systemReduceMotion: Bool,
+        previewImageData: Data? = nil
+    ) {
+        self.artifact = artifact
+        self.transfer = transfer
+        self.themeRevision = themeRevision
+        self.colorMode = colorMode
+        self.systemReduceMotion = systemReduceMotion
+        self.previewImageData = previewImageData
+    }
 }
 
 @MainActor
@@ -202,7 +219,7 @@ extension RuneScribeUISession {
             artifact = try await prepareCipherShare(
                 cipherID: source.cipherID,
                 displayName: source.displayName,
-                representation: .file,
+                representation: .link,
                 selection: selection,
                 descriptor: catalog.descriptor,
                 effects: catalog.draft.effects,
@@ -232,10 +249,14 @@ extension RuneScribeUISession {
             case .file:
                 transfer = try await shareTransfer(for: artifact.id)
             case .opaque:
-                transfer = try await textShareTransfer(
-                    source.inscription,
-                    artifactID: artifact.id
-                )
+                if source.purpose == .cipherInvitation {
+                    transfer = try await shareTransfer(for: artifact.id)
+                } else {
+                    transfer = try await textShareTransfer(
+                        source.inscription,
+                        artifactID: artifact.id
+                    )
+                }
             }
             try Task.checkCancellation()
             guard let transfer else {
@@ -257,7 +278,8 @@ extension RuneScribeUISession {
                 transfer: transfer,
                 themeRevision: currentThemeRevision,
                 colorMode: colorMode,
-                systemReduceMotion: systemReduceMotion
+                systemReduceMotion: systemReduceMotion,
+                previewImageData: renderedPreview.presentation.safePreviewData
             )
         } catch {
             await transfer?.close()

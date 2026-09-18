@@ -40,7 +40,9 @@ final class AppHostRoutingTests: XCTestCase {
         let fixture = makeFixture(inboundFiles: inboundFiles)
         let delegate = AppDelegate(runtime: fixture.composition)
         let application = UIApplication.shared
-        let coldWebURL = URL(string: "https://ravenforgesoftware.com/rune-scribe/import?p=cold-web")!
+        let coldWebURL = URL(
+            string: "https://ravenforgesoftware.com/rune-scribe/?runescribe=import&v=3&p=cold-web"
+        )!
         let coldActivity = browsingActivity(url: coldWebURL)
 
         XCTAssertTrue(delegate.application(application, open: coldURL))
@@ -75,7 +77,9 @@ final class AppHostRoutingTests: XCTestCase {
         assertLifecycle(received[7], equals: .willTerminate, isColdStart: true)
 
         let warmURL = URL(string: "runescribe://import?p=warm")!
-        let warmWebURL = URL(string: "https://ravenforgesoftware.com/rune-scribe/import?p=warm-web")!
+        let warmWebURL = URL(
+            string: "https://ravenforgesoftware.com/rune-scribe/?runescribe=import&v=3&p=warm-web"
+        )!
         XCTAssertTrue(delegate.application(application, open: warmURL))
         XCTAssertEqual(delegate.receive(userActivity: browsingActivity(url: warmWebURL)), [.accepted])
         delegate.applicationDidBecomeActive(application)

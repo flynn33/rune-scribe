@@ -3,9 +3,53 @@ import RuneScribeRuntimeCore
 import RuneScribeUIRuntime
 import SwiftUI
 import XCTest
+@testable import RuneScribeUIModule
 
 @MainActor
 final class RootViewPresentationTests: XCTestCase {
+    func testTutorialCatalogExplainsArtifactsAndRecipientFlow() {
+        let tutorialText = RuneScribeTutorialCatalog.pages.flatMap { page in
+            [page.title, page.summary] + page.details
+        }.joined(separator: " ")
+
+        for requiredTerm in ["Relic", "Seal", "Frame", "import confirmation", "App Store"] {
+            XCTAssertTrue(tutorialText.localizedCaseInsensitiveContains(requiredTerm))
+        }
+    }
+
+    func testImportAndMessagePresentationsTakePriorityOverTutorial() {
+        XCTAssertEqual(
+            RootPendingPresentationPolicy.selection(
+                showSplash: false,
+                isLocked: false,
+                hasPendingImport: true,
+                hasPendingMessage: true,
+                needsTutorial: true
+            ),
+            .importConfirmation
+        )
+        XCTAssertEqual(
+            RootPendingPresentationPolicy.selection(
+                showSplash: false,
+                isLocked: false,
+                hasPendingImport: false,
+                hasPendingMessage: true,
+                needsTutorial: true
+            ),
+            .receivedMessage
+        )
+        XCTAssertEqual(
+            RootPendingPresentationPolicy.selection(
+                showSplash: false,
+                isLocked: false,
+                hasPendingImport: false,
+                hasPendingMessage: false,
+                needsTutorial: true
+            ),
+            .tutorial
+        )
+    }
+
     func testStorePresentsExactlyOneContributionAndDismissesItsOwner() throws {
         let store = RootViewPresentationStore()
         let moduleID: ModuleIdentifier = "com.runescribe.module.ui"

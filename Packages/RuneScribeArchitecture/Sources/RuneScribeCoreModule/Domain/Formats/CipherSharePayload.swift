@@ -1,5 +1,6 @@
 import Foundation
 import CryptoKit
+import RuneScribeContracts
 
 enum CipherShareError: Error, LocalizedError, Equatable, Sendable {
     case wrongSize, unsupportedVersion(UInt8), badChecksum, notAMapping
@@ -29,7 +30,8 @@ struct CipherSharePayload: Equatable, Sendable {
     static let host = "import"
     static let byteCount = 1 + 8 + 32 + 32 + 16 + 4 + 32 + 4   // 129
     static let webHost = "ravenforgesoftware.com"
-    static let webPath = "/rune-scribe/import"
+    static let webPath = "/rune-scribe/"
+    static let legacyWebPath = "/rune-scribe/import"
 
     let publicID: Data        // 8
     let keyMaterial: Data     // 32
@@ -119,12 +121,15 @@ struct CipherSharePayload: Equatable, Sendable {
         return (payload, rest)
     }
 
-    /// True for a Rune Scribe share link in either the offline `runescribe:` custom-scheme
-    /// form (what we generate now) or the legacy https universal-link form (still accepted).
+    /// True for a Rune Scribe share link in either the HTTPS universal-link form or the
+    /// compatible `runescribe:` custom-scheme and legacy HTTPS forms.
     static func isShareURL(_ string: String) -> Bool {
         let s = string.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         if s.hasPrefix("runescribe:") { return true }
-        return s.hasPrefix("https://\(webHost)\(webPath)") || s.hasPrefix("https://www.\(webHost)\(webPath)")
+        return s.hasPrefix("https://\(webHost)\(webPath)")
+            || s.hasPrefix("https://www.\(webHost)\(webPath)")
+            || s.hasPrefix("https://\(webHost)\(legacyWebPath)")
+            || s.hasPrefix("https://www.\(webHost)\(legacyWebPath)")
     }
 
     private static func checksum(of data: Data) -> Data {
@@ -149,11 +154,16 @@ struct CipherSharePayload: Equatable, Sendable {
 
     func url(name: String?) throws -> URL {
         var comps = URLComponents()
-        // Offline custom scheme: the iPhone Camera and the in-app scanner open the app from
-        // this directly — no server, no Universal-Link association file. `init(url:)` and
-        // `isShareURL` still accept the legacy https form for any links made before this.
-        comps.scheme = Self.scheme; comps.host = Self.host
-        var items = [URLQueryItem(name: "v", value: String(Self.version)),
+        // The product page is also the no-app fallback. With the associated-domain file
+        // deployed, iOS opens the app directly; otherwise the recipient sees the page and
+        // its App Store link instead of a dead custom-scheme URL.
+        comps.scheme = "https"
+        comps.host = Self.webHost
+        comps.path = Self.webPath
+        var items = [
+                     URLQueryItem(name: RuneScribeWireFormat.webImportQueryName,
+                                  value: RuneScribeWireFormat.webImportQueryValue),
+                     URLQueryItem(name: "v", value: String(Self.version)),
                      URLQueryItem(name: "p", value: Self.base64url(try encoded()))]
         if let name = name?.trimmingCharacters(in: .whitespacesAndNewlines), !name.isEmpty {
             items.append(URLQueryItem(name: "n", value: name))
@@ -163,13 +173,19 @@ struct CipherSharePayload: Equatable, Sendable {
         return url
     }
 
-    /// Parse a Rune Scribe share URL in either the offline `runescribe://import` form (what we
-    /// generate now) or the legacy https universal-link form (accepted for older links).
+    /// Parse the current HTTPS universal-link form and compatible links from earlier builds.
     init(url: URL) throws {
         guard let comps = URLComponents(url: url, resolvingAgainstBaseURL: false) else { throw CipherShareError.invalidURL }
+        let normalizedPath = comps.path.lowercased()
+        let hasWebImportMarker = comps.queryItems?.contains(where: {
+            $0.name == RuneScribeWireFormat.webImportQueryName
+                && $0.value == RuneScribeWireFormat.webImportQueryValue
+        }) == true
         let isHTTPS = url.scheme?.lowercased() == "https"
             && (comps.host?.lowercased() == Self.webHost || comps.host?.lowercased() == "www.\(Self.webHost)")
-            && comps.path.lowercased().hasPrefix("/rune-scribe/import")
+            && ((normalizedPath == Self.webPath && hasWebImportMarker)
+                || normalizedPath == Self.legacyWebPath
+                || normalizedPath == Self.legacyWebPath + "/")
         let isScheme = url.scheme?.lowercased() == "runescribe"
             && ((comps.host ?? comps.path).lowercased().trimmingCharacters(in: CharacterSet(charactersIn: "/")) == "import")
         guard isHTTPS || isScheme else { throw CipherShareError.invalidURL }

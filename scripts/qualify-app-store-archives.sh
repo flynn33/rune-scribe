@@ -319,6 +319,7 @@ macos = JSON.parse(File.read(ARGV.fetch(1)))
 ios_allowed = %w[
   application-identifier
   beta-reports-active
+  com.apple.developer.associated-domains
   com.apple.developer.game-center
   com.apple.developer.icloud-container-environment
   com.apple.developer.icloud-container-identifiers
@@ -347,6 +348,8 @@ abort "unexpected iOS Store entitlements: #{unexpected_ios.sort.join(', ')}" \
 abort "unexpected macOS Store entitlements: #{unexpected_macos.sort.join(', ')}" \
   unless unexpected_macos.empty?
 abort "iOS Store export lacks beta reporting" unless ios["beta-reports-active"] == true
+abort "iOS Store export lacks the Rune Scribe associated domain" unless \
+  ios["com.apple.developer.associated-domains"] == ["applinks:ravenforgesoftware.com"]
 RUBY
 
 assert_plist_value "$output_root/ios-store-profile.plist" Name \

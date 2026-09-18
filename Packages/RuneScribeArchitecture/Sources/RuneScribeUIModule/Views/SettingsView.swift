@@ -76,6 +76,7 @@ struct SettingsView: View {
     @State private var showLicense = false
     @State private var showContacts = false
     @State private var showVaultProgress = false
+    @State private var showTutorial = false
     @State private var showThemeFailureDetails = false
     @State private var initialScrollTarget: String?
 
@@ -93,6 +94,7 @@ struct SettingsView: View {
 
             ScrollView {
                 VStack(alignment: .leading, spacing: RuneMetrics.sectionGap) {
+                    guidePanel
                     appearancePanel
                     progressAndFeedbackPanel
                     cloudAndGameCenterPanel
@@ -122,6 +124,36 @@ struct SettingsView: View {
         }
         .sheet(isPresented: $showVaultProgress) {
             VaultProgressView()
+        }
+        .sheet(isPresented: $showTutorial) {
+            TutorialView(mode: .reference)
+        }
+    }
+
+    // MARK: - Guide
+
+    private var guidePanel: some View {
+        RunePanel(title: "Guide", systemImage: "book.closed", accent: .runeBlue) {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Learn how to write, decode, import, and share with Rune Scribe.")
+                    .font(.footnote)
+                    .foregroundColor(.runeSilver)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Text("Relic chooses the tablet, Seal adds its emblem, and Frame chooses its border. They change presentation only.")
+                    .font(.footnote)
+                    .foregroundColor(.runeTextPrimary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Button {
+                    showTutorial = true
+                } label: {
+                    Label("Open Tutorial", systemImage: "book.pages")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(RuneScribButtonStyle())
+                .accessibilityIdentifier("settings.open-tutorial")
+            }
         }
     }
 

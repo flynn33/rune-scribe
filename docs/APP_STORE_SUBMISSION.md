@@ -99,7 +99,12 @@ ENCRYPTION
 • Peer-to-peer key handoff only (link / QR / file). No end-to-end messaging network.
 
 URL SCHEME
-• runescribe:// — cipher import deep links (CFBundleURLTypes). Not Universal Links; no associated domains.
+• runescribe:// — compatible cipher import deep links (CFBundleURLTypes).
+
+UNIVERSAL LINKS (iOS)
+• https://ravenforgesoftware.com/rune-scribe/?runescribe=import… — cipher invitation links.
+• The website association document authorizes Team 9AQ2C2838M and bundle com.runescribe.app.
+• Without the app, the Rune Scribe product page provides the App Store fallback.
 
 DOCUMENT TYPE
 • .runescribe (UTI com.runescribe.runescribe) — typed or exact legacy cipher/message packages, distinguished by container magic or legacy version byte.
@@ -196,7 +201,7 @@ The same text is shown in-app under **Settings → View License**
 - Game Center capability
 - Private iCloud container: `iCloud.com.runescribe.app`
 - CloudKit service and key-value store declarations
-- No associated domains / Universal Links
+- Associated domain: `applinks:ravenforgesoftware.com`
 
 ### macOS (`Config/RuneScrib-macOS.entitlements`)
 

@@ -29,13 +29,25 @@ enum LinkRouter {
         let versions = items.filter { $0.name == "v" }
         let payloads = items.filter { $0.name == "p" }
         let names = items.filter { $0.name == "n" }
-        guard items.allSatisfy({ $0.name == "v" || $0.name == "p" || $0.name == "n" }),
+        let webMarkers = items.filter {
+            $0.name == RuneScribeWireFormat.webImportQueryName
+        }
+        let isWebLandingRoute = components.scheme?.lowercased() == "https"
+            && components.path.lowercased() == RuneScribeWireFormat.webLandingPath
+        guard items.allSatisfy({
+                  $0.name == "v" || $0.name == "p" || $0.name == "n"
+                    || $0.name == RuneScribeWireFormat.webImportQueryName
+              }),
               versions.count == 1,
               versions[0].value == String(RuneScribeWireFormat.cipherVersion),
               payloads.count == 1,
               payloads[0].value?.isEmpty == false,
               names.count <= 1,
-              names.first?.value?.utf8.count ?? 0 <= maximumNameByteCount
+              names.first?.value?.utf8.count ?? 0 <= maximumNameByteCount,
+              isWebLandingRoute
+                ? (webMarkers.count == 1
+                    && webMarkers[0].value == RuneScribeWireFormat.webImportQueryValue)
+                : webMarkers.isEmpty
         else { throw LinkRouterError.invalidQuery }
 
         do {
@@ -57,7 +69,8 @@ enum LinkRouter {
         return scheme == "https"
             && (host == RuneScribeWireFormat.legacyWebHost
                 || host == "www.\(RuneScribeWireFormat.legacyWebHost)")
-            && (path == RuneScribeWireFormat.legacyImportPath
+            && (path == RuneScribeWireFormat.webLandingPath
+                || path == RuneScribeWireFormat.legacyImportPath
                 || path == RuneScribeWireFormat.legacyImportPath + "/")
     }
 }

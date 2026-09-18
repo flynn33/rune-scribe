@@ -514,8 +514,9 @@ upload through App Store Connect.
 Both targets register the **`runescribe://`** URL scheme and a single exported
 **`com.runescribe.runescribe`** document type — the `.runescribe` cipher/message file,
 disambiguated by typed-container magic or its legacy leading version byte — and declare
-Contacts and (iOS) camera usage strings. Sharing is fully offline: there are no
-associated domains or Universal Links.
+Contacts and (iOS) camera usage strings. The iOS target also declares
+**`applinks:ravenforgesoftware.com`** so cipher invitations can open the app through a
+Universal Link after the website publishes the matching association document.
 Those Info.plist keys and entitlements — and the bundled splash video — are configured
 in `project.yml` and `Config/`, the source of truth.
 

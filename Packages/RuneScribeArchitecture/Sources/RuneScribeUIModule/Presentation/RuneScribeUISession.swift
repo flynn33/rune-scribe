@@ -35,6 +35,7 @@ final class RuneScribeUISession: ObservableObject {
     @Published var runtimePresentationSettingsReady = false
     @Published var contactsImportPrompted = false
     @Published var splashLastShownAt: Date?
+    @Published var tutorialCompletedVersion = 0
     @Published private(set) var cloudGameCenterStatus: RuntimeCloudGameCenterStatusSnapshotDTO?
     @Published private(set) var cloudGameCenterError: String?
     @Published var unlockFeedbackPreferences = UnlockFeedbackPreferences.defaults
@@ -303,6 +304,7 @@ final class RuneScribeUISession: ObservableObject {
         runtimePresentationSettingsReady = false
         contactsImportPrompted = false
         splashLastShownAt = nil
+        tutorialCompletedVersion = 0
         cloudGameCenterStatus = nil
         cloudGameCenterError = nil
         unlockFeedbackPreferences = .defaults

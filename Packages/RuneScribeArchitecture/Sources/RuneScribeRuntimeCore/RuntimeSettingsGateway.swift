@@ -181,6 +181,21 @@ public struct RuntimeSettingsClient: Sendable {
             )
         )
     }
+
+    @discardableResult
+    public func setTutorialCompletedVersion(
+        _ version: Int,
+        expectedRevision: UInt64? = nil
+    ) async throws -> RuntimeSettingDTO {
+        guard version >= 0 else { throw ModuleStateStoreError.invalidRequest }
+        return try await set(
+            SetRuntimeSettingCommand(
+                settingID: RuneScribeRuntimeSettings.tutorialCompletedVersion,
+                value: .integer(Int64(version)),
+                expectedRevision: expectedRevision
+            )
+        )
+    }
 }
 
 actor RuntimeSettingsGateway {
@@ -562,7 +577,8 @@ actor RuntimeSettingsGateway {
                   RuntimeEffectsPreference(rawValue: rawValue) != nil
             else { throw ModuleStateStoreError.invalidRequest }
         }
-        if settingID == RuneScribeRuntimeSettings.splashLastShownEpochMilliseconds {
+        if settingID == RuneScribeRuntimeSettings.splashLastShownEpochMilliseconds
+            || settingID == RuneScribeRuntimeSettings.tutorialCompletedVersion {
             guard let milliseconds = value.integerValue, milliseconds >= 0 else {
                 throw ModuleStateStoreError.invalidRequest
             }
@@ -591,7 +607,8 @@ actor RuntimeSettingsGateway {
             return (value, false)
         }
         guard let kind = artifactKind(for: settingID) else {
-            if settingID == RuneScribeRuntimeSettings.splashLastShownEpochMilliseconds,
+            if (settingID == RuneScribeRuntimeSettings.splashLastShownEpochMilliseconds
+                    || settingID == RuneScribeRuntimeSettings.tutorialCompletedVersion),
                (value.integerValue ?? -1) < 0 {
                 return (fallback, false)
             }
