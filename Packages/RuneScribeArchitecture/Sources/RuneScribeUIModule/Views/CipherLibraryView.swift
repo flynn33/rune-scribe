@@ -1096,8 +1096,10 @@ struct CipherLibraryView: View {
     @ViewBuilder
     private var automaticShareLaunchers: some View {
         if let primaryShare, let primaryShareLaunchID {
-            RuneScribePreparedFileShareLauncher(
+            RuneScribePreparedCipherLinkLauncher(
                 transfer: primaryShare.transfer,
+                cipherLabel: primaryShare.artifact.displayName,
+                previewImageData: primaryShare.previewImageData,
                 launchID: primaryShareLaunchID,
                 onPresented: {
                     session.setRevealBlocker(.systemShare, active: true)

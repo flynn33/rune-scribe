@@ -353,6 +353,7 @@ public struct RuntimePolicy: Sendable {
                     RuneScribeRuntimeSettings.effectsPreference,
                     RuneScribeRuntimeSettings.contactsImportPrompted,
                     RuneScribeRuntimeSettings.splashLastShownEpochMilliseconds,
+                    RuneScribeRuntimeSettings.tutorialCompletedVersion,
                 ],
                 RuneScribePolicyClasses.themeCoordinator: [
                     RuneScribeRuntimeSettings.selectedCodex,

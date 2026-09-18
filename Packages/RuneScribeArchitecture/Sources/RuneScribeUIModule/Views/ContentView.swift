@@ -489,13 +489,15 @@ struct ContentView: View {
         VStack(alignment: .leading, spacing: RuneMetrics.sectionGap) {
             activeCipherBar
 
-            artifactSelectionBar
+            if mode == .encode, boxPhase == .editing {
+                artifactSelectionBar
 
-            if let active = session.activeCipher {
-                if let contact = session.contact(id: active.contactID) {
-                    composeRecipient(contact)
-                } else {
-                    recipientPicker(for: active)
+                if let active = session.activeCipher {
+                    if let contact = session.contact(id: active.contactID) {
+                        composeRecipient(contact)
+                    } else {
+                        recipientPicker(for: active)
+                    }
                 }
             }
 

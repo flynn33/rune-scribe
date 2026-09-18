@@ -204,6 +204,9 @@ public enum RuneScribeRuntimeSettings {
     public static let splashLastShownEpochMilliseconds = RuntimeSettingID(
         rawValue: "setting.presentation.splash-last-shown-epoch-milliseconds"
     )!
+    public static let tutorialCompletedVersion = RuntimeSettingID(
+        rawValue: "setting.presentation.tutorial-completed-version"
+    )!
 
     public static func defaultArtifactSelections(
         for kind: RuntimeArtifactSelectionKind
@@ -279,6 +282,10 @@ public enum RuneScribeRuntimeSettings {
             settingID: splashLastShownEpochMilliseconds,
             defaultValue: .integer(0)
         ),
+        RuntimeSettingDescriptor(
+            settingID: tutorialCompletedVersion,
+            defaultValue: .integer(0)
+        ),
     ]
 }
 
@@ -302,6 +309,16 @@ public extension RuntimeSettingsSnapshotDTO {
         let seconds = Double(milliseconds) / 1_000
         guard seconds.isFinite else { return nil }
         return Date(timeIntervalSince1970: seconds)
+    }
+
+    var tutorialCompletedVersion: Int {
+        guard let value = self[
+            RuneScribeRuntimeSettings.tutorialCompletedVersion
+        ]?.integerValue,
+            value >= 0,
+            value <= Int64(Int.max)
+        else { return 0 }
+        return Int(value)
     }
 
     func artifactSelections(

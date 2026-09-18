@@ -42,6 +42,7 @@ enum RootRevealSafetyPolicy {
 enum RootPendingPresentation: Equatable {
     case importConfirmation
     case receivedMessage
+    case tutorial
 }
 
 enum RootPendingPresentationPolicy {
@@ -49,11 +50,13 @@ enum RootPendingPresentationPolicy {
         showSplash: Bool,
         isLocked: Bool,
         hasPendingImport: Bool,
-        hasPendingMessage: Bool
+        hasPendingMessage: Bool,
+        needsTutorial: Bool = false
     ) -> RootPendingPresentation? {
         guard !showSplash, !isLocked else { return nil }
         if hasPendingImport { return .importConfirmation }
         if hasPendingMessage { return .receivedMessage }
+        if needsTutorial { return .tutorial }
         return nil
     }
 }
@@ -70,7 +73,8 @@ enum RootEmergencyThemeWarningPolicy {
         isLocked: Bool,
         hasPendingImport: Bool,
         hasPendingMessage: Bool,
-        hasActiveReveal: Bool
+        hasActiveReveal: Bool,
+        hasTutorial: Bool = false
     ) -> Bool {
         isEmergencyPresentation
             && !isDismissed
@@ -79,6 +83,7 @@ enum RootEmergencyThemeWarningPolicy {
             && !hasPendingImport
             && !hasPendingMessage
             && !hasActiveReveal
+            && !hasTutorial
     }
 }
 
@@ -99,6 +104,7 @@ struct RootView: View {
     @State private var isEmergencyThemeWarningDismissed = false
     @State private var showsEmergencyThemeWarningDetails = false
     @State private var workspaceDraft = ""
+    @State private var tutorialDismissedForSession = false
 
     init(
         session: RuneScribeUISession,
@@ -120,6 +126,7 @@ struct RootView: View {
             hasSecurityOrFailurePresentation: session.importErrorMessage != nil
                 || session.messageErrorMessage != nil
                 || session.lastError != nil
+                || pendingPresentation == .tutorial
         )
     }
 
@@ -128,7 +135,8 @@ struct RootView: View {
             showSplash: showSplash,
             isLocked: session.isLocked,
             hasPendingImport: session.pendingImport != nil,
-            hasPendingMessage: session.pendingMessage != nil
+            hasPendingMessage: session.pendingMessage != nil,
+            needsTutorial: tutorialIsNeeded
         )
     }
 
@@ -140,17 +148,30 @@ struct RootView: View {
             isLocked: session.isLocked,
             hasPendingImport: session.pendingImport != nil,
             hasPendingMessage: session.pendingMessage != nil,
-            hasActiveReveal: session.activeReveal != nil
+            hasActiveReveal: session.activeReveal != nil,
+            hasTutorial: tutorialIsNeeded
         )
+    }
+
+    private var tutorialIsNeeded: Bool {
+        session.runtimePresentationSettingsReady
+            && !tutorialDismissedForSession
+            && session.tutorialCompletedVersion < RuneScribeTutorialCatalog.currentVersion
     }
 
     var body: some View {
         ZStack {
-            if !session.isLocked && !showSplash {
+            // Build the workspace beneath the launch splash so theme fonts and layout
+            // settle before reveal. A locked app still removes the workspace entirely,
+            // keeping message content out of the protected presentation hierarchy.
+            if !session.isLocked {
                 ContentView(
                     initialInputText: workspaceDraft,
                     onInputTextChange: { workspaceDraft = $0 }
                 )
+                .opacity(showSplash ? 0 : 1)
+                .allowsHitTesting(!showSplash)
+                .accessibilityHidden(showSplash)
             }
 
             if showsEmergencyThemeWarning {
@@ -242,6 +263,12 @@ struct RootView: View {
                     session.importErrorMessage = RuneScribeUISession.message(for: error)
                 }
             }
+        }
+        .sheet(isPresented: Binding(
+            get: { pendingPresentation == .tutorial },
+            set: { _ in }
+        )) {
+            TutorialView(mode: .firstRun, onComplete: completeTutorial)
         }
         .sheet(item: Binding(
             get: {
@@ -411,6 +438,16 @@ struct RootView: View {
     private func dismissPendingMessage() {
         guard let id = session.pendingMessage?.id else { return }
         Task { await session.dismissReceivedMessage(id: id) }
+    }
+
+    private func completeTutorial() {
+        guard !tutorialDismissedForSession else { return }
+        tutorialDismissedForSession = true
+        Task {
+            await session.markTutorialCompleted(
+                version: RuneScribeTutorialCatalog.currentVersion
+            )
+        }
     }
 }
 

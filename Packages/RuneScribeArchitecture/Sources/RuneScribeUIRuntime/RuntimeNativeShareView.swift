@@ -233,6 +233,7 @@ public struct RuneScribePreparedTextShareLauncher: View {
 public struct RuneScribePreparedCipherLinkLauncher: View {
     @ObservedObject private var transfer: OpaqueShareTransfer
     private let cipherLabel: String
+    private let previewImageData: Data?
     private let launchID: UUID
     private let onPresented: @MainActor () -> Void
     private let onFinish: @MainActor (SharePresentationCompletion) -> Void
@@ -240,12 +241,14 @@ public struct RuneScribePreparedCipherLinkLauncher: View {
     public init(
         transfer: OpaqueShareTransfer,
         cipherLabel: String,
+        previewImageData: Data? = nil,
         launchID: UUID,
         onPresented: @escaping @MainActor () -> Void = {},
         onFinish: @escaping @MainActor (SharePresentationCompletion) -> Void
     ) {
         self.transfer = transfer
         self.cipherLabel = cipherLabel
+        self.previewImageData = previewImageData
         self.launchID = launchID
         self.onPresented = onPresented
         self.onFinish = onFinish
@@ -261,6 +264,7 @@ public struct RuneScribePreparedCipherLinkLauncher: View {
                         presentationURL,
                         previewTitle: "Rune Scribe cipher: \(cipherLabel)",
                         previewSystemImage: "link",
+                        previewImageData: previewImageData,
                         subject: "Rune Scribe cipher: \(cipherLabel)",
                         message: "Tap to open in Rune Scribe and import this cipher so you can decode my messages."
                     ),
@@ -429,6 +433,7 @@ public struct RuneScribeCipherLinkShareLink<Label: View>: View {
                 presentationURL,
                 previewTitle: "Rune Scribe cipher: \(cipherLabel)",
                 previewSystemImage: "link",
+                previewImageData: nil,
                 subject: "Rune Scribe cipher: \(cipherLabel)",
                 message: "Tap to open in Rune Scribe and import this cipher so you "
                     + "can decode my messages."
@@ -570,6 +575,7 @@ private enum RuneScribeIOSActivityPayload {
         URL,
         previewTitle: String,
         previewSystemImage: String,
+        previewImageData: Data?,
         subject: String,
         message: String
     )
@@ -592,6 +598,7 @@ private enum RuneScribeIOSActivityPayload {
             url,
             previewTitle,
             previewSystemImage,
+            previewImageData,
             subject,
             message
         ):
@@ -601,6 +608,7 @@ private enum RuneScribeIOSActivityPayload {
                     url: url,
                     previewTitle: previewTitle,
                     previewSystemImage: previewSystemImage,
+                    previewImageData: previewImageData,
                     subject: subject
                 ),
             ]
@@ -860,17 +868,20 @@ private final class RuneScribeIOSActivityItemSource: NSObject,
     private let url: URL
     private let previewTitle: String
     private let previewSystemImage: String
+    private let previewImageData: Data?
     private let subject: String?
 
     init(
         url: URL,
         previewTitle: String,
         previewSystemImage: String,
+        previewImageData: Data? = nil,
         subject: String?
     ) {
         self.url = url
         self.previewTitle = previewTitle
         self.previewSystemImage = previewSystemImage
+        self.previewImageData = previewImageData
         self.subject = subject
     }
 
@@ -899,7 +910,12 @@ private final class RuneScribeIOSActivityItemSource: NSObject,
     ) -> LPLinkMetadata? {
         let metadata = LPLinkMetadata()
         metadata.title = previewTitle
-        if let image = UIImage(systemName: previewSystemImage) {
+        metadata.originalURL = url
+        metadata.url = url
+        if let previewImageData,
+           let image = UIImage(data: previewImageData) {
+            metadata.imageProvider = NSItemProvider(object: image)
+        } else if let image = UIImage(systemName: previewSystemImage) {
             metadata.iconProvider = NSItemProvider(object: image)
         }
         return metadata

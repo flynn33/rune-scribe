@@ -5,6 +5,9 @@ public enum RuneScribeWireFormat {
     public static let importHost = "import"
     public static let legacyWebHost = "ravenforgesoftware.com"
     public static let legacyImportPath = "/rune-scribe/import"
+    public static let webLandingPath = "/rune-scribe/"
+    public static let webImportQueryName = "runescribe"
+    public static let webImportQueryValue = "import"
     public static let contentType = "com.runescribe.runescribe"
     public static let fileExtension = "runescribe"
     public static let cipherVersion = 3

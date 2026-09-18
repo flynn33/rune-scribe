@@ -246,6 +246,7 @@ MACOS_OPTIONAL_SIGNING_ENTITLEMENTS = {
 }
 IOS_ALLOWED_ENTITLEMENTS = {
     "application-identifier",
+    "com.apple.developer.associated-domains",
     "com.apple.developer.team-identifier",
     "get-task-allow",
     "keychain-access-groups",
@@ -756,6 +757,10 @@ def entitlement_policy_errors(
             errors.append(f"{label} Release product enables get-task-allow")
         if entitlement.get("com.apple.developer.game-center") is not True:
             errors.append(f"{label} required Game Center entitlement is absent")
+        if entitlement.get("com.apple.developer.associated-domains") != [
+            "applinks:ravenforgesoftware.com"
+        ]:
+            errors.append(f"{label} Rune Scribe associated domain is absent")
         groups = entitlement.get("keychain-access-groups")
         application_identifier = entitlement.get("application-identifier")
         if (

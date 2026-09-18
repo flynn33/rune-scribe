@@ -233,6 +233,8 @@ targets:
     entitlements:
       path: Config/RuneScrib-iOS.entitlements
       properties:
+        com.apple.developer.associated-domains:
+          - applinks:ravenforgesoftware.com
         com.apple.developer.game-center: true
         com.apple.developer.icloud-container-identifiers:
           - iCloud.com.runescribe.app

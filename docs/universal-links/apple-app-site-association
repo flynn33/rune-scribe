@@ -1,0 +1,28 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": [
+          "9AQ2C2838M.com.runescribe.app"
+        ],
+        "components": [
+          {
+            "/": "/rune-scribe/",
+            "?": {
+              "runescribe": "import"
+            },
+            "comment": "Current Rune Scribe cipher invitation links"
+          },
+          {
+            "/": "/rune-scribe/import",
+            "comment": "Compatible cipher invitation links from earlier builds"
+          },
+          {
+            "/": "/rune-scribe/import/",
+            "comment": "Compatible cipher invitation links from earlier builds"
+          }
+        ]
+      }
+    ]
+  }
+}

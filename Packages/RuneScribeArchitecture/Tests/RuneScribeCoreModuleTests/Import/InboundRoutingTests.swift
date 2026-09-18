@@ -54,6 +54,10 @@ final class InboundRoutingTests: XCTestCase {
         let cipher = Cipher.generated(label: "Fixture")
         let custom = try CipherSharePayload(cipher: cipher).url(name: "Fixture")
         XCTAssertEqual(try LinkRouter.decodeCipher(custom).keyMaterial, cipher.keyMaterial)
+        XCTAssertEqual(
+            URLComponents(url: custom, resolvingAgainstBaseURL: false)?.path,
+            "/rune-scribe/"
+        )
 
         let token = try CipherSharePayload(cipher: cipher).encoded()
             .base64EncodedString()
@@ -64,6 +68,13 @@ final class InboundRoutingTests: XCTestCase {
             URL(string: "https://www.ravenforgesoftware.com/rune-scribe/import?v=3&p=\(token)&n=Fixture")
         )
         XCTAssertEqual(try LinkRouter.decodeCipher(legacy).keyMaterial, cipher.keyMaterial)
+
+        let missingMarker = try XCTUnwrap(
+            URL(string: "https://ravenforgesoftware.com/rune-scribe/?v=3&p=\(token)")
+        )
+        XCTAssertThrowsError(try LinkRouter.decodeCipher(missingMarker)) { error in
+            XCTAssertEqual(error as? LinkRouterError, .invalidQuery)
+        }
     }
 
     func testLinkRouterRejectsAmbiguousRoutesQueriesAndBounds() throws {

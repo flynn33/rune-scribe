@@ -236,12 +236,13 @@ final class ThemeRootRemediationTests: XCTestCase {
         XCTAssertFalse(presentation.contains("CodexComposeWorkspacePanel("))
         XCTAssertFalse(presentation.contains("CodexMessagePanel("))
 
-        XCTAssertTrue(root.contains("if !session.isLocked && !showSplash"))
+        XCTAssertTrue(root.contains("if !session.isLocked"))
         XCTAssertTrue(root.contains("initialInputText: workspaceDraft"))
         XCTAssertTrue(root.contains("onInputTextChange: { workspaceDraft = $0 }"))
         XCTAssertTrue(content.contains("onChange(of: inputText, initial: true)"))
         XCTAssertTrue(root.contains(".accessibilityAddTraits(.isModal)"))
         XCTAssertFalse(root.contains(".accessibilityHidden(session.isLocked || showSplash)"))
+        XCTAssertTrue(root.contains(".accessibilityHidden(showSplash)"))
     }
 
     func testPrimaryPresentationsUseSharedSemanticSurfaces() throws {
