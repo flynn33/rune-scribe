@@ -315,8 +315,9 @@ that source passed 1,238/1,238 Swift tests, 255/255 Python tests, 60 Norse seman
 25/25 Norse mutations, 18/18 legacy mutations, 28/28 shipping negative mutations,
 27/27 evidence-hardening tests, and 101/101 local built-product checks. Those historical
 results are not relabeled as source-bound evidence for 1.0.41. The current candidate is
-**not shipped**. Fresh iOS and macOS archives have been exported for App Store Connect
-with matching distribution identities, profiles, versions, and production entitlements;
+**not shipped**. The earlier signed 1.0.41 archives predate the subsequently merged
+theme, Universal Link, tutorial, and workspace changes. Fresh iOS and macOS archive and
+export qualification is required for the current source before upload; validation,
 upload, submission, release, and rollout remain owner-operated publication work.
 
 | Wave | Scope | Source status |
@@ -327,7 +328,7 @@ upload, submission, release, and rollout remain owner-operated publication work.
 | 4 | Themed Artifact sharing, receiving, Encounters, provenance | Complete |
 | 5A | Local-first private iCloud progression synchronization | Complete; live provisioning is a separate external-service action |
 | 5B | Optional Game Center catalog, mapping, outbox, status | Complete; live records and sandbox access are separate external-service actions |
-| 6 | Production Elven providers, hardening, evidence, no-ship handoff | App Store upload-ready candidate; not shipped |
+| 6 | Production Elven providers, hardening, evidence, no-ship handoff | Merged source candidate; fresh Store qualification required; not shipped |
 | 7 | Limited/singular collectible program | Deferred separate program |
 
 The corrected Elven v3.1 corpus (56 logical resources and 184 shipping outputs) remains
@@ -548,9 +549,11 @@ Named final-source, mutation, and built-product guards pass. Retained prior iPho
 headless UI run passes 7 tests with 1 iPad-only skip and 0 failures. The iPad Pro 13-inch (M5)
 headless UI run on iOS 26.5 passes 5 tests with 3 phone-specific skips by design and 0
 failures. Those UI runs are not represented as current-candidate source-bound evidence.
-Signed Store archive/export qualification passes. App Store Connect validation, upload,
-submission, and publication remain external. Every result stays labeled by the
-environment in which it was observed.
+Earlier signed Store archive/export qualification passed for the source measured at
+that time. Those artifacts predate later merged changes and do not qualify the current
+source; fresh archive/export qualification is required before upload. App Store Connect
+validation, upload, submission, and publication remain external. Every result stays
+labeled by the environment in which it was observed.
 
 ---
 

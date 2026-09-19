@@ -293,7 +293,7 @@ require(
     "README roadmap version differs from the project version",
 )
 require(
-    "| 6 | Production Elven providers, hardening, evidence, no-ship handoff | App Store upload-ready candidate; not shipped |"
+    "| 6 | Production Elven providers, hardening, evidence, no-ship handoff | Merged source candidate; fresh Store qualification required; not shipped |"
     in readme_roadmap,
     "README Wave 6 roadmap scope differs",
 )
@@ -357,13 +357,18 @@ require(
     in submission,
     "App Store packet lacks the noncontrolling legacy-package boundary",
 )
+normalized_submission = re.sub(
+    r"\s+", " ", re.sub(r"(?m)^>\s?", "", submission)
+)
 require(
-    f"version {marketing} build {build} is the current UI/Xcode remediation"
-    in re.sub(r"\s+", " ", submission)
+    f"version {marketing} build {build} is the current source candidate"
+    in normalized_submission
     and "101/101" in submission
+    and "Fresh current-source archive and export qualification is required"
+    in normalized_submission
     and "- [x] Retained prior iPad Pro 13-inch (M5) headless UI qualification passes on iOS 26.5"
     in submission,
-    "App Store packet lacks the current candidate, historical built-product, or retained iPad boundary",
+    "App Store packet lacks the current version, stale-artifact boundary, historical built-product result, or retained iPad boundary",
 )
 privacy = read("docs/PRIVACY.md")
 support = read("docs/SUPPORT.md")

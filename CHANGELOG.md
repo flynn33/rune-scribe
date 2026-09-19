@@ -8,13 +8,18 @@ release work and reviewed against the project version before merge. The format f
 <!-- NEW ENTRIES BELOW -->
 ## [Unreleased]
 
+- Add the Rune Scribe Universal Link, website association package, and recipient
+  App Store fallback for shared cipher invitations.
+- Add the built-in tutorial, seal guidance, simplified Scribe/Decode workspaces, and
+  stable splash/lock presentation behavior.
 - Isolate every normal-route UI test's persistent state while preserving state across
   relaunches within the test, preventing unsigned aggregate runs from sharing CloudKit,
   Keychain, or inbound-file fixtures.
-- Add a reproducible App Store archive qualification command and export options. Fresh
-  iOS and macOS archives now export with Apple distribution signing, Store profiles,
-  production entitlements, Hardened Runtime, and matching version 1.0.41 build 41.
-  Upload, submission, release, and rollout remain owner-operated and were not performed.
+- Add a reproducible App Store archive qualification command and export options. The
+  earlier 1.0.41 archives passed Apple distribution, Store profile, entitlement,
+  Hardened Runtime, and version checks, but predate the subsequently merged visual and
+  sharing/tutorial changes. Fresh archives are required for the current 1.0.41 build 41
+  source before upload. Upload, submission, release, and rollout remain owner-operated.
 
 ## [1.0.41] - 2026-09-13
 

@@ -51,9 +51,11 @@ retained version 1.0.40 source qualification passed 1,238/1,238 Swift
 tests, 255/255 Python tests, architecture, roadmap, documentation, resource, mutation,
 named source and mutation gates. The iOS Release build and arm64-only unsigned macOS
 Release build pass. Local ad-hoc built-product content, resource, privacy, signature,
-Hardened Runtime, and entitlement inspection passes 101/101 checks. Fresh iOS and macOS
-archives also export for App Store Connect with matching Apple distribution identities,
-Store profiles, production entitlements, architectures, and package signatures.
+Hardened Runtime, and entitlement inspection passed 101/101 checks for the earlier
+qualified source. Its iOS and macOS archives also exported for App Store Connect with
+matching Apple distribution identities, Store profiles, production entitlements,
+architectures, and package signatures. Those artifacts predate later merged theme,
+Universal Link, tutorial, and workspace changes and do not qualify the current source.
 Those 1.0.40 results remain historical rather than evidence for the new source. The
 1.0.41 candidate is deliberately **NOT SHIPPED**; its repository-qualification decision
 is made only by the current report. The repository now contains:
@@ -84,8 +86,9 @@ prior evidence records the iPhone 17 Pro headless UI run on iOS 26.5 with 7 pass
 iPad-only skipped, and 0 failed and the iPad Pro 13-inch (M5) run with 5 passed, 3
 phone-specific skipped by design, and 0 failed. Those results are regression context,
 not current-candidate source-bound evidence. Manual hardware observations are superseded by supported
-Simulator, hosted, and deterministic equivalents. App Store Connect validation, upload,
-submission, and rollout remain owner-operated.
+Simulator, hosted, and deterministic equivalents. Fresh current-source archive/export
+qualification and App Store Connect validation, upload, submission, and rollout remain
+owner-operated.
 
 ### Retained package-audit history
 
