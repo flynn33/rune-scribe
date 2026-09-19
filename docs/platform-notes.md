@@ -66,10 +66,11 @@ Version 1.0.40 retained evidence records the iPhone
 the iPad Pro 13-inch (M5) run with 5 passed, 3 phone-specific skipped by design, and 0
 failed; those runs are not current-candidate source-bound evidence. Local ad-hoc
 built-product content, resource, privacy, signature, Hardened
-Runtime, and entitlement inspection passes 101/101 checks. Fresh iOS and macOS App Store
-exports also pass distribution signature, Store profile, production-entitlement,
-architecture, privacy-manifest, and package inspection. Upload and submission remain
-owner-operated publication work. The separate v4.3 package audit is incomplete
+Runtime, and entitlement inspection passed 101/101 checks for the earlier qualified
+source. Its iOS and macOS App Store exports passed distribution signature, Store profile,
+production-entitlement, architecture, privacy-manifest, and package inspection, but
+they predate later merged changes and must not be reused for the current source. Fresh
+qualification, upload, and submission remain owner-operated publication work. The separate v4.3 package audit is incomplete
 but noncontrolling.
 
 The same privacy rule applies on both platforms: a `.runescribe` file or import link

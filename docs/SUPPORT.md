@@ -1,7 +1,7 @@
 # Rune Scribe Support
 
 **Current product source:** version 1.0.41 (build 41)
-**Publication boundary:** App Store upload-ready candidate; not shipped
+**Publication boundary:** Current source requires fresh Store qualification; not shipped
 
 Current source-bound results and screenshots are indexed in the
 [UI/Xcode remediation qualification](verification/ui-xcode-remediation/QualificationSummary.md).
@@ -13,9 +13,10 @@ architecture guard, roadmap/documentation guards, exact-resource validators, and
 negative mutation suites. The iOS
 Release build and arm64-only unsigned macOS Release build pass. Built-product content,
 resource, privacy, local-signature, Hardened Runtime, and entitlement inspection passes
-101/101 checks on local products. Fresh iOS and macOS archives also export successfully
-for App Store Connect with matching distribution identities, Store profiles, versions,
-production entitlements, and package signatures. Retained prior iPhone 17 Pro headless UI evidence records
+101/101 checks on local products. The earlier iOS and macOS archives exported
+successfully for App Store Connect with matching distribution identities, Store
+profiles, versions, production entitlements, and package signatures, but they predate
+later merged changes and do not qualify the current source. Retained prior iPhone 17 Pro headless UI evidence records
 7 tests with 1 iPad-only skip and 0 failures. The iPad Pro 13-inch (M5) headless UI run
 on iOS 26.5 records 5 passed, 3 phone-specific skipped by design, and 0 failed. Those
 runs are not represented as current-candidate source-bound evidence. The
@@ -96,8 +97,9 @@ observations are superseded by repository-controlled Simulator, hosted, and dete
 equivalents and are not a pending shippability boundary. The current source is a
 repository-qualified release candidate with no known release-blocking defects. Retained
 prior headless UI results remain regression context rather than current-candidate
-source-bound evidence. The signed packages are ready for owner upload; App Store Connect
-validation, upload, submission, release, and rollout remain external publication work.
+source-bound evidence. Fresh current-source archive and export qualification is required
+before owner upload; App Store Connect validation, upload, submission, release, and
+rollout remain external publication work.
 
 For help, use the contact channel published at
 [Raven Forge Software](https://ravenforgesoftware.com/). Include the app version, build,

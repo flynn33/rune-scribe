@@ -5,15 +5,16 @@ Keep this file in sync when shipping a new marketing version.
 
 **Last prepared for:** 1.0.41 (build 41) — 2026-09-13
 
-> **Publication boundary:** version 1.0.41 build 41 is the current App Store upload-ready
-> candidate and is not shipped. Current-source qualification is recorded in
-> [`verification/ui-xcode-remediation/QualificationSummary.md`](verification/ui-xcode-remediation/QualificationSummary.md).
-> Fresh iOS and macOS archives and Store exports pass distribution-signature, profile,
-> version, architecture, privacy-manifest, Hardened Runtime, and production-entitlement
-> inspection. Validation, upload, submission, release, and rollout remain owner-operated.
+> **Publication boundary:** version 1.0.41 build 41 is the current source candidate and
+> is not shipped. The
+> [earlier UI/Xcode qualification](verification/ui-xcode-remediation/QualificationSummary.md)
+> and signed Store exports cover the source measured at that time. They predate subsequently merged theme,
+> Universal Link, tutorial, and workspace changes. Fresh current-source archive and
+> export qualification is required before upload. Validation, upload, submission,
+> release, and rollout remain owner-operated.
 
-The record confirms that version 1.0.41 build 41 is the current UI/Xcode remediation
-result and App Store upload-ready candidate.
+The packet remains aligned to version 1.0.41 build 41, but does not claim that the
+current merged source is upload-ready before fresh qualification.
 
 ---
 
@@ -260,8 +261,9 @@ team. The remaining steps are owner-operated publication actions.
   required-reason declarations
 - [x] Local ad-hoc content, resource, privacy, signature, Hardened Runtime, and
   entitlement inspection passes 101/101 checks
-- [x] iOS and macOS Store exports pass distribution identity, Store provisioning profile,
-  architecture, production entitlement, privacy manifest, and package signature inspection
+- [ ] Produce fresh iOS and macOS Store exports from the current merged source and pass
+  distribution identity, Store provisioning profile, architecture, production
+  entitlement, privacy manifest, and package signature inspection
 - [x] No known release-blocking defects remain
 - [ ] Release notes pasted (What’s New)
 - [ ] Review notes pasted
@@ -281,10 +283,11 @@ team. The remaining steps are owner-operated publication actions.
 
 Manual hardware observations are superseded by repository-controlled Simulator, hosted,
 and deterministic equivalents and are not a product-shippability requirement. Legacy
-package audit and self-binding mechanics are noncontrolling verification history. The
-source and exported packages are qualified for owner upload. Retained prior headless UI
-results are not represented as current-candidate source-bound evidence. App Store Connect
-validation, upload, submission, release, and rollout remain external.
+package audit and self-binding mechanics are noncontrolling verification history.
+Earlier exported packages are retained historical evidence and are not qualified for
+upload as the current source. Retained prior headless UI results are not represented as
+current-candidate source-bound evidence. App Store Connect validation, upload,
+submission, release, and rollout remain external.
 
 ---
 
@@ -298,20 +301,21 @@ Internal release summary; this is **not a shipment claim**:
 4. Themed typed-package sharing/receiving, static preview, Encounter and provenance state
 5. Local-first private progression synchronization and optional Game Center policy
 6. Core, runtime, providers, Progression, Cloud, Game Center, and UI boundaries guarded
-7. Final-source checks pass: 1,242/1,242 Swift tests, 255/255 Python tests, 60 Norse
+7. The earlier qualified source passed 1,242/1,242 Swift tests, 255/255 Python tests, 60 Norse
    semantic rules, 25/25 Norse mutations, 18/18 legacy mutations, 28/28 shipping
    negative mutations, and 27/27 evidence-hardening tests
 8. The iOS Release and arm64-only unsigned macOS Release builds pass; local ad-hoc
    built-product content, resource, privacy, signature, Hardened Runtime, and entitlement
-   inspection passes 101/101 checks. Fresh iOS and macOS Store exports pass distribution
-   identity, profile, production-entitlement, architecture, and package-signature checks
+   inspection passed 101/101 checks for that source. Its iOS and macOS Store exports
+   passed distribution identity, profile, production-entitlement, architecture, and
+   package-signature checks; fresh current-source qualification remains required
 9. Retained prior evidence records the iPhone 17 Pro iOS 26.5 UI run with 7 passed, 1
    iPad-only skipped, and 0 failed, and the iPad Pro 13-inch (M5) iOS 26.5 UI run with 5
    passed, 3 phone-specific skipped by design, and 0 failed. These runs are not
    current-candidate source-bound evidence
 10. The superseded v4.3 package audit is retained as noncontrolling verification history
-11. Marketing version **1.0.41**, build **41** is not shipped; the signed Store packages
-    are ready for owner validation and upload, while submission and rollout remain external
+11. Marketing version **1.0.41**, build **41** is not shipped; earlier signed Store
+    packages are retained evidence and must not be uploaded as the current source
 
 Platform-specific import notes: [`platform-notes.md`](platform-notes.md)
 

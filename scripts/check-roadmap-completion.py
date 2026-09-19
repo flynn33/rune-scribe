@@ -27,7 +27,7 @@ PROVIDERS = {
         "codexID": "codex.moonleaf",
         "entitlement": "unlock.codex.moonleaf",
         "outputs": 65,
-        "bytes": 70_713_288,
+        "bytes": 70_543_811,
     },
     "sunspire": {
         "product": "RuneScribeThemeSunspireModule",
@@ -36,7 +36,7 @@ PROVIDERS = {
         "codexID": "codex.sunspire",
         "entitlement": "unlock.codex.sunspire",
         "outputs": 60,
-        "bytes": 76_176_567,
+        "bytes": 76_011_959,
     },
     "wildwood": {
         "product": "RuneScribeThemeWildwoodModule",
@@ -45,7 +45,7 @@ PROVIDERS = {
         "codexID": "codex.wildwood",
         "entitlement": "unlock.codex.wildwood",
         "outputs": 60,
-        "bytes": 85_363_508,
+        "bytes": 85_212_927,
     },
     "gloamthorn": {
         "product": "RuneScribeThemeGloamthornModule",
@@ -54,7 +54,7 @@ PROVIDERS = {
         "codexID": "codex.gloamthorn",
         "entitlement": "unlock.codex.gloamthorn",
         "outputs": 60,
-        "bytes": 68_428_342,
+        "bytes": 68_300_382,
     },
 }
 
