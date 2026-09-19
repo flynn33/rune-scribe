@@ -3,9 +3,9 @@
 Ready-to-paste material for App Store Connect (iOS App Store and Mac App Store).
 Keep this file in sync when shipping a new marketing version.
 
-**Last prepared for:** 1.0.41 (build 41) — 2026-09-13
+**Last prepared for:** 1.0.42 (build 42) — 2026-09-19
 
-> **Publication boundary:** version 1.0.41 build 41 is the current source candidate and
+> **Publication boundary:** version 1.0.42 build 42 is the current source candidate and
 > is not shipped. The
 > [earlier UI/Xcode qualification](verification/ui-xcode-remediation/QualificationSummary.md)
 > and signed Store exports cover the source measured at that time. They predate subsequently merged theme,
@@ -13,7 +13,7 @@ Keep this file in sync when shipping a new marketing version.
 > export qualification is required before upload. Validation, upload, submission,
 > release, and rollout remain owner-operated.
 
-The packet remains aligned to version 1.0.41 build 41, but does not claim that the
+The packet remains aligned to version 1.0.42 build 42, but does not claim that the
 current merged source is upload-ready before fresh qualification.
 
 ---
@@ -22,8 +22,8 @@ current merged source is upload-ready before fresh qualification.
 
 | Field | Value |
 |--------|--------|
-| **Version** | `1.0.41` |
-| **Build** | `41` |
+| **Version** | `1.0.42` |
+| **Build** | `42` |
 | **Bundle ID** | `com.runescribe.app` |
 | **Display name** | Rune Scribe |
 | **Category** | Lifestyle (`public.app-category.lifestyle`) |
@@ -250,7 +250,7 @@ team. The remaining steps are owner-operated publication actions.
 
 ### Before upload
 
-- [ ] Version and build match the configured App Store Connect record (`1.0.41` / `41` for this packet)
+- [ ] Version and build match the configured App Store Connect record (`1.0.42` / `42` for this packet)
 - [x] Core user flows and clean automated tests pass against the final source
 - [x] iOS Simulator and arm64-only unsigned macOS Release builds pass
 - [x] Retained prior iPhone 17 Pro headless UI qualification passes on iOS 26.5
@@ -291,7 +291,7 @@ submission, release, and rollout remain external.
 
 ---
 
-## Version 1.0.41 UI/Xcode remediation candidate
+## Version 1.0.42 current-source candidate
 
 Internal release summary; this is **not a shipment claim**:
 
@@ -314,7 +314,7 @@ Internal release summary; this is **not a shipment claim**:
    passed, 3 phone-specific skipped by design, and 0 failed. These runs are not
    current-candidate source-bound evidence
 10. The superseded v4.3 package audit is retained as noncontrolling verification history
-11. Marketing version **1.0.41**, build **41** is not shipped; earlier signed Store
+11. Marketing version **1.0.42**, build **42** is not shipped; earlier signed Store
     packages are retained evidence and must not be uploaded as the current source
 
 Platform-specific import notes: [`platform-notes.md`](platform-notes.md)

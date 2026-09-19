@@ -155,7 +155,7 @@ public enum ProgressionCatalogResourceCatalog {
     public static let moduleManifestDescriptor = ProgressionCatalogResourceDescriptor(
         resource: moduleManifest,
         expectedByteCount: 2_494,
-        expectedSHA256Hex: "34588066f7788a350354d6efd92094129dba12b9cbf95bb0f1e5e9c47e9c34a9",
+        expectedSHA256Hex: "3bd7c11a4e43d39d37e50b4055f4ed85dbcb77468c8a6fcd55c026dae72246fb",
         maximumByteCount: 4_096
     )
     public static let packageManifestDescriptor = ProgressionCatalogResourceDescriptor(

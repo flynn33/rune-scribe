@@ -8,6 +8,8 @@ release work and reviewed against the project version before merge. The format f
 <!-- NEW ENTRIES BELOW -->
 ## [Unreleased]
 
+## [1.0.42] - 2026-09-19
+
 - Add the Rune Scribe Universal Link, website association package, and recipient
   App Store fallback for shared cipher invitations.
 - Add the built-in tutorial, seal guidance, simplified Scribe/Decode workspaces, and
@@ -18,7 +20,7 @@ release work and reviewed against the project version before merge. The format f
 - Add a reproducible App Store archive qualification command and export options. The
   earlier 1.0.41 archives passed Apple distribution, Store profile, entitlement,
   Hardened Runtime, and version checks, but predate the subsequently merged visual and
-  sharing/tutorial changes. Fresh archives are required for the current 1.0.41 build 41
+  sharing/tutorial changes. Fresh archives are required for the current 1.0.42 build 42
   source before upload. Upload, submission, release, and rollout remain owner-operated.
 
 ## [1.0.41] - 2026-09-13
