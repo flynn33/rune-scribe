@@ -4,7 +4,7 @@
 
 ## Authority and scope
 
-**Current application:** version 1.0.41 build 41
+**Current application:** version 1.0.42 build 42
 
 The current UI/Xcode remediation is mapped in the
 [September 2026 amendment](../product-roadmap/Rune-Scribe-UI-Xcode-Remediation-Amendment-2026-09.md)
@@ -44,12 +44,13 @@ effective only where they do not conflict with that authority.
 
 ## Current result
 
-Version 1.0.41 build 41 carries the source-complete authorized roadmap baseline, Theme
+Version 1.0.42 build 42 carries the source-complete authorized roadmap baseline, Theme
 Fidelity source remediation, and the bounded UI/Xcode repair described by W01-W09.
-Current-source results are recorded in the linked UI/Xcode qualification report. The
-retained version 1.0.40 source qualification passed 1,238/1,238 Swift
-tests, 255/255 Python tests, architecture, roadmap, documentation, resource, mutation,
-named source and mutation gates. The iOS Release build and arm64-only unsigned macOS
+The linked UI/Xcode qualification report records the earlier 1.0.41 source and Store
+artifacts; fresh current-source qualification is required. The retained version 1.0.40
+source qualification passed 1,238/1,238 Swift tests, 255/255 Python tests, architecture,
+roadmap, documentation, resource, mutation, named source and mutation gates. The iOS
+Release build and arm64-only unsigned macOS
 Release build pass. Local ad-hoc built-product content, resource, privacy, signature,
 Hardened Runtime, and entitlement inspection passed 101/101 checks for the earlier
 qualified source. Its iOS and macOS archives also exported for App Store Connect with
@@ -57,8 +58,8 @@ matching Apple distribution identities, Store profiles, production entitlements,
 architectures, and package signatures. Those artifacts predate later merged theme,
 Universal Link, tutorial, and workspace changes and do not qualify the current source.
 Those 1.0.40 results remain historical rather than evidence for the new source. The
-1.0.41 candidate is deliberately **NOT SHIPPED**; its repository-qualification decision
-is made only by the current report. The repository now contains:
+1.0.42 candidate is deliberately **NOT SHIPPED**; a fresh qualification run must make
+the current-source decision. The repository now contains:
 
 - app-owned runtime composition, bounded contracts, capability policy, thin hosts,
   serialized ingress, and permanent dependency guards;
@@ -234,13 +235,13 @@ For the retained roadmap-completion baseline, those gates established:
 - **MANUAL HARDWARE VALIDATION SUPERSEDED**
 - **NOT SHIPPED**
 
-The version 1.0.41 build 41 candidate uses the same product acceptance boundary:
+The version 1.0.42 build 42 candidate must satisfy the same product acceptance boundary:
 
-- **FINAL-SOURCE REPOSITORY GATES PASS**
-- **REPOSITORY-QUALIFIED RELEASE CANDIDATE**
-- **IPHONE HEADLESS UI QUALIFICATION PASS**
-- **IPAD HEADLESS UI QUALIFICATION PASS**
-- **APP STORE ARCHIVE AND EXPORT QUALIFICATION PASS**
+- **FINAL-SOURCE REPOSITORY GATES REQUIRED**
+- **REPOSITORY QUALIFICATION REQUIRED**
+- **IPHONE HEADLESS UI QUALIFICATION REQUIRED**
+- **IPAD HEADLESS UI QUALIFICATION REQUIRED**
+- **FRESH APP STORE ARCHIVE AND EXPORT QUALIFICATION REQUIRED**
 - **NOT SHIPPED**
 
 Repository-controlled Simulator, hosted, and deterministic checks replace physical or

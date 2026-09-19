@@ -1,9 +1,9 @@
 # Rune Scribe Support
 
-**Current product source:** version 1.0.41 (build 41)
+**Current product source:** version 1.0.42 (build 42)
 **Publication boundary:** Current source requires fresh Store qualification; not shipped
 
-Current source-bound results and screenshots are indexed in the
+Earlier source-bound results and screenshots are indexed in the
 [UI/Xcode remediation qualification](verification/ui-xcode-remediation/QualificationSummary.md).
 The version 1.0.40 counts below are retained historical context and are not evidence for
 the new candidate.

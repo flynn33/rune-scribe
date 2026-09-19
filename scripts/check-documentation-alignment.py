@@ -312,7 +312,7 @@ require(
     and "1,238/1,238 Swift tests" in normalized_readme_roadmap
     and "255/255 Python tests" in normalized_readme_roadmap
     and "101/101" in normalized_readme_roadmap
-    and "Those historical results are not relabeled as source-bound evidence for 1.0.41"
+    and f"Those historical results are not relabeled as source-bound evidence for {marketing}"
     in normalized_readme_roadmap,
     "README lacks the current report link or historical qualification boundary",
 )
@@ -432,8 +432,9 @@ require(
     f"Version {marketing} build {build} carries the source-complete authorized roadmap baseline"
     in roadmap
     and "**NOT SHIPPED**" in roadmap
-    and "**IPAD HEADLESS UI QUALIFICATION PASS**" in roadmap,
-    "roadmap lacks the current source-complete qualification and shipment boundary",
+    and "**IPAD HEADLESS UI QUALIFICATION REQUIRED**" in roadmap
+    and "**FRESH APP STORE ARCHIVE AND EXPORT QUALIFICATION REQUIRED**" in roadmap,
+    "roadmap lacks the current source qualification requirements and shipment boundary",
 )
 require("validated Elven Series recovery boundary" in roadmap, "roadmap lacks recovery result")
 require(RECOVERY_STATUS in roadmap, "roadmap lacks the closed recovery result")
@@ -505,9 +506,6 @@ current_release_documents = {
     "docs/architecture/RoadmapAlignment.md": roadmap,
     "docs/verification/roadmap-alignment.json": read(
         "docs/verification/roadmap-alignment.json"
-    ),
-    "docs/product-roadmap/Rune-Scribe-UI-Xcode-Remediation-Amendment-2026-09.md": read(
-        "docs/product-roadmap/Rune-Scribe-UI-Xcode-Remediation-Amendment-2026-09.md"
     ),
 }
 stale_shipping_claim = "97/101"
@@ -1280,5 +1278,5 @@ if ERRORS:
 print(
     f"Documentation alignment passed: version {marketing} build {build}, "
     "recovery closed, Phase C history retained, roadmap baseline source-complete, "
-    "repository-qualified release candidate recorded, retained UI evidence labeled, not shipped."
+    "fresh qualification required, retained UI evidence labeled, not shipped."
 )

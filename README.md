@@ -10,7 +10,7 @@ as a string of Unicode runes. Send a friend your cipher — by QR, iMessage, lin
 or file — and they can read it; without it, the runes are just runes.
 
 ![Platform](https://img.shields.io/badge/platform-macOS%2015%20%7C%20iOS%2017-3A7FD5?style=flat-square)
-![Version](https://img.shields.io/badge/version-1.0.41%20build%2041-3A7FD5?style=flat-square)
+![Version](https://img.shields.io/badge/version-1.0.42%20build%2042-3A7FD5?style=flat-square)
 ![Swift](https://img.shields.io/badge/Swift-6.0-D4971A?style=flat-square)
 ![SwiftUI](https://img.shields.io/badge/UI-SwiftUI%20%2B%20Metal-3A7FD5?style=flat-square)
 ![Tests](https://img.shields.io/badge/tests-1242%20package%20%7C%20architecture%20guards-2ea043?style=flat-square)
@@ -306,15 +306,15 @@ the current boundary and dependency rules.
 ## 🗺 Implementation roadmap
 
 The previously authorized version 1.0.39 build 39 roadmap-completion baseline remains a
-historical source-complete snapshot that was not shipped. Version 1.0.41 build 41 is the
-current UI/Xcode remediation candidate. Its source-bound qualification, device matrix,
-visual evidence, and known limits are recorded in the
+historical source-complete snapshot that was not shipped. Version 1.0.42 build 42 is the
+current UI/Xcode remediation candidate. The earlier 1.0.41 source-bound qualification,
+device matrix, visual evidence, and known limits are recorded in the
 [UI/Xcode remediation qualification](docs/verification/ui-xcode-remediation/QualificationSummary.md).
 Version 1.0.40 build 40 remains a retained historical repository-qualification record:
 that source passed 1,238/1,238 Swift tests, 255/255 Python tests, 60 Norse semantic rules,
 25/25 Norse mutations, 18/18 legacy mutations, 28/28 shipping negative mutations,
 27/27 evidence-hardening tests, and 101/101 local built-product checks. Those historical
-results are not relabeled as source-bound evidence for 1.0.41. The current candidate is
+results are not relabeled as source-bound evidence for 1.0.42. The current candidate is
 **not shipped**. The earlier signed 1.0.41 archives predate the subsequently merged
 theme, Universal Link, tutorial, and workspace changes. Fresh iOS and macOS archive and
 export qualification is required for the current source before upload; validation,

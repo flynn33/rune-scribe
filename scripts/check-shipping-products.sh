@@ -348,8 +348,8 @@ errors << "platform marketing versions differ" unless marketing_versions.uniq.le
 errors << "platform build numbers differ" unless build_versions.uniq.length == 1
 errors << "marketing version is malformed" unless marketing_versions.first.to_s.match?(/\A\d+(?:\.\d+){1,2}\z/)
 errors << "build number is malformed" unless build_versions.first.to_s.match?(/\A\d+\z/)
-errors << "built marketing version differs from current 1.0.41" unless marketing_versions == ["1.0.41", "1.0.41"]
-errors << "built build number differs from current 41" unless build_versions == ["41", "41"]
+errors << "built marketing version differs from current 1.0.42" unless marketing_versions == ["1.0.42", "1.0.42"]
+errors << "built build number differs from current 42" unless build_versions == ["42", "42"]
 
 puts errors
 exit(errors.empty? ? 0 : 1)
@@ -687,6 +687,7 @@ end
 
 ios_allowed = [
   "application-identifier",
+  "com.apple.developer.associated-domains",
   "com.apple.developer.team-identifier",
   "get-task-allow",
   "keychain-access-groups",
@@ -709,6 +710,9 @@ ios_by_architecture.each do |architecture, ios|
 
   unless ios["com.apple.developer.game-center"] == true
     errors << "#{label} required Game Center entitlement is absent"
+  end
+  unless ios["com.apple.developer.associated-domains"] == ["applinks:ravenforgesoftware.com"]
+    errors << "#{label} associated domains entitlement differs"
   end
   validate_cloud(errors, ios, label)
 
@@ -942,7 +946,7 @@ expected = {
   ],
   "module-manifest.json" => [
     2494,
-    "34588066f7788a350354d6efd92094129dba12b9cbf95bb0f1e5e9c47e9c34a9"
+    "3bd7c11a4e43d39d37e50b4055f4ed85dbcb77468c8a6fcd55c026dae72246fb"
   ]
 }
 
@@ -1140,8 +1144,8 @@ providers = {
     entry_point: "RuneScribeThemeMoonleafModule",
     output_count: 65,
     output_bytes: 70_543_811,
-    manifest_bytes: 20_221,
-    manifest_sha256: "a7bfe8e9aa0e0a86e2d40ede5ef306b08be79c27612ec76d1364636f887d311e",
+    manifest_bytes: 20_218,
+    manifest_sha256: "540cba0719cabc6d73639df18a420c623aa4fe4fb694cde7e4033ddde64fb4be",
     module_manifest_bytes: 14_061,
     module_manifest_sha256: "8d205be32b619678c2c514a5fc17d87b8bf06e39b30149b8ef13d3329c82fd4d"
   },
@@ -1154,8 +1158,8 @@ providers = {
     entry_point: "RuneScribeThemeSunspireModule",
     output_count: 60,
     output_bytes: 76_011_959,
-    manifest_bytes: 18_753,
-    manifest_sha256: "c749b9eb4c441622199f30a5cad9d649cf5722374782df7dec2d474a61ba9863",
+    manifest_bytes: 18_750,
+    manifest_sha256: "3db7e3af75cf4a39d900281078d9e5d92d41fad08b20f5aac262c322ea982b07",
     module_manifest_bytes: 13_097,
     module_manifest_sha256: "9f95540db36d5e432716c528398db66f9da5da96ad1f1f2fec89a73df7d22136"
   },
@@ -1168,8 +1172,8 @@ providers = {
     entry_point: "RuneScribeThemeWildwoodModule",
     output_count: 60,
     output_bytes: 85_212_927,
-    manifest_bytes: 18_769,
-    manifest_sha256: "dccfc480cbcb64e7159c45fa5309cfc8890b4d276226c12716334870bbdcffc2",
+    manifest_bytes: 18_766,
+    manifest_sha256: "faa22821ac0112c299e2d4ada68ac89329f9c5e160af39bcd39f376569b085b8",
     module_manifest_bytes: 13_108,
     module_manifest_sha256: "7c615de5ca324236c64dfb0c2f78c7f89dbbf389896264976c268f19e4a03e02"
   },
@@ -1182,8 +1186,8 @@ providers = {
     entry_point: "RuneScribeThemeGloamthornModule",
     output_count: 60,
     output_bytes: 68_300_382,
-    manifest_bytes: 19_067,
-    manifest_sha256: "403ec2e256f9d9f253558081ae5e5b9ace53a79d86ac3ff04707fd57c2c38ad3",
+    manifest_bytes: 19_064,
+    manifest_sha256: "23f348639a71daf33586511de2a6889db21af6f2b2dfd14ef60e274508ed20d2",
     module_manifest_bytes: 13_394,
     module_manifest_sha256: "fdd254f26561b18803d3de6949e705abf5f2b23b7467dc250ba2c2b8bbd9930d"
   }
@@ -1238,7 +1242,7 @@ non_theme_resource_contracts = {
     files: {
       "module-manifest.json" => [
         3_084,
-        "83742169d2ed6c3468304d9a952bb70a90ba74c068bd3c6c278d2c8c6923e77e"
+        "15971e004605a20c3abbd6435e08d6a484aaaa01da7381f5d9a411ffbfeacfa9"
       ]
     }
   }
@@ -2116,9 +2120,9 @@ errors << "project.yml package declarations differ" unless project.fetch("packag
 
 base_settings = project.dig("settings", "base")
 unless base_settings.is_a?(Hash) &&
-    base_settings["MARKETING_VERSION"] == "1.0.41" &&
-    base_settings["CURRENT_PROJECT_VERSION"] == "41"
-  errors << "project.yml version/build differ from current 1.0.41 (41)"
+    base_settings["MARKETING_VERSION"] == "1.0.42" &&
+    base_settings["CURRENT_PROJECT_VERSION"] == "42"
+  errors << "project.yml version/build differ from current 1.0.42 (42)"
 end
 
 expected_macos_entitlements = {
@@ -2131,6 +2135,7 @@ expected_macos_entitlements = {
   "com.apple.security.files.user-selected.read-write" => true
 }
 expected_ios_entitlements = {
+  "com.apple.developer.associated-domains" => ["applinks:ravenforgesoftware.com"],
   "com.apple.developer.game-center" => true,
   "com.apple.developer.icloud-container-identifiers" => ["iCloud.com.runescribe.app"],
   "com.apple.developer.icloud-services" => ["CloudKit"],
@@ -2575,9 +2580,9 @@ end
 
 configurations_for(objects, project_object, "generated project", errors).each do |configuration|
   settings = configuration.fetch("buildSettings", {})
-  unless settings["MARKETING_VERSION"] == "1.0.41" &&
-      settings["CURRENT_PROJECT_VERSION"] == "41"
-    errors << "generated project #{configuration['name']} version/build differ from current 1.0.41 (41)"
+  unless settings["MARKETING_VERSION"] == "1.0.42" &&
+      settings["CURRENT_PROJECT_VERSION"] == "42"
+    errors << "generated project #{configuration['name']} version/build differ from current 1.0.42 (42)"
   end
   forbidden_build_settings.each do |setting|
     errors << "generated project #{configuration['name']} injects #{setting}" if settings.key?(setting)

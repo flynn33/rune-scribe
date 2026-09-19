@@ -57,10 +57,10 @@ configuration is a separate external-service action when credentials are availab
 does not determine product shippability.
 
 Manual hardware observations are superseded by repository-controlled macOS hosted,
-iPhone Simulator, iPad Simulator, and deterministic evidence. Version 1.0.41 build 41 is
-the current UI/Xcode remediation candidate and is not shipped; current source-bound
-results are recorded in the
-[qualification report](verification/ui-xcode-remediation/QualificationSummary.md).
+iPhone Simulator, iPad Simulator, and deterministic evidence. Version 1.0.42 build 42 is
+the current UI/Xcode remediation candidate and is not shipped. The linked
+[qualification report](verification/ui-xcode-remediation/QualificationSummary.md)
+records the earlier 1.0.41 source; fresh current-source qualification is required.
 Version 1.0.40 retained evidence records the iPhone
 17 Pro headless UI run on iOS 26.5 with 7 passed, 1 iPad-only skipped, and 0 failed and
 the iPad Pro 13-inch (M5) run with 5 passed, 3 phone-specific skipped by design, and 0
