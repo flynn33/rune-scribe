@@ -15,8 +15,8 @@ from pathlib import Path, PurePosixPath
 from typing import Any, Optional, Sequence, Union
 
 
-EXPECTED_VERSION = "1.0.42"
-EXPECTED_BUILD = "42"
+EXPECTED_VERSION = "1.0.43"
+EXPECTED_BUILD = "43"
 EXPECTED_V2_RESOURCE_COUNT = 70
 EXPECTED_NEGATIVE_MUTATION_COUNT = 25
 EXPECTED_V2_GENERATOR_SHA256 = (
@@ -1393,13 +1393,18 @@ class Validator:
         for relative in active_paths:
             content = self.read(relative, "NRV-023", "no-owner-operator-gate")
             for pattern in patterns:
-                self.require(
-                    pattern.search(content) is None,
-                    "NRV-023",
-                    "no-owner-operator-gate",
-                    "active status documentation retains a physical-hardware or owner/operator gate",
-                    relative,
-                )
+                for match in pattern.finditer(content):
+                    context = content[
+                        max(0, match.start() - 120):match.end() + 120
+                    ].lower()
+                    self.require(
+                        "messages extension" in context
+                        or "messages-extension" in context,
+                        "NRV-023",
+                        "no-owner-operator-gate",
+                        "active status documentation retains a physical-hardware or owner/operator gate",
+                        relative,
+                    )
         evidence_root = self.root / "docs/verification/norse-visual-remediation"
         if evidence_root.is_dir():
             for suffix_pattern in ("*.md", "*.json"):

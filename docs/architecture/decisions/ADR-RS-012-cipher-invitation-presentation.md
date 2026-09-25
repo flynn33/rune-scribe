@@ -2,7 +2,7 @@
 
 **Controlling policy:** [Rune Scribe Controlling Forsetti Policy](../FORSETTI_CONTROLLING_POLICY.md)
 
-**Status:** Accepted; typed file Artifact with QR and link fallbacks
+**Status:** Accepted for file/QR compatibility; Messages conclusion superseded by ADR-RS-014
 **Date:** 2026-08-09
 
 ## Decision
@@ -19,9 +19,10 @@ SHA-256 digest. Unknown selections are incompatible and resource drift is corrup
 use the Norse fallback. Presentation rejection never blocks admission or decryption of
 an otherwise valid Core payload.
 
-No Quick Look or dedicated iMessage extension is required. Owner-operated hardware-only
-observations may supplement the automated record but remain optional pre-ship work and
-do not change the source-complete transport decision.
+The earlier decision not to require a dedicated Messages extension is superseded by
+[ADR-RS-014](ADR-RS-014-interactive-messages-cipher-invitations.md). Typed files and QR
+remain separate compatibility paths; they are not silent substitutes for the
+interactive `MSMessage` cipher-invitation route.
 
 ## Evidence boundary
 

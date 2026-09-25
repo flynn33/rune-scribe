@@ -1,6 +1,12 @@
 import Foundation
 import RuneScribeContracts
+import RuneScribeMessagesShared
 import RuneScribeUIRuntime
+
+struct PreparedMessageShareDelivery {
+    let artifact: ShareArtifactDTO
+    let previewImageData: Data?
+}
 
 extension RuneScribeUISession {
     @discardableResult
@@ -76,7 +82,7 @@ extension RuneScribeUISession {
     ) async throws -> ShareArtifactDTO {
         let presentationPreparation: OutboundSharePresentationPreparation
         if let renderedPresentation {
-            guard representation == .file else {
+            guard representation == .file || representation == .link else {
                 throw OpaqueSharePresentationError.unavailable
             }
             presentationPreparation = OutboundSharePresentationPreparation(
@@ -129,6 +135,32 @@ extension RuneScribeUISession {
         systemReduceMotion: Bool = false,
         renderedPresentation: OutboundSharePresentationDTO? = nil
     ) async throws -> ShareArtifactDTO {
+        try await prepareMessageShareDelivery(
+            runes: runes,
+            senderName: senderName,
+            cipherID: cipherID,
+            shareHandle: shareHandle,
+            selection: selection,
+            descriptor: descriptor,
+            effects: effects,
+            colorMode: colorMode,
+            systemReduceMotion: systemReduceMotion,
+            renderedPresentation: renderedPresentation
+        ).artifact
+    }
+
+    func prepareMessageShareDelivery(
+        runes: String,
+        senderName: String,
+        cipherID: UUID,
+        shareHandle: EncodedMessageHandle,
+        selection: SharePresentationSelection? = nil,
+        descriptor: ThemeDescriptor? = nil,
+        effects: RuntimeEffectsPreference? = nil,
+        colorMode: ShareArtifactColorMode = .standard,
+        systemReduceMotion: Bool = false,
+        renderedPresentation: OutboundSharePresentationDTO? = nil
+    ) async throws -> PreparedMessageShareDelivery {
         let presentationPreparation: OutboundSharePresentationPreparation
         if let renderedPresentation {
             presentationPreparation = OutboundSharePresentationPreparation(
@@ -162,7 +194,10 @@ extension RuneScribeUISession {
             )
         }
         recordOutboundSharePresentationStatus(presentationPreparation.status)
-        return artifact
+        return PreparedMessageShareDelivery(
+            artifact: artifact,
+            previewImageData: presentationPreparation.presentation?.safePreviewData
+        )
     }
 
     func completeShareArtifact(
@@ -211,7 +246,7 @@ extension RuneScribeUISession {
         source: InboundDeliverySourceDTO = .qrScanner,
         isColdStart: Bool = false
     ) async throws -> ImportResultDTO {
-        try await perform {
+        let result = try await perform {
             try await requireApplicationClient().importURL(
                 InboundURLDTO(
                     metadata: inboundMetadata(source: source, isColdStart: isColdStart),
@@ -219,6 +254,11 @@ extension RuneScribeUISession {
                 )
             )
         }
+        if let importID = result.pendingImport?.id,
+           let invitation = try? MessagesInvitationValidator.validate(url) {
+            messagesHandoffIDByImportID[importID] = invitation.handoffID
+        }
+        return result
     }
 
     func ingest(

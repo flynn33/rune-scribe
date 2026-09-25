@@ -1,6 +1,7 @@
 import Foundation
 @_spi(ThemeFidelityQualification) import RuneScribeContracts
 import RuneScribeCoreModule
+import RuneScribeMessagesShared
 import RuneScribeThemeGloamthornModule
 import RuneScribeThemeMoonleafModule
 import RuneScribeNorseThemeModule
@@ -21,6 +22,7 @@ private enum RuntimeCompositionQualificationError: Error { case invalidLaunch }
     private let qualificationResolution: ThemeFidelityQualificationLaunch.Resolution
     private let resources: any ApplicationResourceLocator
     private let rootPresentationAdapter: RuntimeRootPresentationHostAdapter
+    private let messagesImportStateHandler: MessagesImportStateHandler
     private var isConfigured = false, startIsInFlight = false
     private var activationState: RuntimeActivationState = .idle
     private var activationGeneration: UInt64 = 0
@@ -39,8 +41,11 @@ private enum RuntimeCompositionQualificationError: Error { case invalidLaunch }
         processEnvironment: [String: String] = ProcessInfo.processInfo.environment,
         moduleStateStore: @autoclosure () -> (any ModuleStateStore)? = try? AppleSQLiteModuleStateStore(),
         inboundFiles: @autoclosure () -> any InboundFileReader = AppleInboundFileReader(),
-        cloudSync: (any CloudSyncTransport)? = nil
+        cloudSync: (any CloudSyncTransport)? = nil,
+        messagesImportStateHandler: @escaping MessagesImportStateHandler =
+            MessagesImportStateHandlers.unavailable
     ) {
+        self.messagesImportStateHandler = messagesImportStateHandler
         self.qualificationResolution = qualificationResolution
         switch qualificationResolution {
         case .invalid, .validated:
@@ -196,7 +201,13 @@ private enum RuntimeCompositionQualificationError: Error { case invalidLaunch }
         try await RuneScribeThemeGloamthornModuleBootstrap.register(with: runtime)
         try await RuneScribeThemeCoordinatorModuleBootstrap.register(with: runtime)
         try await RuneScribeProgressionModuleBootstrap.register(with: runtime)
-        try await runtime.register(manifest: RuneScribeUIModuleBootstrap.manifest(), factory: RuneScribeUIModuleBootstrap.factory(qualificationResolution: qualificationResolution))
+        try await runtime.register(
+            manifest: RuneScribeUIModuleBootstrap.manifest(),
+            factory: RuneScribeUIModuleBootstrap.factory(
+                qualificationResolution: qualificationResolution,
+                messagesImportStateHandler: messagesImportStateHandler
+            )
+        )
         try await runtime.installStandardPort(rootPresentationAdapter, for: .standard)
         try await runtime.installPlatformAdapter(platformEnvironment.secureValues, for: RuneScribeServiceKeys.secureValueStore)
         try await runtime.installPlatformAdapter(platformEnvironment.protectedFiles, for: RuneScribeServiceKeys.protectedFileStore)

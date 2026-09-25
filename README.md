@@ -10,10 +10,10 @@ as a string of Unicode runes. Send a friend your cipher — by QR, iMessage, lin
 or file — and they can read it; without it, the runes are just runes.
 
 ![Platform](https://img.shields.io/badge/platform-macOS%2015%20%7C%20iOS%2017-3A7FD5?style=flat-square)
-![Version](https://img.shields.io/badge/version-1.0.42%20build%2042-3A7FD5?style=flat-square)
+![Version](https://img.shields.io/badge/version-1.0.43%20build%2043-3A7FD5?style=flat-square)
 ![Swift](https://img.shields.io/badge/Swift-6.0-D4971A?style=flat-square)
 ![SwiftUI](https://img.shields.io/badge/UI-SwiftUI%20%2B%20Metal-3A7FD5?style=flat-square)
-![Tests](https://img.shields.io/badge/tests-1242%20package%20%7C%20architecture%20guards-2ea043?style=flat-square)
+![Tests](https://img.shields.io/badge/tests-focused%20Messages%20%7C%20architecture%20guards-2ea043?style=flat-square)
 ![License](https://img.shields.io/badge/license-Proprietary-A0A8B8?style=flat-square)
 
 A product of **Raven Forge Software**.
@@ -40,11 +40,11 @@ A product of **Raven Forge Software**.
   appearance metadata. On the **first** eligible message to a contact it also carries
   the cipher key. Later themed messages keep the file and never resend the key; Copy
   Runes remains the compact compatibility action.
-- **🤝 Share a cipher safely** — the primary **Share** action sends a validated themed
-  **`.runescribe` Artifact**; **Customize Share** chooses its Codex appearance. Explicit
-  Export, offline `runescribe://import` link, and QR actions remain available as
-  fallbacks. Each invitation carries the same validated key. No server or Universal Link
-  is involved.
+- **🤝 Share a cipher safely** — on iOS, **Share** and the cipher-invitation path in
+  **Customize Share** compose a themed `MSMessage` artwork bubble. The same validated
+  HTTPS invitation is stored in `MSMessage.url` and repeated in the composer body.
+  The Messages extension offers only **Continue to Rune Scribe**; the containing app
+  owns import confirmation and persistence. Explicit Export and QR remain available.
 - **🔒 App lock** — an optional **4-digit PIN** gates the app on launch and when it
   returns from the background. The PIN is never stored: a salted
   **PBKDF2-HMAC-SHA256** hash lives in the Keychain, and repeated wrong guesses
@@ -134,16 +134,24 @@ simply tries each cipher it holds until exactly one succeeds.
 ## 🤝 Sharing a cipher
 
 A cipher is the shared secret: whoever holds it can read — and write — your runes.
-Rune Scribe provides one primary typed-Artifact path plus explicit compatibility
-fallbacks. Every path funnels through the **same validated import rail** and works
-without a Rune Scribe server.
+Rune Scribe provides one validated invitation rail with platform-specific presentation.
+Every path funnels through the **same validated import rail** and works without a Rune
+Scribe message server.
 
-- **Primary Share / Customize Share.** **Cipher Library → Share** prepares a themed,
-  typed `.runescribe` Artifact and opens the system share sheet. **Customize Share**
-  opens the provider-neutral Share Builder first, with a fixed warning that the
-  invitation contains the shared cipher. The Artifact carries validated presentation,
-  safe-preview, provenance, and optional legacy-font sections without exposing key bytes
-  to UI state.
+- **Primary Share / Customize Share on iOS.** **Cipher Library → Share** and the
+  cipher-invitation route in **Customize Share** prepare an `MSMessage` whose template
+  image is the existing themed render, letterboxed into a 300 × 225-point 4:3 canvas
+  with a safe inset. The bitmap contains no instructional text. The validated HTTPS
+  invitation is both `MSMessage.url` and visible composer body text. This route attaches
+  neither PNG nor `.runescribe` data.
+- **Messages extension handoff.** Tapping the custom bubble is intended to open the
+  `com.runescribe.app.messages` extension. Its only action is **Continue to Rune
+  Scribe**, which asks the system to open the exact invitation URL. The containing app
+  remains the sole import-confirmation and mutation authority. A key-free envelope in
+  `group.com.runescribe.app` is recovery state, not a second cipher library.
+- **macOS presentation.** Cipher Share and Customize Share continue through the normal
+  system share presentation using the validated invitation URL. Explicit file export
+  remains separate.
 - **Link / QR fallbacks.** A cipher is packed into a compact **129-byte record**
   (version, an 8-byte public ID, the 32-byte key, the 32-glyph permutation, the font
   reference, and a SHA-256 checksum) carried as base64url inside an offline
@@ -155,12 +163,12 @@ without a Rune Scribe server.
   Import**, or open the file with Rune Scribe. Exact legacy decoder files remain
   readable.
 
-Every channel — primary Artifact, Share Builder Artifact, exported file, link, QR, or a
-pasted `runescribe://` link — is validated on
-arrival. Legacy records must retain their exact version, length, true 0–31 permutation,
-and checksum. Typed packages additionally enforce canonical sections, byte/count/image
-bounds, hashes, and required versions before allocation or rendering. The in-app **QR
-scanner is iOS-only**; on macOS you import via the file or a pasted link.
+Every channel — interactive HTTPS invitation, exported file, link, QR, or a pasted
+`runescribe://` link — is validated on arrival. Legacy records must retain their exact
+version, length, true 0–31 permutation, and checksum. Typed packages additionally
+enforce canonical sections, byte/count/image bounds, hashes, and required versions
+before allocation or rendering. The in-app **QR scanner is iOS-only**; on macOS you
+import via the file or a pasted link.
 
 Themed presentation is resolved against the installed provider's artifact and resource
 inventory before rendering. Unknown selections or resource metadata/digest drift use
@@ -174,6 +182,12 @@ the Base Norse fallback without changing admission or decryption of a valid Core
 > **Guard the cipher.** A shared QR image or `.runescribe` file carries the actual
 > **256-bit key** — anyone who has it can read your runes, so hand it over privately
 > and don't post it publicly.
+
+> **Messages qualification boundary.** Source tests, simulator builds, and signed
+> product inspection do not prove a recipient transcript or tap result. The sender-to-
+> recipient rows for installed/cold, installed/running, deleted-app fallback, visible
+> body URL, and green-bubble/SMS URL retention have not been run on two physical
+> iPhones. The artwork-tap import/fallback behavior is therefore not yet accepted.
 
 ---
 
@@ -287,7 +301,7 @@ compliance pass. It tracks further per-call mediation and ownership hardening as
 architecture backlog; the product-release bar remains the concrete regression, source,
 mutation, Release-build, asset, privacy, and built-product gates.
 
-The current application targets link Contracts, Runtime Core, UI Runtime, Platform,
+The current application targets link Contracts, Runtime Core, Messages Shared, UI Runtime, Platform,
 Core, Progression, Theme Coordinator, Norse Base, four Elven providers, Cloud policy,
 Game Center policy, and the sole UI Module. Norse remains the required fallback;
 optional provider, Progression, cloud, and Game Center failures cannot block cipher
@@ -306,7 +320,7 @@ the current boundary and dependency rules.
 ## 🗺 Implementation roadmap
 
 The previously authorized version 1.0.39 build 39 roadmap-completion baseline remains a
-historical source-complete snapshot that was not shipped. Version 1.0.42 build 42 is the
+historical source-complete snapshot that was not shipped. Version 1.0.43 build 43 is the
 current UI/Xcode remediation candidate. The earlier 1.0.41 source-bound qualification,
 device matrix, visual evidence, and known limits are recorded in the
 [UI/Xcode remediation qualification](docs/verification/ui-xcode-remediation/QualificationSummary.md).
@@ -314,7 +328,7 @@ Version 1.0.40 build 40 remains a retained historical repository-qualification r
 that source passed 1,238/1,238 Swift tests, 255/255 Python tests, 60 Norse semantic rules,
 25/25 Norse mutations, 18/18 legacy mutations, 28/28 shipping negative mutations,
 27/27 evidence-hardening tests, and 101/101 local built-product checks. Those historical
-results are not relabeled as source-bound evidence for 1.0.42. The current candidate is
+results are not relabeled as source-bound evidence for 1.0.43. The current candidate is
 **not shipped**. The earlier signed 1.0.41 archives predate the subsequently merged
 theme, Universal Link, tutorial, and workspace changes. Fresh iOS and macOS archive and
 export qualification is required for the current source before upload; validation,
@@ -342,8 +356,10 @@ The controlling automated release bar is narrower and product-focused: core user
 clean tests, iPhone/iPad/macOS Release builds, deterministic UI smoke coverage,
 accessibility/privacy/security checks, signing and entitlements, and no known
 release-blocking defects. Manual hardware observations and package self-binding
-bookkeeping are superseded and nonblocking. The repository-controlled final-source gates
-and supported UI runs pass with no known release-blocking defects. The repository's
+bookkeeping are superseded and nonblocking for the older covered feature set. The
+1.0.43 Messages-focused tests and repository guards pass, but the full package run did
+not complete in this publication pass and the Messages physical-device matrix remains
+open. The repository's
 `scripts/qualify-app-store-archives.sh` gate also creates and inspects fresh iOS and
 Mac App Store exports without uploading them. App Store Connect validation, upload,
 submission, and rollout remain owner-operated publication work.
@@ -439,11 +455,13 @@ RuneScrib/
 ├── AppHost/      SwiftUI entry, delegates, composition, lifecycle and input forwarding
 ├── Metal/        Shipping Metal shader
 └── Resources/    Assets, privacy manifest, Noto Sans Runic font, splash video and licenses
+RuneScribeMessagesExtension/      iOS Messages handoff UI; no import mutation
 Packages/RuneScribeArchitecture/
 ├── Sources/
 │   ├── RuneScribeContracts/      Neutral IDs, DTOs and service protocols
 │   ├── RuneScribeRuntimeCore/    App-owned runtime and mediation control plane
 │   ├── RuneScribeUIPresentationContracts/ Typed root-presentation contracts
+│   ├── RuneScribeMessagesShared/ Validated URL and key-free App Group envelope
 │   ├── RuneScribeUIRuntime/      Native system-presentation boundary
 │   ├── RuneScribePlatform/       Keychain, files, Contacts, fonts and system adapters
 │   ├── RuneScribeCoreModule/     Domain, crypto, persistence, import and app lock
@@ -455,7 +473,7 @@ Packages/RuneScribeArchitecture/
 │   ├── RuneScribeGameCenterModule/ Frozen catalog, mapping and outbox policy
 │   ├── RuneScribeUIModule/       SwiftUI product views, state projection and navigation
 │   └── RuneScribeTestSupport/    In-memory adapters; never linked into shipping apps
-└── Tests/                        1242 Swift package tests
+└── Tests/                        Swift package and focused Messages tests
 RuneScribTests/                   Hosted macOS composition and compatibility tests
 RuneScribIOSTests/                Hosted iOS routing, migration and presentation tests
 RuneScribIOSUITests/              iPhone/iPad product parity tests
@@ -503,10 +521,12 @@ scripts/qualify-app-store-archives.sh
 ```
 
 Two app targets — **RuneScrib-macOS** (macOS 15) and **RuneScrib-iOS** (iOS 17) —
-share the thin host sources and link the same local package products, built in **Swift
-6** language mode. The macOS target ships with App Sandbox + Hardened Runtime enabled
-for Mac App Store distribution. Debug and Simulator qualification use ad-hoc signing so
-automated checks do not require a login-Keychain password.
+share the thin host sources and link the local package products, built in **Swift 6**
+language mode. The iOS app embeds **RuneScribeMessagesExtension**, bundle identifier
+`com.runescribe.app.messages`, with `APPLICATION_EXTENSION_API_ONLY = YES`. The macOS
+target ships with App Sandbox + Hardened Runtime enabled for Mac App Store distribution.
+Debug and Simulator qualification use ad-hoc signing so automated checks do not require
+a login-Keychain password.
 The Release-product qualifier retains its logs and local app bundles under a unique
 temporary evidence directory. The separate App Store qualifier retains signed archives,
 exports, entitlements, profiles, signature reports, and hashes; it does not validate or
@@ -517,7 +537,8 @@ Both targets register the **`runescribe://`** URL scheme and a single exported
 disambiguated by typed-container magic or its legacy leading version byte — and declare
 Contacts and (iOS) camera usage strings. The iOS target also declares
 **`applinks:ravenforgesoftware.com`** so cipher invitations can open the app through a
-Universal Link after the website publishes the matching association document.
+Universal Link. The app and Messages extension both declare the
+**`group.com.runescribe.app`** App Group used for key-free handoff recovery.
 Those Info.plist keys and entitlements — and the bundled splash video — are configured
 in `project.yml` and `Config/`, the source of truth.
 
@@ -525,11 +546,12 @@ in `project.yml` and `Config/`, the source of truth.
 
 ## ✅ Testing
 
-The local Swift package passes **1242 package tests** (1105 XCTest cases and
-137 Swift Testing cases), supplemented by repository architecture guards, hosted
-macOS/iOS tests, iPhone/iPad UI parity, and an
-isolated macOS parity host. The package suite uses deterministic in-memory adapters and
-does not access the operator's login Keychain.
+The retained 1.0.42 candidate recorded **1242 package tests** (1105 XCTest cases and
+137 Swift Testing cases). For 1.0.43, the package compiled and the focused Messages
+Shared, durable-fingerprint, handoff, and rendered-link tests passed. The full package
+run did not complete in this publication pass, so there is no current aggregate pass to
+report. The package suite uses deterministic in-memory adapters and does not access the
+operator's login Keychain.
 
 | Suite | What it covers |
 |---|---|
@@ -542,10 +564,13 @@ does not access the operator's login Keychain.
 | Platform adapters | Keychain contract, protected files and SQLite state, scoped inbound reads, Contacts, fonts, resources, feedback, clipboard and share artifacts |
 | Hosted and parity tests | Composition, isolated Simulator Keychain migration, native share outcomes, accessibility, iPhone/iPad and macOS product flows |
 
-Direct-device observations are superseded by repository-controlled Simulator, hosted,
-and deterministic equivalents and are not pending release gates. The
+Direct-device observations remain superseded for the older covered feature set. They do
+not prove the new Messages extension route: its physical sender/recipient transcript,
+artwork tap, installed-app cold/warm handoff, deleted-app fallback, visible body URL,
+and green-bubble/SMS URL-retention rows remain unrun release gates. The
 legacy package's larger visual-evidence and self-binding matrix remains noncontrolling.
-Named final-source, mutation, and built-product guards pass. Retained prior iPhone 17 Pro
+Named documentation, roadmap, architecture, shipping-mutation, and focused Messages
+guards pass. Retained prior iPhone 17 Pro
 headless UI run passes 7 tests with 1 iPad-only skip and 0 failures. The iPad Pro 13-inch (M5)
 headless UI run on iOS 26.5 passes 5 tests with 3 phone-specific skips by design and 0
 failures. Those UI runs are not represented as current-candidate source-bound evidence.

@@ -4,7 +4,7 @@
 
 ## Authority and scope
 
-**Current application:** version 1.0.42 build 42
+**Current application:** version 1.0.43 build 43
 
 The current UI/Xcode remediation is mapped in the
 [September 2026 amendment](../product-roadmap/Rune-Scribe-UI-Xcode-Remediation-Amendment-2026-09.md)
@@ -44,7 +44,7 @@ effective only where they do not conflict with that authority.
 
 ## Current result
 
-Version 1.0.42 build 42 carries the source-complete authorized roadmap baseline, Theme
+Version 1.0.43 build 43 carries the source-complete authorized roadmap baseline, Theme
 Fidelity source remediation, and the bounded UI/Xcode repair described by W01-W09.
 The linked UI/Xcode qualification report records the earlier 1.0.41 source and Store
 artifacts; fresh current-source qualification is required. The retained version 1.0.40
@@ -58,7 +58,7 @@ matching Apple distribution identities, Store profiles, production entitlements,
 architectures, and package signatures. Those artifacts predate later merged theme,
 Universal Link, tutorial, and workspace changes and do not qualify the current source.
 Those 1.0.40 results remain historical rather than evidence for the new source. The
-1.0.42 candidate is deliberately **NOT SHIPPED**; a fresh qualification run must make
+1.0.43 candidate is deliberately **NOT SHIPPED**; a fresh qualification run must make
 the current-source decision. The repository now contains:
 
 - app-owned runtime composition, bounded contracts, capability policy, thin hosts,
@@ -74,15 +74,20 @@ the current-source decision. The repository now contains:
 - a data-driven Artifact renderer, persisted Codex/Relic/Seal/Frame defaults, themed
   vNext cipher/message files, legacy link and QR compatibility, fail-soft receiving,
   Encounter recording, and provenance state;
+- an iOS Messages extension cipher-invitation route with themed `MSMessage` artwork,
+  the validated HTTPS invitation in both `MSMessage.url` and visible composer body,
+  handoff-only extension UI, containing-app import authority, and a key-free App Group
+  recovery inbox; physical transcript/tap/fallback/SMS behavior remains unrun;
 - local-first private progression synchronization with deterministic merge, offline and
   account-change policy, corruption quarantine, runtime-owned CloudKit I/O, and no
   secret-bearing cloud fields; and
 - optional Game Center mapping/report policy with a frozen 15-achievement, 220-point
   catalog, monotonic outbox, runtime-owned GameKit I/O, and no local grant authority.
 
-The repository-controlled release bar passes core user flows, clean tests, iOS/macOS
-Release builds, deterministic UI coverage, accessibility, privacy, exact assets, negative
-mutations, and built-product inspection with no known release-blocking defects. Retained
+For 1.0.43, the repository-controlled documentation, roadmap, architecture,
+shipping-mutation, and focused Messages tests pass. The full package run did not complete
+in this publication pass, and fresh iOS/macOS Release-product qualification remains
+outstanding. Retained
 prior evidence records the iPhone 17 Pro headless UI run on iOS 26.5 with 7 passed, 1
 iPad-only skipped, and 0 failed and the iPad Pro 13-inch (M5) run with 5 passed, 3
 phone-specific skipped by design, and 0 failed. Those results are regression context,
@@ -235,17 +240,21 @@ For the retained roadmap-completion baseline, those gates established:
 - **MANUAL HARDWARE VALIDATION SUPERSEDED**
 - **NOT SHIPPED**
 
-The version 1.0.42 build 42 candidate must satisfy the same product acceptance boundary:
+The version 1.0.43 build 43 candidate must satisfy the same product acceptance boundary:
 
 - **FINAL-SOURCE REPOSITORY GATES REQUIRED**
 - **REPOSITORY QUALIFICATION REQUIRED**
 - **IPHONE HEADLESS UI QUALIFICATION REQUIRED**
 - **IPAD HEADLESS UI QUALIFICATION REQUIRED**
 - **FRESH APP STORE ARCHIVE AND EXPORT QUALIFICATION REQUIRED**
+- **MESSAGES EXTENSION PHYSICAL-DEVICE MATRIX REQUIRED**
 - **NOT SHIPPED**
 
 Repository-controlled Simulator, hosted, and deterministic checks replace physical or
-manual validation for Messages/share destinations, camera/QR fixtures, Contacts,
-accessibility, performance, account-state policy, and service failure handling. App Store
+manual validation for the previously covered Messages/share destinations, camera/QR
+fixtures, Contacts, accessibility, performance, account-state policy, and service
+failure handling. They do not replace the new Messages-extension sender/recipient
+matrix: installed/cold, installed/running, deleted-app fallback, body-link visibility,
+and green-bubble/SMS retention are unrun. App Store
 metadata confirmation, validation, upload, submission, and rollout remain distinct
 owner-operated publication actions; none was performed by product qualification.

@@ -992,6 +992,12 @@ actor CipherRepository {
         guard current.version == CipherLibrary.legacyVersion else {
             throw CipherLibraryValidationError.progressionEvidenceRequired
         }
+        if let existing = try Self.cipherMatchingImportFingerprint(
+            payload,
+            in: current
+        ) {
+            return CipherRepositoryMutation(value: existing, library: current)
+        }
         let cipher = try await Self.importedCipher(
             payload,
             label: Self.cleanLabel(label ?? "", fallback: "Imported Cipher"),
@@ -1013,6 +1019,12 @@ actor CipherRepository {
         defer { releaseMutationPermit() }
 
         let current = try await snapshot()
+        if let existing = try Self.cipherMatchingImportFingerprint(
+            payload,
+            in: current
+        ) {
+            return CipherRepositoryMutation(value: existing, library: current)
+        }
         let cipher = try await Self.importedCipher(
             payload,
             label: Self.cleanLabel(label ?? "", fallback: "Imported Cipher"),
@@ -1047,6 +1059,12 @@ actor CipherRepository {
         let current = try await snapshot()
         guard current.version == CipherLibrary.currentVersion else {
             throw CipherLibraryValidationError.progressionEvidenceRequired
+        }
+        if let existing = try Self.cipherMatchingImportFingerprint(
+            payload,
+            in: current
+        ) {
+            return CipherRepositoryMutation(value: existing, library: current)
         }
         let cipher = try await Self.importedCipher(
             payload,
@@ -1109,6 +1127,27 @@ actor CipherRepository {
             library: current,
             requiresPersistence: true
         )
+    }
+
+    /// Durable invitation idempotency is derived from the complete v3 cipher
+    /// payload, excluding the URL's optional display name. A replay after app
+    /// relaunch therefore resolves to the already-persisted cipher without a
+    /// second library mutation.
+    private static func cipherMatchingImportFingerprint(
+        _ payload: CipherSharePayload,
+        in library: CipherLibrary
+    ) throws -> Cipher? {
+        let expected = try importFingerprint(payload)
+        for cipher in library.ciphers {
+            if try importFingerprint(CipherSharePayload(cipher: cipher)) == expected {
+                return cipher
+            }
+        }
+        return nil
+    }
+
+    private static func importFingerprint(_ payload: CipherSharePayload) throws -> Data {
+        Data(SHA256.hash(data: try payload.encoded()))
     }
 
     /// Commits relationship activity and decoded facts only for a cipher that

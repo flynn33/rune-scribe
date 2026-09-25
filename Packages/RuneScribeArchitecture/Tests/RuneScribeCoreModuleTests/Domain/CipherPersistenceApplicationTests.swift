@@ -268,6 +268,50 @@ final class CipherPersistenceApplicationTests: XCTestCase {
         XCTAssertEqual(updated.activeID, legacyID)
     }
 
+    func testCipherInvitationFingerprintPreventsDuplicateAfterRelaunch() async throws {
+        let importedID = try XCTUnwrap(
+            UUID(uuidString: "22222222-3333-4444-5555-666666666666")
+        )
+        let unusedReplayID = try XCTUnwrap(
+            UUID(uuidString: "99999999-AAAA-BBBB-CCCC-DDDDDDDDDDDD")
+        )
+        let store = InMemorySecureValueStore()
+        try await Self.seedLegacyLibrary(in: store)
+        let payload = Self.payload(publicID: Data(9...16), keyStart: 96)
+        let firstRepository = CipherRepository(
+            secureValueStore: store,
+            clock: FixedClock(Date(timeIntervalSince1970: 1_749_283_750)),
+            uuid: FixedUUIDProvider(importedID)
+        )
+
+        let first = try await firstRepository.importCipher(
+            payload,
+            label: "First invitation"
+        )
+        XCTAssertEqual(first.value.id, importedID)
+        XCTAssertEqual(first.library.ciphers.count, 2)
+
+        let relaunched = CipherRepository(
+            secureValueStore: store,
+            clock: FixedClock(Date(timeIntervalSince1970: 1_749_283_751)),
+            uuid: FixedUUIDProvider(unusedReplayID)
+        )
+        _ = try await relaunched.snapshot()
+        await store.clearOperations()
+
+        let replay = try await relaunched.importCipher(
+            payload,
+            label: "Replay invitation"
+        )
+
+        XCTAssertEqual(replay.value.id, importedID)
+        XCTAssertEqual(replay.value.label, "First invitation")
+        XCTAssertEqual(replay.library.ciphers.count, 2)
+        XCTAssertFalse(replay.library.ciphers.contains { $0.id == unusedReplayID })
+        let writes = await store.recordedOperations().filter(\.isWrite)
+        XCTAssertTrue(writes.isEmpty)
+    }
+
     func testFailedWriteDoesNotClaimOrCacheMutation() async throws {
         let newID = try XCTUnwrap(
             UUID(uuidString: "44444444-5555-6666-7777-888888888888")

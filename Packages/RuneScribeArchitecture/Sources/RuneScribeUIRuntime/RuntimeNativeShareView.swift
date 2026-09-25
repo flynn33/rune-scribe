@@ -228,8 +228,9 @@ public struct RuneScribePreparedTextShareLauncher: View {
     }
 }
 
-/// Launches an explicitly requested compact cipher-link fallback. The primary
-/// Cipher Library path remains the typed file launcher above.
+/// Launches a cipher invitation as a rendered image plus its HTTPS import link.
+/// The Cipher Library primary action and its customized variant both use this
+/// presentation; explicit file export remains available separately.
 public struct RuneScribePreparedCipherLinkLauncher: View {
     @ObservedObject private var transfer: OpaqueShareTransfer
     private let cipherLabel: String
@@ -258,17 +259,14 @@ public struct RuneScribePreparedCipherLinkLauncher: View {
         Group {
             if let presentationURL = transfer.presentationURL {
                 #if os(iOS)
-                RuneScribeIOSAutomaticActivityLauncher(
+                RuneScribePreparedInteractiveMessageLauncher(
+                    transfer: transfer,
+                    cipherLabel: cipherLabel,
+                    previewImageData: previewImageData,
                     launchID: launchID,
-                    payload: .link(
-                        presentationURL,
-                        previewTitle: "Rune Scribe cipher: \(cipherLabel)",
-                        previewSystemImage: "link",
-                        previewImageData: previewImageData,
-                        subject: "Rune Scribe cipher: \(cipherLabel)",
-                        message: "Tap to open in Rune Scribe and import this cipher so you can decode my messages."
-                    ),
-                    onPresented: reportPresented,
+                    onPresented: {
+                        reportPresented(on: .messages)
+                    },
                     onFinish: finish
                 )
                 #elseif os(macOS)
@@ -384,6 +382,7 @@ public struct RuneScribeTextShareLink: View {
 public struct RuneScribeCipherLinkShareLink<Label: View>: View {
     @ObservedObject private var transfer: OpaqueShareTransfer
     private let cipherLabel: String
+    private let previewImageData: Data
     private let onShareTriggered: @MainActor () -> Void
     private let onFinish: @MainActor (SharePresentationCompletion) -> Void
     private let onPresentation: @MainActor (RuneScribeSharePresentationHandle) -> Void
@@ -392,6 +391,7 @@ public struct RuneScribeCipherLinkShareLink<Label: View>: View {
     public init(
         transfer: OpaqueShareTransfer,
         cipherLabel: String,
+        previewImageData: Data,
         onShareTriggered: @escaping @MainActor () -> Void = {},
         onFinish: @escaping @MainActor (SharePresentationCompletion) -> Void = { _ in },
         onPresentation: @escaping @MainActor (RuneScribeSharePresentationHandle) -> Void = { _ in },
@@ -399,6 +399,7 @@ public struct RuneScribeCipherLinkShareLink<Label: View>: View {
     ) {
         self.transfer = transfer
         self.cipherLabel = cipherLabel
+        self.previewImageData = previewImageData
         self.onShareTriggered = onShareTriggered
         self.onFinish = onFinish
         self.onPresentation = onPresentation
@@ -428,18 +429,14 @@ public struct RuneScribeCipherLinkShareLink<Label: View>: View {
                 )
             }
         #else
-        RuneScribeIOSActivityButton(
-            payload: .link(
-                presentationURL,
-                previewTitle: "Rune Scribe cipher: \(cipherLabel)",
-                previewSystemImage: "link",
-                previewImageData: nil,
-                subject: "Rune Scribe cipher: \(cipherLabel)",
-                message: "Tap to open in Rune Scribe and import this cipher so you "
-                    + "can decode my messages."
-            ),
+        RuneScribeInteractiveMessageButton(
+            transfer: transfer,
+            cipherLabel: cipherLabel,
+            previewImageData: previewImageData,
             onShareTriggered: onShareTriggered,
-            onPresented: reportPresented,
+            onPresented: {
+                reportPresented(on: .messages)
+            },
             onFinish: finish,
             label: label
         )
@@ -602,17 +599,50 @@ private enum RuneScribeIOSActivityPayload {
             subject,
             message
         ):
-            return [
-                message as NSString,
-                RuneScribeIOSActivityItemSource(
-                    url: url,
-                    previewTitle: previewTitle,
-                    previewSystemImage: previewSystemImage,
-                    previewImageData: previewImageData,
-                    subject: subject
-                ),
-            ]
+            return RuneScribeIOSLinkActivityItemFactory.makeItems(
+                url: url,
+                previewTitle: previewTitle,
+                previewSystemImage: previewSystemImage,
+                previewImageData: previewImageData,
+                subject: subject,
+                message: message
+            )
         }
+    }
+}
+
+/// Builds the concrete items handed to iOS share services for a cipher invitation.
+/// The PNG is deliberately a first-class activity item instead of only link-preview
+/// metadata, so the destination receives the rendered cipher, seal, and frame as a
+/// proposed image attachment. The separate HTTPS item carries the opaque import payload.
+/// Actual Messages transcript behavior remains a physical-device qualification boundary.
+@_spi(RuntimeTesting)
+@MainActor
+public enum RuneScribeIOSLinkActivityItemFactory {
+    public static func makeItems(
+        url: URL,
+        previewTitle: String,
+        previewSystemImage: String,
+        previewImageData: Data?,
+        subject: String,
+        message: String
+    ) -> [Any] {
+        var items: [Any] = []
+        if let previewImageData,
+           let previewImage = UIImage(data: previewImageData) {
+            items.append(previewImage)
+        }
+        items.append(message as NSString)
+        items.append(
+            RuneScribeIOSActivityItemSource(
+                url: url,
+                previewTitle: previewTitle,
+                previewSystemImage: previewSystemImage,
+                previewImageData: previewImageData,
+                subject: subject
+            )
+        )
+        return items
     }
 }
 

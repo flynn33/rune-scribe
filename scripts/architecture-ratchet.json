@@ -14,6 +14,7 @@
   "requiredProducts": [
     "RuneScribeContracts",
     "RuneScribeRuntimeCore",
+    "RuneScribeMessagesShared",
     "RuneScribeUIRuntime",
     "RuneScribePlatform",
     "RuneScribeCoreModule",
@@ -191,9 +192,9 @@
       "removalPhase": "P6"
     },
     "hostPhysicalLines": {
-      "maximum": 340,
+      "maximum": 467,
       "owner": "HostMigration",
-      "reason": "The host is limited to composition, runtime activation, exact optional-provider registration, typed OS input conversion, and neutral root presentation.",
+      "reason": "The host is limited to composition, runtime activation, exact optional-provider registration, typed OS input conversion, neutral root presentation, and key-free Messages handoff recovery.",
       "removalPhase": "P6"
     }
   }

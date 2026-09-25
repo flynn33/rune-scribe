@@ -1,8 +1,10 @@
 #if os(macOS)
 import AppKit
 #endif
+import CryptoKit
 import Foundation
 @_spi(RuntimeOperationAuthority) import RuneScribeContracts
+import RuneScribeMessagesShared
 import RuneScribeNorseThemeModule
 import RuneScribeThemeGloamthornModule
 import RuneScribeThemeMoonleafModule
@@ -16,6 +18,46 @@ import XCTest
 
 @MainActor
 final class RuneScribeUISessionTests: XCTestCase {
+    func testMessagesHandoffReportsCoreTerminalStateExactlyOnce() async throws {
+        let recorder = MessagesImportStateRecorder()
+        let (session, runtime) = try await makeSession(
+            applicationService: ControllableApplicationService(),
+            messagesImportStateHandler: { handoffID, state in
+                await recorder.record(handoffID: handoffID, state: state)
+            }
+        )
+        let importID = ImportID(
+            rawValue: try XCTUnwrap(
+                UUID(uuidString: "A1000000-0000-0000-0000-000000000001")
+            )
+        )
+        let pending = PendingImportSummary(
+            id: importID,
+            suggestedName: "Freyja",
+            source: .link,
+            includesFont: false
+        )
+        session.messagesHandoffIDByImportID[importID] = "handoff"
+
+        session.reportMessagesImportTransition(
+            from: ImportStateDTO(phase: .awaitingConfirmation, pending: pending),
+            to: ImportStateDTO(phase: .completed)
+        )
+        session.reportMessagesImportTransition(
+            from: ImportStateDTO(phase: .awaitingConfirmation, pending: pending),
+            to: ImportStateDTO(phase: .completed)
+        )
+
+        let events = await recorder.waitForEvents(count: 1)
+        XCTAssertEqual(events, [MessagesImportStateEvent(
+            handoffID: "handoff",
+            state: .completed
+        )])
+        XCTAssertTrue(session.messagesHandoffIDByImportID.isEmpty)
+        await session.stop()
+        await runtime.stop()
+    }
+
     func testCodexCardPreviewRolesFollowProviderVisualState() {
         func provider(
             state: ThemeProviderState,
@@ -3016,6 +3058,77 @@ final class RuneScribeUISessionTests: XCTestCase {
         await fixture.runtime.stop()
     }
 
+    func testPrepareMessageShareDeliveryReturnsRenderedPNGForMessages() async throws {
+        let artifactID = ShareArtifactID(
+            rawValue: UUID(uuidString: "86100000-0000-0000-0000-000000000008")!
+        )
+        let artifact = ShareArtifactDTO(
+            id: artifactID,
+            reference: .file(artifactID),
+            displayName: "Rune Scribe Message",
+            contentType: RuneScribeWireFormat.contentType,
+            fileExtension: RuneScribeWireFormat.fileExtension,
+            lifetime: .singleUse,
+            requiresKeyDelivery: true
+        )
+        let service = ControllableApplicationService(
+            preparedMessageArtifact: artifact
+        )
+        let fixture = try await makeSession(applicationService: service)
+        let cipherID = UUID(uuidString: "86100000-0000-0000-0000-000000000009")!
+        let handle = EncodedMessageHandle(
+            rawValue: UUID(uuidString: "86100000-0000-0000-0000-000000000010")!
+        )
+        let descriptor = RuneScribeNorseThemeModuleBootstrap.discoveryDescriptor
+        let selection = try SharePresentationSelection(
+            codexID: descriptor.codex.id,
+            scriptID: descriptor.codex.primaryScriptID,
+            relicID: descriptor.codex.defaultRelicID,
+            sealID: descriptor.codex.seals.first(where: {
+                $0.metadata.availability != .reservedInactive
+            })?.metadata.id,
+            frameID: descriptor.codex.frames.first(where: {
+                $0.metadata.availability != .reservedInactive
+            })?.metadata.id
+        )
+        let previewData = Data([0x89, 0x50, 0x4e, 0x47])
+        let previewDigest = SHA256.hash(data: previewData).map {
+            String(format: "%02x", $0)
+        }.joined()
+        let previewMetadata = try ShareSafePreviewMetadata(
+            mediaType: .png,
+            byteLength: UInt32(previewData.count),
+            pixelSize: ThemePixelSize(width: 4, height: 3),
+            sha256: ThemeSHA256Digest(rawValue: previewDigest)!
+        )
+        let presentation = try OutboundSharePresentationDTO(
+            metadata: SharePresentationMetadata(
+                selection: selection,
+                safePreview: previewMetadata,
+                compatibility: SharePresentationCompatibilityFlags.safePreviewPresent
+                    .union(.norseInteractiveFallback)
+            ),
+            safePreviewData: previewData
+        )
+
+        let prepared = try await fixture.session.prepareMessageShareDelivery(
+            runes: "ᚱᚢᚾᛖ",
+            senderName: "Freya",
+            cipherID: cipherID,
+            shareHandle: handle,
+            renderedPresentation: presentation
+        )
+
+        XCTAssertEqual(prepared.artifact, artifact)
+        XCTAssertEqual(prepared.previewImageData, previewData)
+        let commands = await service.recordedPrepareMessageShareCommands()
+        XCTAssertEqual(try XCTUnwrap(commands.first).presentation, presentation)
+        XCTAssertEqual(fixture.session.outboundSharePresentationStatus, .themed)
+
+        await fixture.session.stop()
+        await fixture.runtime.stop()
+    }
+
     func testPrepareCipherFileSharePreservesLegacyFallbackWithTypedStatus() async throws {
         let artifactID = ShareArtifactID(
             rawValue: UUID(uuidString: "86100000-0000-0000-0000-000000000004")!
@@ -3053,6 +3166,76 @@ final class RuneScribeUISessionTests: XCTestCase {
             .legacyFallback(.themeUnavailable)
         )
         XCTAssertNotNil(fixture.session.outboundSharePresentationStatus.userVisibleMessage)
+
+        await fixture.session.stop()
+        await fixture.runtime.stop()
+    }
+
+    func testPrepareCipherLinkShareAcceptsRenderedImagePresentation() async throws {
+        let artifactID = ShareArtifactID(
+            rawValue: UUID(uuidString: "86100000-0000-0000-0000-000000000006")!
+        )
+        let artifact = ShareArtifactDTO(
+            id: artifactID,
+            reference: .opaque(artifactID),
+            displayName: "Freya",
+            contentType: "text/uri-list",
+            fileExtension: nil,
+            lifetime: .singleUse,
+            requiresKeyDelivery: true
+        )
+        let service = ControllableApplicationService(
+            preparedCipherArtifact: artifact
+        )
+        let fixture = try await makeSession(applicationService: service)
+        let cipherID = UUID(uuidString: "86100000-0000-0000-0000-000000000007")!
+        let descriptor = RuneScribeNorseThemeModuleBootstrap.discoveryDescriptor
+        let selection = try SharePresentationSelection(
+            codexID: descriptor.codex.id,
+            scriptID: descriptor.codex.primaryScriptID,
+            relicID: descriptor.codex.defaultRelicID,
+            sealID: descriptor.codex.seals.first(where: {
+                $0.metadata.availability != .reservedInactive
+            })?.metadata.id,
+            frameID: descriptor.codex.frames.first(where: {
+                $0.metadata.availability != .reservedInactive
+            })?.metadata.id
+        )
+        let previewData = Data([0x89, 0x50, 0x4e, 0x47])
+        let previewDigest = SHA256.hash(data: previewData).map {
+            String(format: "%02x", $0)
+        }.joined()
+        let previewMetadata = try ShareSafePreviewMetadata(
+            mediaType: .png,
+            byteLength: UInt32(previewData.count),
+            pixelSize: ThemePixelSize(width: 4, height: 3),
+            sha256: ThemeSHA256Digest(rawValue: previewDigest)!
+        )
+        let presentation = try OutboundSharePresentationDTO(
+            metadata: SharePresentationMetadata(
+                selection: selection,
+                safePreview: previewMetadata,
+                compatibility: SharePresentationCompatibilityFlags.safePreviewPresent
+                    .union(.norseInteractiveFallback)
+            ),
+            safePreviewData: previewData
+        )
+
+        let prepared = try await fixture.session.prepareCipherShare(
+            cipherID: cipherID,
+            displayName: "Freya",
+            representation: .link,
+            renderedPresentation: presentation
+        )
+
+        XCTAssertEqual(prepared, artifact)
+        let commands = await service.recordedPrepareCipherShareCommands()
+        let command = try XCTUnwrap(commands.first)
+        XCTAssertEqual(commands.count, 1)
+        XCTAssertEqual(command.cipherID, CipherID(rawValue: cipherID))
+        XCTAssertEqual(command.representation, .link)
+        XCTAssertEqual(command.presentation, presentation)
+        XCTAssertEqual(fixture.session.outboundSharePresentationStatus, .themed)
 
         await fixture.session.stop()
         await fixture.runtime.stop()
@@ -3292,10 +3475,20 @@ final class RuneScribeUISessionTests: XCTestCase {
         )
         XCTAssertTrue(operationTimePreparation.contains("shareHandle: preparation.shareHandle"))
         XCTAssertTrue(
-            operationTimePreparation.contains("canonicalMessageTransfer(for: preparedArtifact)")
+            operationTimePreparation.contains("session.prepareMessageShareDelivery(")
+        )
+        XCTAssertTrue(
+            operationTimePreparation.contains(
+                "canonicalMessageTransfer(for: preparedDelivery.artifact)"
+            )
         )
         XCTAssertTrue(operationTimePreparation.contains("pendingMessageArtifact = artifact"))
         XCTAssertTrue(operationTimePreparation.contains("pendingMessageTransfer = transfer"))
+        XCTAssertTrue(
+            operationTimePreparation.contains(
+                "pendingMessagePreviewImageData = previewImageData"
+            )
+        )
         XCTAssertTrue(operationTimePreparation.contains("messageShareLaunchID = UUID()"))
         XCTAssertTrue(operationTimePreparation.contains("showMessageCompose = true"))
         XCTAssertFalse(operationTimePreparation.contains("textShareTransfer"))
@@ -3306,6 +3499,9 @@ final class RuneScribeUISessionTests: XCTestCase {
             to: "        #endif"
         )
         XCTAssertTrue(messageSheet.contains("attachment: pendingMessageTransfer"))
+        XCTAssertTrue(
+            messageSheet.contains("previewImageData: pendingMessagePreviewImageData")
+        )
 
         let messageButton = try sourceSection(
             source,
@@ -3494,7 +3690,9 @@ final class RuneScribeUISessionTests: XCTestCase {
         productMetadata: RuneScribeUIProductMetadata = .init(
             version: "1.0",
             buildNumber: "1"
-        )
+        ),
+        messagesImportStateHandler: @escaping MessagesImportStateHandler =
+            MessagesImportStateHandlers.unavailable
     ) async throws -> (session: RuneScribeUISession, runtime: RuneScribeRuntime) {
         let harness = try await makeApplicationClientHarness(
             applicationService: applicationService,
@@ -3510,7 +3708,8 @@ final class RuneScribeUISessionTests: XCTestCase {
                     splashVideo: nil,
                     metalLibrary: nil
                 ),
-            productMetadata: productMetadata
+            productMetadata: productMetadata,
+            messagesImportStateHandler: messagesImportStateHandler
         )
         return (session, harness.runtime)
     }
@@ -4225,6 +4424,30 @@ private actor ControllableApplicationService:
 
     func disablePIN(_ command: DisablePINCommand) async throws {
         throw StubError.unexpectedCommand
+    }
+}
+
+private struct MessagesImportStateEvent: Equatable, Sendable {
+    let handoffID: String
+    let state: MessagesImportAppState
+}
+
+private actor MessagesImportStateRecorder {
+    private var values: [MessagesImportStateEvent] = []
+
+    func record(handoffID: String, state: MessagesImportAppState) {
+        values.append(MessagesImportStateEvent(
+            handoffID: handoffID,
+            state: state
+        ))
+    }
+
+    func waitForEvents(count: Int) async -> [MessagesImportStateEvent] {
+        for _ in 0..<500 {
+            if values.count >= count { return values }
+            try? await Task.sleep(for: .milliseconds(1))
+        }
+        return values
     }
 }
 

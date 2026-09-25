@@ -55,10 +55,11 @@ MODULE_IMPORT_POLICY = {
   "RuneScribeContracts" => %w[Foundation],
   "RuneScribeUIPresentationContracts" => %w[Foundation SwiftUI RuneScribeContracts],
   "RuneScribeRuntimeCore" => %w[Foundation RuneScribeCloudSyncModule RuneScribeContracts RuneScribeGameCenterModule RuneScribeProgressionSyncDomain RuneScribeUIPresentationContracts],
-  "RuneScribeUIRuntime" => %w[Foundation SwiftUI RuneScribeContracts RuneScribeRuntimeCore RuneScribeUIPresentationContracts AVFoundation AppKit Contacts ContactsUI CoreImage CoreTransferable LinkPresentation MessageUI Metal MetalKit Observation UIKit UniformTypeIdentifiers],
+  "RuneScribeMessagesShared" => %w[Foundation CryptoKit RuneScribeContracts],
+  "RuneScribeUIRuntime" => %w[Foundation SwiftUI RuneScribeContracts RuneScribeMessagesShared RuneScribeRuntimeCore RuneScribeUIPresentationContracts AVFoundation AppKit Contacts ContactsUI CoreImage CoreTransferable LinkPresentation MessageUI Messages Metal MetalKit Observation UIKit UniformTypeIdentifiers],
   "RuneScribePlatform" => %w[Foundation Darwin CoreData CryptoKit RuneScribeContracts Security Contacts CoreText AudioToolbox AppKit UIKit CloudKit GameKit],
   "RuneScribeCoreModule" => %w[Foundation CryptoKit CommonCrypto ImageIO RuneScribeContracts RuneScribeRuntimeCore],
-  "RuneScribeUIModule" => %w[Foundation SwiftUI Combine Accessibility CryptoKit AppKit RuneScribeContracts RuneScribeRuntimeCore RuneScribeUIPresentationContracts RuneScribeUIRuntime UIKit UniformTypeIdentifiers],
+  "RuneScribeUIModule" => %w[Foundation SwiftUI Combine Accessibility CryptoKit AppKit RuneScribeContracts RuneScribeMessagesShared RuneScribeRuntimeCore RuneScribeUIPresentationContracts RuneScribeUIRuntime UIKit UniformTypeIdentifiers],
   "RuneScribeProgressionModule" => %w[Foundation RuneScribeContracts RuneScribeProgressionSyncDomain RuneScribeRuntimeCore],
   "RuneScribeThemeCoordinatorModule" => %w[Foundation RuneScribeContracts RuneScribeRuntimeCore],
   "RuneScribeNorseThemeModule" => %w[Foundation CryptoKit RuneScribeContracts RuneScribeRuntimeCore],
@@ -665,6 +666,7 @@ end
 generated_project_path = root.join("RuneScrib.xcodeproj/project.pbxproj")
 expected_compiled_sources = %w[
   RuneScrib/AppHost/AppDelegate.swift
+  RuneScrib/AppHost/MessagesImportInboxDrainer.swift
   RuneScrib/AppHost/RuneScribApp.swift
   RuneScrib/AppHost/RuneScribeRuntimeComposition.swift
   RuneScrib/Metal/Shaders.metal
@@ -788,7 +790,8 @@ if package_present
         "RuneScribeContracts" => [],
         "RuneScribeUIPresentationContracts" => ["RuneScribeContracts"],
         "RuneScribeRuntimeCore" => ["RuneScribeCloudSyncModule", "RuneScribeContracts", "RuneScribeGameCenterModule", "RuneScribeProgressionSyncDomain", "RuneScribeUIPresentationContracts"],
-        "RuneScribeUIRuntime" => ["RuneScribeContracts", "RuneScribeRuntimeCore", "RuneScribeUIPresentationContracts"],
+        "RuneScribeMessagesShared" => ["RuneScribeContracts"],
+        "RuneScribeUIRuntime" => ["RuneScribeContracts", "RuneScribeMessagesShared", "RuneScribeRuntimeCore", "RuneScribeUIPresentationContracts"],
         "RuneScribePlatform" => ["RuneScribeContracts"],
         "RuneScribeCoreModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
         "RuneScribeProgressionModule" => ["RuneScribeContracts", "RuneScribeProgressionSyncDomain", "RuneScribeRuntimeCore"],
@@ -801,14 +804,15 @@ if package_present
         "RuneScribeProgressionSyncDomain" => ["RuneScribeContracts"],
         "RuneScribeCloudSyncModule" => ["RuneScribeProgressionSyncDomain"],
         "RuneScribeGameCenterModule" => ["RuneScribeContracts"],
-        "RuneScribeUIModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore", "RuneScribeUIPresentationContracts", "RuneScribeUIRuntime"],
+        "RuneScribeUIModule" => ["RuneScribeContracts", "RuneScribeMessagesShared", "RuneScribeRuntimeCore", "RuneScribeUIPresentationContracts", "RuneScribeUIRuntime"],
         "RuneScribeTestSupport" => ["RuneScribeContracts"]
       }
       required_dependencies = {
         "RuneScribeContracts" => [],
         "RuneScribeUIPresentationContracts" => ["RuneScribeContracts"],
         "RuneScribeRuntimeCore" => ["RuneScribeCloudSyncModule", "RuneScribeContracts", "RuneScribeGameCenterModule", "RuneScribeProgressionSyncDomain", "RuneScribeUIPresentationContracts"],
-        "RuneScribeUIRuntime" => ["RuneScribeContracts", "RuneScribeRuntimeCore", "RuneScribeUIPresentationContracts"],
+        "RuneScribeMessagesShared" => ["RuneScribeContracts"],
+        "RuneScribeUIRuntime" => ["RuneScribeContracts", "RuneScribeMessagesShared", "RuneScribeRuntimeCore", "RuneScribeUIPresentationContracts"],
         "RuneScribePlatform" => ["RuneScribeContracts"],
         "RuneScribeCoreModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
         "RuneScribeProgressionModule" => ["RuneScribeContracts", "RuneScribeProgressionSyncDomain", "RuneScribeRuntimeCore"],
@@ -821,7 +825,7 @@ if package_present
         "RuneScribeProgressionSyncDomain" => ["RuneScribeContracts"],
         "RuneScribeCloudSyncModule" => ["RuneScribeProgressionSyncDomain"],
         "RuneScribeGameCenterModule" => ["RuneScribeContracts"],
-        "RuneScribeUIModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore", "RuneScribeUIPresentationContracts", "RuneScribeUIRuntime"],
+        "RuneScribeUIModule" => ["RuneScribeContracts", "RuneScribeMessagesShared", "RuneScribeRuntimeCore", "RuneScribeUIPresentationContracts", "RuneScribeUIRuntime"],
         "RuneScribeTestSupport" => ["RuneScribeContracts"]
       }
 
@@ -856,8 +860,9 @@ if package_present
   if strict_package_mode
     errors << "project.yml must reference #{architecture_package_relative} as a local package" if package_reference_names.empty?
     app_target_names.each do |target_name|
-      missing = required_products - project_product_dependencies.fetch(target_name)
-      unexpected = project_product_dependencies.fetch(target_name) - required_products
+      target_required_products = target_name == "RuneScrib-iOS" ? required_products : required_products - ["RuneScribeMessagesShared"]
+      missing = target_required_products - project_product_dependencies.fetch(target_name)
+      unexpected = project_product_dependencies.fetch(target_name) - target_required_products
       errors << "project.yml target #{target_name} is missing package products: #{missing.join(', ')}" unless missing.empty?
       errors << "project.yml target #{target_name} has non-shipping package products: #{unexpected.join(', ')}" unless unexpected.empty?
     end
@@ -1080,7 +1085,7 @@ host_files.each do |path|
       RuneScribeThemeMoonleafModule RuneScribeThemeSunspireModule
       RuneScribeThemeWildwoodModule RuneScribeThemeGloamthornModule
       RuneScribeCloudSyncModule RuneScribeGameCenterModule
-      RuneScribeUIModule RuneScribeUIRuntime
+      RuneScribeUIModule RuneScribeUIRuntime RuneScribeMessagesShared
     ]
     errors << "#{relative(path, root)}:#{line}: host may not import #{imported}" unless allowed.include?(imported)
   end
@@ -1088,7 +1093,8 @@ end
 
 missing_manifest_count = required_module_ids.keys.count { |module_id| !manifest_groups.key?(module_id) }
 missing_project_product_dependencies = app_target_names.sum do |target_name|
-  (required_products - project_product_dependencies.fetch(target_name)).length
+  target_required_products = target_name == "RuneScrib-iOS" ? required_products : required_products - ["RuneScribeMessagesShared"]
+  (target_required_products - project_product_dependencies.fetch(target_name)).length
 end
 
 metrics = {

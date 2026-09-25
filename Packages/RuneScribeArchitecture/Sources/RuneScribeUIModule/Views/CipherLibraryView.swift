@@ -90,6 +90,7 @@ struct CipherLibraryView: View {
         let artifact: ShareArtifactDTO
         let transfer: OpaqueShareTransfer
         let label: String
+        let previewImageData: Data
     }
 
     @EnvironmentObject private var session: RuneScribeUISession
@@ -897,14 +898,50 @@ struct CipherLibraryView: View {
             var artifact: ShareArtifactDTO?
             var transfer: OpaqueShareTransfer?
             do {
-                let preparedArtifact = try await session.prepareCipherShare(
-                    cipherID: cipher.id,
-                    displayName: cipher.label,
-                    representation: .link,
-                    colorMode: shareColorMode,
-                    systemReduceMotion: effectiveReduceMotion
-                )
+                let preparedArtifact: ShareArtifactDTO
+                let preparedTransfer: OpaqueShareTransfer
+                let previewImageData: Data?
+                switch purpose {
+                case .link:
+                    let catalog = try session.makeShareBuilderCatalog()
+                    let source = ShareBuilderSource.cipherInvitation(
+                        cipherID: cipher.id,
+                        displayName: cipher.label
+                    )
+                    let renderedPreview = try await session.renderShareBuilderPreview(
+                        source: source,
+                        catalog: catalog,
+                        colorMode: shareColorMode,
+                        systemReduceMotion: effectiveReduceMotion
+                    )
+                    let prepared = try await session.prepareShareBuilderArtifact(
+                        source: source,
+                        catalog: catalog,
+                        renderedPreview: renderedPreview,
+                        colorMode: shareColorMode,
+                        systemReduceMotion: effectiveReduceMotion
+                    )
+                    preparedArtifact = prepared.artifact
+                    preparedTransfer = prepared.transfer
+                    previewImageData = prepared.previewImageData
+                case .qr:
+                    preparedArtifact = try await session.prepareCipherShare(
+                        cipherID: cipher.id,
+                        displayName: cipher.label,
+                        representation: .link,
+                        colorMode: shareColorMode,
+                        systemReduceMotion: effectiveReduceMotion
+                    )
+                    preparedTransfer = try await session.shareTransfer(
+                        for: preparedArtifact.id
+                    )
+                    previewImageData = nil
+                }
                 artifact = preparedArtifact
+                transfer = preparedTransfer
+                if case .link = purpose, previewImageData == nil {
+                    throw OpaqueSharePresentationError.unavailable
+                }
                 try Task.checkCancellation()
                 guard case .opaque = preparedArtifact.reference else {
                     throw OpaqueSharePresentationError.unavailable
@@ -915,10 +952,6 @@ struct CipherLibraryView: View {
                 else {
                     throw CancellationError()
                 }
-                let preparedTransfer = try await session.shareTransfer(
-                    for: preparedArtifact.id
-                )
-                transfer = preparedTransfer
                 try Task.checkCancellation()
                 guard isViewActive,
                       shareOperations.ownsPreparation(operationID: operationID),
@@ -940,7 +973,8 @@ struct CipherLibraryView: View {
                         cipherID: cipher.id,
                         artifact: preparedArtifact,
                         transfer: preparedTransfer,
-                        label: cipher.label
+                        label: cipher.label,
+                        previewImageData: previewImageData!
                     )
                     fallbackLinkLaunchID = UUID()
                 case .qr:
@@ -1113,6 +1147,7 @@ struct CipherLibraryView: View {
             RuneScribePreparedCipherLinkLauncher(
                 transfer: fallbackLinkShare.transfer,
                 cipherLabel: fallbackLinkShare.label,
+                previewImageData: fallbackLinkShare.previewImageData,
                 launchID: fallbackLinkLaunchID,
                 onPresented: {
                     session.setRevealBlocker(.systemShare, active: true)

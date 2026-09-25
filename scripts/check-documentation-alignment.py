@@ -298,13 +298,14 @@ require(
     "README Wave 6 roadmap scope differs",
 )
 require(
-    re.search(r"tests-\d+%20package", readme) is not None,
-    "README package-test badge is missing",
+    "tests-focused%20Messages%20%7C%20architecture%20guards" in readme,
+    "README focused-test badge is missing",
 )
 require(
-    "tests-1242%20package" in readme
-    and "**1242 package tests** (1105 XCTest cases and" in normalized_readme,
-    "README current package-test inventory differs from the qualified candidate",
+    "retained 1.0.42 candidate recorded **1242 package tests** (1105 XCTest cases and"
+    in normalized_readme
+    and "there is no current aggregate pass to report" in normalized_readme,
+    "README does not preserve the historical package count and current qualification boundary",
 )
 require(
     "Version 1.0.40 build 40 remains a retained historical repository-qualification record"
@@ -347,10 +348,11 @@ require(
     "App Store packet lacks supported-environment progression validation",
 )
 require(
-    "Manual hardware observations are superseded by repository-controlled Simulator, hosted,"
-    in submission
-    and "not a product-shippability requirement" in submission,
-    "App Store packet lacks the supported automated hardware-replacement boundary",
+    "they do not replace the five unrun messages-extension rows above"
+    in re.sub(r"\s+", " ", submission).lower()
+    and "installed recipient with Rune Scribe cold" in submission
+    and "green-bubble/SMS send retains the HTTPS URL" in submission,
+    "App Store packet lacks the unrun Messages-extension physical-device boundary",
 )
 require(
     "package audit and self-binding mechanics are noncontrolling verification history"
@@ -401,10 +403,28 @@ require(
     "support guide makes owner testing a publication-readiness gate",
 )
 require(
-    "manual hardware observations are superseded by repository-controlled simulator, hosted,"
-    in normalized_support
-    and "not a pending shippability boundary" in normalized_support,
-    "support guide lacks the supported automated hardware-replacement boundary",
+    "the new custom-bubble transcript" in normalized_support
+    and "have not been run on two physical iphones" in normalized_support
+    and "simulator and signing results do not establish those behaviors"
+    in normalized_support,
+    "support guide lacks the unrun Messages-extension physical-device boundary",
+)
+require(
+    "MSMessage.url" in readme
+    and "Continue to Rune Scribe" in readme
+    and "group.com.runescribe.app" in readme
+    and "neither PNG nor `.runescribe` data" in readme,
+    "README lacks the Messages-extension transport and authority boundary",
+)
+messages_adr = read(
+    "docs/architecture/decisions/ADR-RS-014-interactive-messages-cipher-invitations.md"
+)
+require(
+    "physical-device qualification pending" in messages_adr
+    and "These rows have not\nbeen run" in messages_adr
+    and "containing app remains the only import-confirmation UI and mutation authority"
+    in messages_adr,
+    "Messages ADR lacks its source-only and containing-app authority boundary",
 )
 require(
     f"Rune Scribe {HISTORICAL_APPLICATION_VERSION} "
@@ -643,16 +663,18 @@ require(
     "ADR-RS-005 retains a hardware acceptance requirement",
 )
 require(
-    "**Status:** Accepted; typed file Artifact with QR and link fallbacks" in invitation_presentation,
-    "ADR-RS-012 status differs from the completed transport decision",
+    "**Status:** Accepted for file/QR compatibility; Messages conclusion superseded by ADR-RS-014"
+    in invitation_presentation,
+    "ADR-RS-012 status does not record the Messages successor decision",
 )
 require(
     "Blocked on physical-device spike" not in invitation_presentation,
     "ADR-RS-012 retains a hardware blocker",
 )
 require(
-    "Accepted; typed file Artifact with QR and link fallbacks" in decision_index,
-    "decision index differs from the completed ADR-RS-012 status",
+    "Accepted; source implemented, physical-device qualification pending"
+    in decision_index,
+    "decision index lacks the pending-device Messages ADR status",
 )
 
 migration_decisions = read("docs/architecture/MigrationDecisions.md")
@@ -1172,10 +1194,12 @@ owner_gate_patterns = (
 )
 for relative, content in active_owner_boundary_docs.items():
     for pattern in owner_gate_patterns:
-        require(
-            pattern.search(content) is None,
-            f"{relative} retains an active hardware or owner/operator gate",
-        )
+        for match in pattern.finditer(content):
+            context = content[max(0, match.start() - 120):match.end() + 120].lower()
+            require(
+                "messages extension" in context or "messages-extension" in context,
+                f"{relative} retains an active hardware or owner/operator gate",
+            )
 
 stale_status = re.compile(
     r"DEV-ELVEN-003\s+through\s+DEV-ELVEN-009.{0,100}(?:remain|still).{0,30}(?:blocked|block)",

@@ -348,8 +348,8 @@ errors << "platform marketing versions differ" unless marketing_versions.uniq.le
 errors << "platform build numbers differ" unless build_versions.uniq.length == 1
 errors << "marketing version is malformed" unless marketing_versions.first.to_s.match?(/\A\d+(?:\.\d+){1,2}\z/)
 errors << "build number is malformed" unless build_versions.first.to_s.match?(/\A\d+\z/)
-errors << "built marketing version differs from current 1.0.42" unless marketing_versions == ["1.0.42", "1.0.42"]
-errors << "built build number differs from current 42" unless build_versions == ["42", "42"]
+errors << "built marketing version differs from current 1.0.43" unless marketing_versions == ["1.0.43", "1.0.43"]
+errors << "built build number differs from current 43" unless build_versions == ["43", "43"]
 
 puts errors
 exit(errors.empty? ? 0 : 1)
@@ -946,7 +946,7 @@ expected = {
   ],
   "module-manifest.json" => [
     2494,
-    "3bd7c11a4e43d39d37e50b4055f4ed85dbcb77468c8a6fcd55c026dae72246fb"
+    "c2de759857d087a37974df5a1fc508b05236302a3ee45d8e6d8c7b345a824e28"
   ]
 }
 
@@ -1242,7 +1242,7 @@ non_theme_resource_contracts = {
     files: {
       "module-manifest.json" => [
         3_084,
-        "15971e004605a20c3abbd6435e08d6a484aaaa01da7381f5d9a411ffbfeacfa9"
+        "61f958e151f11855a3fd198e178528c838e69d849cbeb38de1156a273f92aa6a"
       ]
     }
   }
@@ -2008,6 +2008,14 @@ inspect_linkage() {
     fi
   done
 
+  if [ "$platform" = "iOS" ]; then
+    if grep -Fq "RuneScribeMessagesShared" "$symbols"; then
+      pass_check "$platform executable links RuneScribeMessagesShared"
+    else
+      fail_check "$platform executable has no linkage evidence for RuneScribeMessagesShared"
+    fi
+  fi
+
   if grep -Fq "RuneScribeTestSupport" "$symbols"; then
     fail_check "$platform executable unexpectedly links RuneScribeTestSupport"
   else
@@ -2068,6 +2076,7 @@ errors = []
 shipping_products = [
   "RuneScribeContracts",
   "RuneScribeRuntimeCore",
+  "RuneScribeMessagesShared",
   "RuneScribeUIRuntime",
   "RuneScribePlatform",
   "RuneScribeCoreModule",
@@ -2085,6 +2094,7 @@ shipping_products = [
 app_product_names = [
   "RuneScribeContracts",
   "RuneScribeRuntimeCore",
+  "RuneScribeMessagesShared",
   "RuneScribeUIRuntime",
   "RuneScribePlatform",
   "RuneScribeCoreModule",
@@ -2109,7 +2119,11 @@ all_regular_targets.insert(
   progression_target_index + 1,
   "RuneScribeProgressionSyncDomain"
 )
-expected_app_dependencies = app_product_names.map do |product|
+expected_ios_dependencies = app_product_names.map do |product|
+  { "package" => "RuneScribeArchitecture", "product" => product }
+end + [{ "target" => "RuneScribeMessagesExtension", "embed" => true }]
+expected_macos_product_names = app_product_names - ["RuneScribeMessagesShared"]
+expected_macos_dependencies = expected_macos_product_names.map do |product|
   { "package" => "RuneScribeArchitecture", "product" => product }
 end
 
@@ -2120,9 +2134,9 @@ errors << "project.yml package declarations differ" unless project.fetch("packag
 
 base_settings = project.dig("settings", "base")
 unless base_settings.is_a?(Hash) &&
-    base_settings["MARKETING_VERSION"] == "1.0.42" &&
-    base_settings["CURRENT_PROJECT_VERSION"] == "42"
-  errors << "project.yml version/build differ from current 1.0.42 (42)"
+    base_settings["MARKETING_VERSION"] == "1.0.43" &&
+    base_settings["CURRENT_PROJECT_VERSION"] == "43"
+  errors << "project.yml version/build differ from current 1.0.43 (43)"
 end
 
 expected_macos_entitlements = {
@@ -2135,6 +2149,7 @@ expected_macos_entitlements = {
   "com.apple.security.files.user-selected.read-write" => true
 }
 expected_ios_entitlements = {
+  "com.apple.security.application-groups" => ["group.com.runescribe.app"],
   "com.apple.developer.associated-domains" => ["applinks:ravenforgesoftware.com"],
   "com.apple.developer.game-center" => true,
   "com.apple.developer.icloud-container-identifiers" => ["iCloud.com.runescribe.app"],
@@ -2169,7 +2184,8 @@ errors << "iOS source entitlement dictionary differs" unless ios_source_entitlem
   end
 
   actual_dependencies = target.fetch("dependencies", [])
-  unless actual_dependencies == expected_app_dependencies
+  expected_dependencies = target_name == "RuneScrib-iOS" ? expected_ios_dependencies : expected_macos_dependencies
+  unless actual_dependencies == expected_dependencies
     errors << "project.yml #{target_name} dependencies differ"
   end
   unless target.fetch("sources", []) == expected_shipping_source_declarations
@@ -2217,6 +2233,7 @@ errors << "Package.swift regular target set differs" unless regular_target_names
 
 test_target_names = package_targets.select { |target| target["type"] == "test" }.map { |target| target["name"] }
 expected_test_target_names = [
+  "RuneScribeMessagesSharedTests",
   "RuneScribeRuntimeCoreTests",
   "RuneScribePlatformTests",
   "RuneScribeCoreModuleTests",
@@ -2247,7 +2264,8 @@ expected_edges = {
     "RuneScribeProgressionSyncDomain",
     "RuneScribeUIPresentationContracts"
   ],
-  "RuneScribeUIRuntime" => ["RuneScribeContracts", "RuneScribeRuntimeCore", "RuneScribeUIPresentationContracts"],
+  "RuneScribeMessagesShared" => ["RuneScribeContracts"],
+  "RuneScribeUIRuntime" => ["RuneScribeContracts", "RuneScribeMessagesShared", "RuneScribeRuntimeCore", "RuneScribeUIPresentationContracts"],
   "RuneScribePlatform" => ["RuneScribeContracts"],
   "RuneScribeCoreModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore"],
   "RuneScribeProgressionModule" => [
@@ -2264,7 +2282,7 @@ expected_edges = {
   "RuneScribeProgressionSyncDomain" => ["RuneScribeContracts"],
   "RuneScribeCloudSyncModule" => ["RuneScribeProgressionSyncDomain"],
   "RuneScribeGameCenterModule" => ["RuneScribeContracts"],
-  "RuneScribeUIModule" => ["RuneScribeContracts", "RuneScribeRuntimeCore", "RuneScribeUIPresentationContracts", "RuneScribeUIRuntime"],
+  "RuneScribeUIModule" => ["RuneScribeContracts", "RuneScribeMessagesShared", "RuneScribeRuntimeCore", "RuneScribeUIPresentationContracts", "RuneScribeUIRuntime"],
   "RuneScribeTestSupport" => ["RuneScribeContracts"]
 }
 
@@ -2274,6 +2292,9 @@ end
 
 
 expected_test_edges = {
+  "RuneScribeMessagesSharedTests" => [
+    "RuneScribeMessagesShared"
+  ],
   "RuneScribeRuntimeCoreTests" => [
     "RuneScribeCloudSyncModule",
     "RuneScribeContracts",
@@ -2580,9 +2601,9 @@ end
 
 configurations_for(objects, project_object, "generated project", errors).each do |configuration|
   settings = configuration.fetch("buildSettings", {})
-  unless settings["MARKETING_VERSION"] == "1.0.42" &&
-      settings["CURRENT_PROJECT_VERSION"] == "42"
-    errors << "generated project #{configuration['name']} version/build differ from current 1.0.42 (42)"
+  unless settings["MARKETING_VERSION"] == "1.0.43" &&
+      settings["CURRENT_PROJECT_VERSION"] == "43"
+    errors << "generated project #{configuration['name']} version/build differ from current 1.0.43 (43)"
   end
   forbidden_build_settings.each do |setting|
     errors << "generated project #{configuration['name']} injects #{setting}" if settings.key?(setting)
@@ -2596,6 +2617,7 @@ expected_entitlement_paths = {
 expected_phase_types = ["PBXSourcesBuildPhase", "PBXResourcesBuildPhase", "PBXFrameworksBuildPhase"]
 expected_compiled_sources = %w[
   RuneScrib/AppHost/AppDelegate.swift
+  RuneScrib/AppHost/MessagesImportInboxDrainer.swift
   RuneScrib/AppHost/RuneScribApp.swift
   RuneScrib/AppHost/RuneScribeRuntimeComposition.swift
   RuneScrib/Metal/Shaders.metal
@@ -2611,7 +2633,19 @@ expected_compiled_sources = %w[
   end
 
   target = matching_targets.first
-  errors << "generated project #{target_name} target dependencies differ" unless Array(target["dependencies"]).empty?
+  target_dependencies = Array(target["dependencies"])
+  if target_name == "RuneScrib-macOS"
+    errors << "generated project #{target_name} target dependencies differ" unless target_dependencies.empty?
+  else
+    dependency_targets = target_dependencies.each_with_object([]) do |identifier, names|
+      dependency = objects[identifier]
+      linked_target = objects[dependency["target"]] if dependency.is_a?(Hash)
+      if dependency.is_a?(Hash) && dependency["isa"] == "PBXTargetDependency" && linked_target.is_a?(Hash)
+        names << linked_target["name"]
+      end
+    end
+    errors << "generated project #{target_name} target dependencies differ" unless dependency_targets == ["RuneScribeMessagesExtension"]
+  end
   errors << "generated project #{target_name} build rules differ" unless Array(target["buildRules"]).empty?
   compiled_sources = compiled_source_paths(
     objects,
@@ -2629,19 +2663,21 @@ expected_compiled_sources = %w[
   product_names = product_objects.map do |object|
     object["productName"] if object.is_a?(Hash) && object["isa"] == "XCSwiftPackageProductDependency"
   end
-  errors << "generated project #{target_name} package products differ" unless product_names == app_product_names
+  expected_product_names = target_name == "RuneScrib-iOS" ? app_product_names : expected_macos_product_names
+  errors << "generated project #{target_name} package products differ" unless product_names == expected_product_names
   errors << "generated project #{target_name} package product identifiers are duplicated" unless product_ids.uniq == product_ids
   product_objects.each_with_index do |object, index|
     expected_object = {
       "isa" => "XCSwiftPackageProductDependency",
-      "productName" => app_product_names[index]
+      "productName" => expected_product_names[index]
     }
     errors << "generated project #{target_name} package product object differs" unless object == expected_object
   end
 
   phase_objects = Array(target["buildPhases"]).map { |identifier| objects[identifier] }
   phase_types = phase_objects.map { |phase| phase["isa"] if phase.is_a?(Hash) }
-  errors << "generated project #{target_name} build phases differ" unless phase_types == expected_phase_types
+  target_phase_types = target_name == "RuneScrib-iOS" ? expected_phase_types + ["PBXCopyFilesBuildPhase"] : expected_phase_types
+  errors << "generated project #{target_name} build phases differ" unless phase_types == target_phase_types
 
   framework_phases = phase_objects.select { |phase| phase.is_a?(Hash) && phase["isa"] == "PBXFrameworksBuildPhase" }
   if framework_phases.length != 1

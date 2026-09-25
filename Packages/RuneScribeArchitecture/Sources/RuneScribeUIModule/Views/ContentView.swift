@@ -217,6 +217,7 @@ struct ContentView: View {
     /// temporary file reference and completion handle, never payload or key bytes.
     @State private var pendingMessageArtifact: ShareArtifactDTO?
     @State private var pendingMessageTransfer: OpaqueShareTransfer?
+    @State private var pendingMessagePreviewImageData: Data?
     @State private var messageSharePreparation: MessageSharePreparation?
     @State private var messageArtifactPreparationTask: Task<Void, Never>?
     @State private var messageShareLaunchID: UUID?
@@ -390,6 +391,7 @@ struct ContentView: View {
                                ),
                                recipients: messageRecipients(),
                                attachment: pendingMessageTransfer,
+                               previewImageData: pendingMessagePreviewImageData,
                                onFinish: handleMessageFinished)
         }
         #endif
@@ -1787,6 +1789,7 @@ struct ContentView: View {
         pendingMessageArtifact = nil
         let transfer = pendingMessageTransfer
         pendingMessageTransfer = nil
+        pendingMessagePreviewImageData = nil
         messageShareLaunchID = nil
         Task {
             await transfer?.close()
@@ -1825,6 +1828,7 @@ struct ContentView: View {
         pendingMessageArtifact = nil
         let transfer = pendingMessageTransfer
         pendingMessageTransfer = nil
+        pendingMessagePreviewImageData = nil
         messageShareLaunchID = nil
         await transfer?.close()
         if completionResult == .deliveryRecorded,
@@ -1868,8 +1872,9 @@ struct ContentView: View {
 
         var artifact: ShareArtifactDTO?
         var transfer: OpaqueShareTransfer?
+        var previewImageData: Data?
         do {
-            let preparedArtifact = try await session.prepareMessageShare(
+            let preparedDelivery = try await session.prepareMessageShareDelivery(
                 runes: preparation.runes,
                 senderName: preparation.senderName,
                 cipherID: preparation.cipherID,
@@ -1877,8 +1882,9 @@ struct ContentView: View {
                 colorMode: usesIncreasedContrast ? .highContrast : .standard,
                 systemReduceMotion: effectiveReduceMotion
             )
-            artifact = preparedArtifact
-            transfer = try await canonicalMessageTransfer(for: preparedArtifact)
+            artifact = preparedDelivery.artifact
+            previewImageData = preparedDelivery.previewImageData
+            transfer = try await canonicalMessageTransfer(for: preparedDelivery.artifact)
         } catch {
             if let artifact {
                 await session.releaseShareArtifact(id: artifact.id)
@@ -1905,6 +1911,7 @@ struct ContentView: View {
         }
         pendingMessageArtifact = artifact
         pendingMessageTransfer = transfer
+        pendingMessagePreviewImageData = previewImageData
         switch destination {
         case .systemShare:
             messageShareLaunchID = UUID()
@@ -1961,6 +1968,7 @@ struct ContentView: View {
         messageArtifactPreparationTask?.cancel()
         messageArtifactPreparationTask = nil
         messageSharePreparation = nil
+        pendingMessagePreviewImageData = nil
         guard let artifact = pendingMessageArtifact else { return }
         guard !messageArtifactCompletionGate.isCompleting(artifact.id) else { return }
         pendingMessageArtifact = nil

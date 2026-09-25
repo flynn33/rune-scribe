@@ -1,6 +1,6 @@
 # Rune Scribe Module Graph
 
-Current Core, Progression, and UI module version `1.0.42` matches the application
+Current Core, Progression, and UI module version `1.0.43` matches the application
 candidate. Theme provider versions remain independently governed by their accepted
 resource contracts.
 
@@ -23,8 +23,10 @@ This graph describes committed cleanup snapshot `01e2fcf655a3139a856787fc96f17a5
 flowchart TD
     MacHost["RuneScrib-macOS"]
     IOSHost["RuneScrib-iOS"]
+    MessagesExtension["RuneScribeMessagesExtension"]
     Contracts["RuneScribeContracts"]
     Runtime["RuneScribeRuntimeCore"]
+    MessagesShared["RuneScribeMessagesShared"]
     UIRuntime["RuneScribeUIRuntime"]
     Platform["RuneScribePlatform"]
     Core["RuneScribeCoreModule"]
@@ -41,13 +43,17 @@ flowchart TD
 
     IOSHost --> Contracts
     IOSHost --> Runtime
+    IOSHost --> MessagesShared
     IOSHost --> UIRuntime
     IOSHost --> Platform
     IOSHost --> Core
     IOSHost --> UI
+    IOSHost --> MessagesExtension
+    MessagesExtension --> MessagesShared
 
     Runtime --> Contracts
     UIRuntime --> Contracts
+    MessagesShared --> Contracts
     Platform --> Contracts
     Core --> Contracts
     Core --> Runtime
@@ -69,7 +75,7 @@ RuneScribePlatform   -X-> RuneScribeCoreModule
 RuneScribePlatform   -X-> RuneScribeUIModule
 ```
 
-[`Packages/RuneScribeArchitecture/Package.swift`](../../Packages/RuneScribeArchitecture/Package.swift) declares six one-target shipping library products, one one-target test-only library product, and five package test targets. It declares no external packages. [`project.yml`](../../project.yml) references that local package and links exactly the six shipping products into each app target. `RuneScribeTestSupport` is consumed only by package/hosted tests and is prohibited from shipping app linkage. The committed [`RuneScrib.xcodeproj`](../../RuneScrib.xcodeproj) is generated from `project.yml`; two final regenerations were byte-identical, and `project.pbxproj` has SHA-256 `5fcafb2ffd877311dd1ea973f58526036e7af543e6e6ff45d36b1a80beb56a30`.
+[`Packages/RuneScribeArchitecture/Package.swift`](../../Packages/RuneScribeArchitecture/Package.swift) declares the app-owned library products and target-aligned package tests. It declares no external packages. [`project.yml`](../../project.yml) references that local package, links approved products into each app target, and embeds `RuneScribeMessagesExtension` in the iOS app. `RuneScribeTestSupport` is consumed only by package/hosted tests and is prohibited from shipping app linkage. The committed [`RuneScrib.xcodeproj`](../../RuneScrib.xcodeproj) is generated from `project.yml`.
 
 ## Logical runtime graph
 
@@ -118,7 +124,8 @@ flowchart TD
 |---|---|---|
 | [`RuneScribeContracts`](../../Packages/RuneScribeArchitecture/Sources/RuneScribeContracts) | Stable module, role, capability, service, event, message, domain, and input IDs; key-free command/result DTOs; `RuneScribeApplicationService`; `RuneScribeInboundInputService`; platform protocols; safe event payloads | SwiftUI/AppKit/UIKit, Security/Contacts/CoreText implementation types, raw keys or PIN values, persistence entities, orchestration |
 | [`RuneScribeRuntimeCore`](../../Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore) | Semantic versions, strict manifests, compiled descriptors, factories, eligibility, capability/service policy, scoped contexts, event bus, directed messages, deterministic activation/rollback/stop, host input forwarder | Rune Scribe cipher/contact/font/message/PIN semantics or platform adapter implementations |
-| [`RuneScribeUIRuntime`](../../Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime) | Type-erased root contribution, exactly-one root selection, and boot/ready/recovery presentation | Product screens, product navigation, Core implementation knowledge |
+| [`RuneScribeMessagesShared`](../../Packages/RuneScribeArchitecture/Sources/RuneScribeMessagesShared) | Extension-safe invitation URL validation, SHA-256 handoff identity, and key-free App Group recovery envelope | Keychain, CloudKit, UI Module, Share Builder, key material, or import mutation |
+| [`RuneScribeUIRuntime`](../../Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime) | Type-erased root contribution, exactly-one root selection, boot/ready/recovery presentation, and native Messages composition | Product screens, product navigation, Core implementation knowledge |
 | [`RuneScribePlatform`](../../Packages/RuneScribeArchitecture/Sources/RuneScribePlatform) | Apple Keychain; protected and inbound files; opaque share storage; Contacts values; pasteboard; CoreText registration; application-bundle lookup; clock and UUID | Module lifecycle, navigation, app-lock policy, cipher/contact/font orchestration, test doubles, Core or UI imports |
 | [`RuneScribeCoreModule`](../../Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule) | Key-bearing cipher domain and encrypted repositories; codecs and wire formats; contacts, fonts, imports, messages, share leases, PIN/lock policy; safe snapshots; application and inbound-input services | SwiftUI/AppKit/UIKit/MessageUI, UI navigation, Platform concrete types, raw-key exposure |
 | [`RuneScribeUIModule`](../../Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule) | Sole UI session and every product screen; navigation, commands, accessibility, Metal rendering, splash playback, QR, document/share/MessageUI surfaces, copy | Core or Platform imports, persistence implementation, key material, host lifecycle ownership |
@@ -212,6 +219,12 @@ Platform conditional compilation narrows delegate and lifecycle integration to A
 - [`Config`](../../Config): platform Info.plists and entitlements;
 - bundle identity, version, deployment, signing, sandbox, URL scheme, UTI, document, orientation, camera, and Contacts configuration in [`project.yml`](../../project.yml).
 
+The iOS app additionally embeds `RuneScribeMessagesExtension`
+(`com.runescribe.app.messages`). The parent and extension share
+`group.com.runescribe.app`; the extension is built with
+`APPLICATION_EXTENSION_API_ONLY = YES` and links only Messages Shared plus the required
+Apple Messages/UIKit frameworks.
+
 `BundleApplicationResourceLocator` is initialized with the host bundle. Core requests the bundled font through a neutral resource handle; UI requests splash-video and default-Metal-library handles. Module manifests remain resources of their own package targets and are loaded with `Bundle.module`.
 
 ## Test graph
@@ -235,6 +248,7 @@ The generated project adds:
 | `RuneScribArchitectureTests` | Runs the repository-wide architecture ratchet from the macOS scheme |
 | `RuneScribTests` | Hosted macOS composition and frozen compatibility checks |
 | `RuneScribIOSTests` | Hosted iOS input, Keychain migration, native sharing, and platform presentation |
+| `RuneScribeMessagesExtension` | Embedded iOS Messages handoff extension; product target, not a test target |
 | `RuneScribIOSUITests` | iPhone/iPad product parity flow |
 | `RuneScribMacParityHost` / `RuneScribMacParityTests` | Isolated macOS product and native-share parity validation |
 

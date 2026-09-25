@@ -1,6 +1,6 @@
 # Rune Scribe Support
 
-**Current product source:** version 1.0.42 (build 42)
+**Current product source:** version 1.0.43 (build 43)
 **Publication boundary:** Current source requires fresh Store qualification; not shipped
 
 Earlier source-bound results and screenshots are indexed in the
@@ -8,12 +8,12 @@ Earlier source-bound results and screenshots are indexed in the
 The version 1.0.40 counts below are retained historical context and are not evidence for
 the new candidate.
 
-Final-source qualification passes the Swift and Python suites, the executable 17-ratchet
-architecture guard, roadmap/documentation guards, exact-resource validators, and
-negative mutation suites. The iOS
-Release build and arm64-only unsigned macOS Release build pass. Built-product content,
-resource, privacy, local-signature, Hardened Runtime, and entitlement inspection passes
-101/101 checks on local products. The earlier iOS and macOS archives exported
+For 1.0.43, the package compiles and the focused Messages Shared,
+durable-fingerprint, handoff, and rendered-link tests pass. The full package run did not
+complete in this publication pass, so the source does not have a current aggregate test
+result. Documentation, roadmap, architecture, and shipping-mutation guards pass. The
+earlier iOS and macOS Release builds, 101/101 local product inspection, and Store archives
+remain historical evidence. The earlier iOS and macOS archives exported
 successfully for App Store Connect with matching distribution identities, Store
 profiles, versions, production entitlements, and package signatures, but they predate
 later merged changes and do not qualify the current source. Retained prior iPhone 17 Pro headless UI evidence records
@@ -26,9 +26,13 @@ superseded v4.3 package audit is noncontrolling verification history.
 
 - A `.runescribe` file may contain a cipher invitation or an encrypted message. Open it
   from Files/Finder or use Rune Scribe's Import action.
-- Cipher Library's primary **Share** action sends a typed themed `.runescribe` Artifact.
-  **Customize Share** opens the Share Builder; Export File, Share Link, and Show QR remain
-  explicit fallback actions.
+- Cipher Library's primary **Share** action prepares the validated themed invitation.
+  **Customize Share** opens the Share Builder; Export File and Show QR remain explicit
+  alternate actions.
+- On iOS, the current Cipher Library **Share** and cipher-invitation Share Builder route
+  compose a themed `MSMessage` artwork bubble with the validated HTTPS invitation in
+  both `MSMessage.url` and visible body text. The Messages extension only hands off via
+  **Continue to Rune Scribe**; the containing app owns confirmation and persistence.
 - After encoding, **Quick Share** uses the current validated per-Codex defaults. Use
   **Customize Share** to choose a Codex, Relic, optional Seal/Frame, and effects policy
   for that operation without changing the cipher or re-encrypting the message.
@@ -37,6 +41,10 @@ superseded v4.3 package audit is noncontrolling verification history.
   iPhone/iPad or resizing the Mac window preserves the selected page.
 - On iOS, a Messages attachment can open directly in Rune Scribe. macOS does not claim
   automatic Messages import; use the file, Import, or a `runescribe://` link.
+- The new custom-bubble transcript, artwork tap, cold/warm installed-app handoff,
+  deleted-app product/App Store fallback, body-link visibility, and green-bubble/SMS
+  retention have not been run on two physical iPhones. Simulator and signing results do
+  not establish those behaviors.
 - A first-delivery message can show a decrypted preview, but its embedded cipher and
   claimed sender remain unverified until you confirm the cipher. Rune Scribe does not
   create or rebind a contact from the sender label in the attachment.

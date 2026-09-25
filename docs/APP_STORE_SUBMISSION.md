@@ -3,9 +3,9 @@
 Ready-to-paste material for App Store Connect (iOS App Store and Mac App Store).
 Keep this file in sync when shipping a new marketing version.
 
-**Last prepared for:** 1.0.42 (build 42) — 2026-09-19
+**Last prepared for:** 1.0.43 (build 43) — 2026-09-25
 
-> **Publication boundary:** version 1.0.42 build 42 is the current source candidate and
+> **Publication boundary:** version 1.0.43 build 43 is the current source candidate and
 > is not shipped. The
 > [earlier UI/Xcode qualification](verification/ui-xcode-remediation/QualificationSummary.md)
 > and signed Store exports cover the source measured at that time. They predate subsequently merged theme,
@@ -13,7 +13,7 @@ Keep this file in sync when shipping a new marketing version.
 > export qualification is required before upload. Validation, upload, submission,
 > release, and rollout remain owner-operated.
 
-The packet remains aligned to version 1.0.42 build 42, but does not claim that the
+The packet remains aligned to version 1.0.43 build 43, but does not claim that the
 current merged source is upload-ready before fresh qualification.
 
 ---
@@ -22,8 +22,8 @@ current merged source is upload-ready before fresh qualification.
 
 | Field | Value |
 |--------|--------|
-| **Version** | `1.0.42` |
-| **Build** | `42` |
+| **Version** | `1.0.43` |
+| **Build** | `43` |
 | **Bundle ID** | `com.runescribe.app` |
 | **Display name** | Rune Scribe |
 | **Category** | Lifestyle (`public.app-category.lifestyle`) |
@@ -46,6 +46,7 @@ Sources of truth in the repo:
 • Refreshes all five Codices with production theme resources
 • Keeps long themed messages contained with complete, truthful paging
 • Hardens themed sharing, safe receiving, and accessibility treatments
+• Adds a themed Messages cipher-invitation handoff, pending physical-device qualification
 ```
 
 ### Full
@@ -60,6 +61,8 @@ This update advances Rune Scribe's five Codices while preserving local encryptio
 • Keep editor and Settings content out of reach while App Lock is active.
 • Choose owned Relics, optional Seals and Frames, and Full, Reduced, or Off effects policy in Share Builder.
 • Share ciphers as typed themed .runescribe Artifacts; link, QR, and Export remain explicit fallbacks.
+• On iOS, compose cipher invitations as themed MSMessage artwork with the same HTTPS invitation in MSMessage.url and visible body text.
+• Continue from the Messages extension into Rune Scribe; the containing app remains the only import-confirmation and persistence authority.
 • Receive themed files safely even when their Codex is locked or unavailable.
 • Continue using encode, decode, import, and messages under a visible emergency Base appearance when required appearance resources fail.
 • Cipher keys, contacts, plaintext, and full messages stay out of iCloud and Game Center.
@@ -85,8 +88,9 @@ HOW TO DEMO
    Scribe → Quick Share, Customize Share, or Send via iMessage (iOS).
 5. In Customize Share, review the fixed security summary, choose available appearance
    options, and Share the freshly prepared typed package.
-6. Cipher Library → Share sends a typed themed .runescribe invitation. Customize Share
-   opens the same builder for that invitation.
+6. On iOS, Cipher Library → Share composes a themed Messages invitation. Customize Share
+   opens the appearance builder before composing the same interactive route. The
+   extension action is Continue to Rune Scribe; import confirmation stays in the app.
 7. Cipher Library → More retains Export File, Share Link, and Show QR as explicit
    fallbacks; Import… re-imports supported current and legacy formats.
 8. Open Vault/Progress to review the local Journey, achievement progress, Encounters,
@@ -97,7 +101,7 @@ HOW TO DEMO
 ENCRYPTION
 • AES-256-GCM (CryptoKit) for messages and for the on-device cipher library.
 • Keys stored in the Data Protection Keychain (This Device Only; no iCloud Keychain sync).
-• Peer-to-peer key handoff only (link / QR / file). No end-to-end messaging network.
+• Peer-to-peer key handoff only (validated invitation / QR / file). No end-to-end messaging network.
 
 URL SCHEME
 • runescribe:// — compatible cipher import deep links (CFBundleURLTypes).
@@ -106,6 +110,13 @@ UNIVERSAL LINKS (iOS)
 • https://ravenforgesoftware.com/rune-scribe/?runescribe=import… — cipher invitation links.
 • The website association document authorizes Team 9AQ2C2838M and bundle com.runescribe.app.
 • Without the app, the Rune Scribe product page provides the App Store fallback.
+
+MESSAGES EXTENSION (iOS)
+• Bundle com.runescribe.app.messages renders the selected themed artwork in an MSMessage.
+• MSMessage.url and the visible composer body carry the same validated HTTPS invitation.
+• Continue to Rune Scribe hands off to the containing app; import confirmation and mutation remain there.
+• The group.com.runescribe.app recovery envelope stores no key material.
+• Physical-device transcript, artwork-tap, deleted-app fallback, body-link, and SMS behavior is not yet qualified.
 
 DOCUMENT TYPE
 • .runescribe (UTI com.runescribe.runescribe) — typed or exact legacy cipher/message packages, distinguished by container magic or legacy version byte.
@@ -199,10 +210,18 @@ The same text is shown in-app under **Settings → View License**
 ### iOS (`Config/RuneScrib-iOS.entitlements`)
 
 - Keychain access group: `$(AppIdentifierPrefix)com.runescribe.app`
+- App Group: `group.com.runescribe.app`
 - Game Center capability
 - Private iCloud container: `iCloud.com.runescribe.app`
 - CloudKit service and key-value store declarations
 - Associated domain: `applinks:ravenforgesoftware.com`
+
+### Messages extension (`Config/RuneScribeMessagesExtension.entitlements`)
+
+- Target: `RuneScribeMessagesExtension`
+- Bundle ID: `com.runescribe.app.messages`
+- App Group: `group.com.runescribe.app`
+- Extension-safe build setting: `APPLICATION_EXTENSION_API_ONLY = YES`
 
 ### macOS (`Config/RuneScrib-macOS.entitlements`)
 
@@ -250,9 +269,10 @@ team. The remaining steps are owner-operated publication actions.
 
 ### Before upload
 
-- [ ] Version and build match the configured App Store Connect record (`1.0.42` / `42` for this packet)
-- [x] Core user flows and clean automated tests pass against the final source
-- [x] iOS Simulator and arm64-only unsigned macOS Release builds pass
+- [ ] Version and build match the configured App Store Connect record (`1.0.43` / `43` for this packet)
+- [ ] Complete the full automated package regression against the final source
+- [x] Focused Messages Shared, durable-fingerprint, handoff, and rendered-link tests pass
+- [ ] Re-run iOS Simulator and arm64-only unsigned macOS Release qualification against the final source
 - [x] Retained prior iPhone 17 Pro headless UI qualification passes on iOS 26.5
 - [x] Retained prior iPad Pro 13-inch (M5) headless UI qualification passes on iOS 26.5
 - [x] Deterministic accessibility and privacy checks, source validators, and negative
@@ -264,7 +284,11 @@ team. The remaining steps are owner-operated publication actions.
 - [ ] Produce fresh iOS and macOS Store exports from the current merged source and pass
   distribution identity, Store provisioning profile, architecture, production
   entitlement, privacy manifest, and package signature inspection
-- [x] No known release-blocking defects remain
+- [ ] Run sender iPhone → installed recipient with Rune Scribe cold and confirm exactly one import prompt
+- [ ] Run sender iPhone → installed recipient with Rune Scribe already running and confirm exactly one import prompt
+- [ ] Run sender iPhone → recipient with Rune Scribe deleted and observe the first artwork tap
+- [ ] Confirm the body HTTPS URL remains visible and tappable in the recipient transcript
+- [ ] Confirm a green-bubble/SMS send retains the HTTPS URL
 - [ ] Release notes pasted (What’s New)
 - [ ] Review notes pasted
 - [ ] Privacy answers set
@@ -281,8 +305,9 @@ team. The remaining steps are owner-operated publication actions.
 - [ ] When services are available, create/group Game Center records and upload approved
   images/localizations
 
-Manual hardware observations are superseded by repository-controlled Simulator, hosted,
-and deterministic equivalents and are not a product-shippability requirement. Legacy
+Manual hardware observations remain superseded for the previously covered behavior by
+repository-controlled Simulator, hosted, and deterministic equivalents. They do not
+replace the five unrun Messages-extension rows above, which remain a qualification gate. Legacy
 package audit and self-binding mechanics are noncontrolling verification history.
 Earlier exported packages are retained historical evidence and are not qualified for
 upload as the current source. Retained prior headless UI results are not represented as
@@ -291,7 +316,7 @@ submission, release, and rollout remain external.
 
 ---
 
-## Version 1.0.42 current-source candidate
+## Version 1.0.43 current-source candidate
 
 Internal release summary; this is **not a shipment claim**:
 
@@ -314,7 +339,12 @@ Internal release summary; this is **not a shipment claim**:
    passed, 3 phone-specific skipped by design, and 0 failed. These runs are not
    current-candidate source-bound evidence
 10. The superseded v4.3 package audit is retained as noncontrolling verification history
-11. Marketing version **1.0.42**, build **42** is not shipped; earlier signed Store
+11. The Messages extension uses themed `MSMessage` artwork, the same HTTPS URL in
+    `MSMessage.url` and composer body, a handoff-only Continue action, containing-app
+    import authority, and a key-free App Group recovery envelope
+12. Physical-device Messages transcript, artwork-tap, deleted-app fallback, body-link,
+    and green-bubble/SMS behavior remains unrun and unqualified
+13. Marketing version **1.0.43**, build **43** is not shipped; earlier signed Store
     packages are retained evidence and must not be uploaded as the current source
 
 Platform-specific import notes: [`platform-notes.md`](platform-notes.md)

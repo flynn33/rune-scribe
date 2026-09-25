@@ -9,7 +9,8 @@
 /* Begin PBXBuildFile section */
 		00C20D49F14613A66733DD1B /* RuneScribeTestSupport in Frameworks */ = {isa = PBXBuildFile; productRef = CF4ADC70BD29BA2CE0411ABA /* RuneScribeTestSupport */; };
 		01C55610EF12C17DA83396B2 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 70806C8FC5D83F211738FAAD /* Shaders.metal */; };
-		03EA37E99484E64D6EB3EC5A /* RuneScribeThemeGloamthornModule in Frameworks */ = {isa = PBXBuildFile; productRef = EF45D0B02426EBEAEF355F2D /* RuneScribeThemeGloamthornModule */; };
+		03EA37E99484E64D6EB3EC5A /* RuneScribeThemeWildwoodModule in Frameworks */ = {isa = PBXBuildFile; productRef = 55959CF0E79725D49E7E63CF /* RuneScribeThemeWildwoodModule */; };
+		043E9534595FABC5D3E33F32 /* MessagesImportInboxDrainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 791540D5125ABD137F556B58 /* MessagesImportInboxDrainer.swift */; };
 		04C3F947F0A3C2260D8B773B /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = AD68AA25BC0ABFFEAFE20CF9 /* PrivacyInfo.xcprivacy */; };
 		056BD5AEE7E613EDF8E57B83 /* RuneScribeCloudSyncModule in Frameworks */ = {isa = PBXBuildFile; productRef = 68E33821D4505DCC410DA135 /* RuneScribeCloudSyncModule */; };
 		09653943521792BB49FBC9A5 /* RuneScribeThemeSunspireModule in Frameworks */ = {isa = PBXBuildFile; productRef = DBF4DFA847CDE3EC428631AF /* RuneScribeThemeSunspireModule */; };
@@ -22,9 +23,9 @@
 		1CC0EAA7DFAE0294F058AAD4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F19B0376ECBEEEFF33C99731 /* AppDelegate.swift */; };
 		1D3C60D26AD3E3A0DA6CC7E7 /* Canonical-Render-Catalog-v1.3.json in Resources */ = {isa = PBXBuildFile; fileRef = 27DF8479CF8F5BC1D2E2A08D /* Canonical-Render-Catalog-v1.3.json */; };
 		23D54DA02744177CF8B06BC4 /* RuneScribeUIModule in Frameworks */ = {isa = PBXBuildFile; productRef = 526327790FEC30FB6FC7338D /* RuneScribeUIModule */; };
-		28AAA89BFC5932A189636208 /* RuneScribeThemeSunspireModule in Frameworks */ = {isa = PBXBuildFile; productRef = 0F79D307A70229C6BFB45BF4 /* RuneScribeThemeSunspireModule */; };
-		2B4FCAB266A85EBA67667F2F /* RuneScribeThemeCoordinatorModule in Frameworks */ = {isa = PBXBuildFile; productRef = C2F0441EABEA238EBD5DF206 /* RuneScribeThemeCoordinatorModule */; };
-		2C30E427CFA26A7350205404 /* RuneScribeNorseThemeModule in Frameworks */ = {isa = PBXBuildFile; productRef = EC9D5F3D11B8AC2CE4AAB07A /* RuneScribeNorseThemeModule */; };
+		28AAA89BFC5932A189636208 /* RuneScribeThemeMoonleafModule in Frameworks */ = {isa = PBXBuildFile; productRef = 572D7824B339AD33DB4E055B /* RuneScribeThemeMoonleafModule */; };
+		2B4FCAB266A85EBA67667F2F /* RuneScribeGameCenterModule in Frameworks */ = {isa = PBXBuildFile; productRef = 1D855D46BB13D0BC5882C8C6 /* RuneScribeGameCenterModule */; };
+		2C30E427CFA26A7350205404 /* RuneScribeProgressionModule in Frameworks */ = {isa = PBXBuildFile; productRef = 4C674DBE6F68251A40CF79DC /* RuneScribeProgressionModule */; };
 		2DA13728C48E6550A19E80AA /* RuneScribeProgressionModule in Frameworks */ = {isa = PBXBuildFile; productRef = B68A66859F99B164612C5EFB /* RuneScribeProgressionModule */; };
 		2E50777405A62119357B6CCF /* RuneScribeThemeGloamthornModule in Frameworks */ = {isa = PBXBuildFile; productRef = 454744B12E5949B9CCF9D991 /* RuneScribeThemeGloamthornModule */; };
 		2EC98C8B92544DDCD3490556 /* ThemeFidelityMatrixTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 382C041081C83DEB0A9B75DE /* ThemeFidelityMatrixTests.swift */; };
@@ -33,13 +34,13 @@
 		34A07D593701D17AEC1FC143 /* OFL.txt in Resources */ = {isa = PBXBuildFile; fileRef = B6164CCB0C4A4342270DC5CA /* OFL.txt */; };
 		3648E76D4DC6515672B26F81 /* RuneScribeRuntimeCore in Frameworks */ = {isa = PBXBuildFile; productRef = 0856EBE343F18E81979224CE /* RuneScribeRuntimeCore */; };
 		36C687CCDF36BAB8651E8DDF /* Deterministic-Seed-Catalog-v1.3.json in Resources */ = {isa = PBXBuildFile; fileRef = 9C02B55AFAF19D9D920A814D /* Deterministic-Seed-Catalog-v1.3.json */; };
-		376EA6FEB49E1396C70B9220 /* RuneScribeThemeMoonleafModule in Frameworks */ = {isa = PBXBuildFile; productRef = 572D7824B339AD33DB4E055B /* RuneScribeThemeMoonleafModule */; };
+		376EA6FEB49E1396C70B9220 /* RuneScribeNorseThemeModule in Frameworks */ = {isa = PBXBuildFile; productRef = EC9D5F3D11B8AC2CE4AAB07A /* RuneScribeNorseThemeModule */; };
 		38049FACD09DEBB67B1C6DAF /* raven-forge-spp-splash.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 73480FBCDA99CED16BC695D5 /* raven-forge-spp-splash.mp4 */; };
 		3828C5D79EBACBAE2932DCA1 /* ComplianceGuardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8794218367CD5682362E58C /* ComplianceGuardTests.swift */; };
 		3B8992804CD3C3970A71DE57 /* Deterministic-Seed-Catalog-v1.3.json in Resources */ = {isa = PBXBuildFile; fileRef = 9C02B55AFAF19D9D920A814D /* Deterministic-Seed-Catalog-v1.3.json */; };
 		40A0F491D108F48D91D1E3A6 /* RuneScribeThemeSunspireModule in Frameworks */ = {isa = PBXBuildFile; productRef = D531AAF50C10D2A6FABCD7ED /* RuneScribeThemeSunspireModule */; };
 		453F9C67E7131C528E6E781E /* RuneScribeThemeCoordinatorModule in Frameworks */ = {isa = PBXBuildFile; productRef = 7E0CAEB200DFACF10D6F3618 /* RuneScribeThemeCoordinatorModule */; };
-		469C9325BA26BDA76E53BD44 /* RuneScribeUIModule in Frameworks */ = {isa = PBXBuildFile; productRef = 52B302D4A6F1BF026533FEFF /* RuneScribeUIModule */; };
+		469C9325BA26BDA76E53BD44 /* RuneScribeThemeCoordinatorModule in Frameworks */ = {isa = PBXBuildFile; productRef = C2F0441EABEA238EBD5DF206 /* RuneScribeThemeCoordinatorModule */; };
 		49A2F2518A57128E5F05A105 /* RuneScribeUIRuntime in Frameworks */ = {isa = PBXBuildFile; productRef = 9C0E34DE3867BB9FDF5211F1 /* RuneScribeUIRuntime */; };
 		49B202E878AE83C746A4B887 /* RuneScribeThemeSunspireModule in Frameworks */ = {isa = PBXBuildFile; productRef = A8A04E62141809DD6DDA8F52 /* RuneScribeThemeSunspireModule */; };
 		4C44236B13EEBA051D651277 /* DestinationCompatibilityMatrixTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B9CA154D72FA203A0E62B33 /* DestinationCompatibilityMatrixTests.swift */; };
@@ -51,11 +52,13 @@
 		55BBA4421D3374DFFDED21C7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F19B0376ECBEEEFF33C99731 /* AppDelegate.swift */; };
 		5613355F15ABB24E8A495941 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = AD68AA25BC0ABFFEAFE20CF9 /* PrivacyInfo.xcprivacy */; };
 		584241169D94C9A2AA41FD95 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D2F5EA4DE2C44E252CBAD296 /* Assets.xcassets */; };
+		5B4262788EC918CF1CEDF703 /* RuneScribeUIModule in Frameworks */ = {isa = PBXBuildFile; productRef = 52B302D4A6F1BF026533FEFF /* RuneScribeUIModule */; };
 		5B82C9DC93BF73D970B5820B /* RuneScribeNorseThemeModule in Frameworks */ = {isa = PBXBuildFile; productRef = 7A066175CBDEFCDCD2D588EC /* RuneScribeNorseThemeModule */; };
 		5BDB31D5FC0CB0D89537DA3B /* RuneScribeThemeWildwoodModule in Frameworks */ = {isa = PBXBuildFile; productRef = E855F1D86151A705A0B337C2 /* RuneScribeThemeWildwoodModule */; };
 		61AD60DA89946689B85BE523 /* RuneScribeUIRuntime in Frameworks */ = {isa = PBXBuildFile; productRef = 93910CA2E43931ADB607B6E0 /* RuneScribeUIRuntime */; };
 		61DD380B448CD6318D7544DC /* PlatformPresentationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2DA5225D5589842767F99B5 /* PlatformPresentationTests.swift */; };
 		65EDA0D38F675ABA0FDFEBA6 /* RuneScribeThemeCoordinatorModule in Frameworks */ = {isa = PBXBuildFile; productRef = 32499190D69DF97439CD3DDF /* RuneScribeThemeCoordinatorModule */; };
+		67D9DEEE9980890A251182F9 /* RuneScribeMessagesExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 8FCE189DF2AC76174C2C5171 /* RuneScribeMessagesExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		6C6A2CE5354094309B8C699D /* RuneScribeThemeSunspireModule in Frameworks */ = {isa = PBXBuildFile; productRef = 759788C72A2D82DD55ACFBBC /* RuneScribeThemeSunspireModule */; };
 		6D001408A5A0E31630FC6473 /* Comparison-Authority-v1.3.json in Resources */ = {isa = PBXBuildFile; fileRef = AF3A31BA4896C83FECD82430 /* Comparison-Authority-v1.3.json */; };
 		6E70CD7158A62E597DC2C1EF /* RuneScribeContracts in Frameworks */ = {isa = PBXBuildFile; productRef = 2CE6E93CB8CD48A870CF5C1A /* RuneScribeContracts */; };
@@ -69,25 +72,27 @@
 		94F3288DDBB27DDAEA96A20A /* RuneScribeCoreModule in Frameworks */ = {isa = PBXBuildFile; productRef = 4D1C1664E02BEE34BC1CC37A /* RuneScribeCoreModule */; };
 		957D220785271243149B5236 /* RuntimeCompositionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D3A9AA89B94306C6B926AB /* RuntimeCompositionTests.swift */; };
 		973EBAFA7B1E6A25FAE46B58 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D2F5EA4DE2C44E252CBAD296 /* Assets.xcassets */; };
-		987EDDB9819FB28125EC078A /* RuneScribeCloudSyncModule in Frameworks */ = {isa = PBXBuildFile; productRef = 08C9F99DAD583A82F537B384 /* RuneScribeCloudSyncModule */; };
+		987EDDB9819FB28125EC078A /* RuneScribeThemeGloamthornModule in Frameworks */ = {isa = PBXBuildFile; productRef = EF45D0B02426EBEAEF355F2D /* RuneScribeThemeGloamthornModule */; };
 		99B4D5CC341ADAAD426D63CF /* KeychainMigrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6130DE995C4AA7EC41BAF902 /* KeychainMigrationTests.swift */; };
-		9AA4B4737E553835B70F9291 /* RuneScribePlatform in Frameworks */ = {isa = PBXBuildFile; productRef = B3DFFDF31121756FBA7CFE9C /* RuneScribePlatform */; };
-		9B01C258EBB2B91127ABE1BC /* RuneScribeUIRuntime in Frameworks */ = {isa = PBXBuildFile; productRef = 13B5BAB3ED96974D3FAE69DD /* RuneScribeUIRuntime */; };
+		9AA4B4737E553835B70F9291 /* RuneScribeUIRuntime in Frameworks */ = {isa = PBXBuildFile; productRef = 13B5BAB3ED96974D3FAE69DD /* RuneScribeUIRuntime */; };
+		9B01C258EBB2B91127ABE1BC /* RuneScribeMessagesShared in Frameworks */ = {isa = PBXBuildFile; productRef = F84B22EB85860A6E5AB4FE11 /* RuneScribeMessagesShared */; };
 		9B53ADAC188B98280C166ED9 /* Canonical-Render-Catalog-v1.3.json in Resources */ = {isa = PBXBuildFile; fileRef = 27DF8479CF8F5BC1D2E2A08D /* Canonical-Render-Catalog-v1.3.json */; };
 		A700A5151432D38B2EA96278 /* RuneScribeProgressionModule in Frameworks */ = {isa = PBXBuildFile; productRef = 8C00F16A3B8AA272BD3510BF /* RuneScribeProgressionModule */; };
 		A86EDA53424B9C65FC09E8D5 /* RuneScribeRuntimeCore in Frameworks */ = {isa = PBXBuildFile; productRef = 5E51F0E25CDF33AA3544E166 /* RuneScribeRuntimeCore */; };
 		A8C00592A89A42B1F884E29A /* RuneScribeThemeGloamthornModule in Frameworks */ = {isa = PBXBuildFile; productRef = C7C41DA8358F7CE1BCCE7A60 /* RuneScribeThemeGloamthornModule */; };
 		AB261150949F57AD15EBE992 /* RuneScribeThemeWildwoodModule in Frameworks */ = {isa = PBXBuildFile; productRef = 46DE32DD9F77B90055C568D0 /* RuneScribeThemeWildwoodModule */; };
 		AD024D560D851D28CD7A1FDD /* NativeShareOutcomeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41643CC6ABB57EE5DEE33F09 /* NativeShareOutcomeTests.swift */; };
-		ADE58C68BC79EBBE8A2CA9C5 /* RuneScribeCoreModule in Frameworks */ = {isa = PBXBuildFile; productRef = 24F3E761D75A529FFF45CDE4 /* RuneScribeCoreModule */; };
+		ADE58C68BC79EBBE8A2CA9C5 /* RuneScribePlatform in Frameworks */ = {isa = PBXBuildFile; productRef = B3DFFDF31121756FBA7CFE9C /* RuneScribePlatform */; };
 		B011B6247C5A28BCF3FFDEA9 /* RuneScribeParityUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94EBA085D60AFAD558BC69CD /* RuneScribeParityUITests.swift */; };
 		B6B430C316B5F38F6DD36441 /* RuneScribeRuntimeComposition.swift in Sources */ = {isa = PBXBuildFile; fileRef = C340B435AF5F194973D4BD73 /* RuneScribeRuntimeComposition.swift */; };
-		B7154359FA3819AC64607317 /* RuneScribeGameCenterModule in Frameworks */ = {isa = PBXBuildFile; productRef = 1D855D46BB13D0BC5882C8C6 /* RuneScribeGameCenterModule */; };
+		B7154359FA3819AC64607317 /* RuneScribeCloudSyncModule in Frameworks */ = {isa = PBXBuildFile; productRef = 08C9F99DAD583A82F537B384 /* RuneScribeCloudSyncModule */; };
 		B82FD0E550E20EA8EEA02D7F /* RuneScribeThemeGloamthornModule in Frameworks */ = {isa = PBXBuildFile; productRef = 07D4F90FAF61D13576919B92 /* RuneScribeThemeGloamthornModule */; };
-		B98E838AC8959237CB19A737 /* RuneScribeProgressionModule in Frameworks */ = {isa = PBXBuildFile; productRef = 4C674DBE6F68251A40CF79DC /* RuneScribeProgressionModule */; };
-		BACDA3BF9E691F058222B9D8 /* RuneScribeThemeWildwoodModule in Frameworks */ = {isa = PBXBuildFile; productRef = 55959CF0E79725D49E7E63CF /* RuneScribeThemeWildwoodModule */; };
+		B8947529F37B5EC31E7D9220 /* Messages.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7952D2A1D45641B3A3BC79F4 /* Messages.framework */; };
+		B98E838AC8959237CB19A737 /* RuneScribeCoreModule in Frameworks */ = {isa = PBXBuildFile; productRef = 24F3E761D75A529FFF45CDE4 /* RuneScribeCoreModule */; };
+		BACDA3BF9E691F058222B9D8 /* RuneScribeThemeSunspireModule in Frameworks */ = {isa = PBXBuildFile; productRef = 0F79D307A70229C6BFB45BF4 /* RuneScribeThemeSunspireModule */; };
 		BBDE889FE559FC9B9D193E7A /* RuneScribeMacAppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA4DDCBBBBC405F5414582E7 /* RuneScribeMacAppUITests.swift */; };
 		BC5AD914530E38D7488FDEB0 /* DestinationCompatibilityMatrixTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B9CA154D72FA203A0E62B33 /* DestinationCompatibilityMatrixTests.swift */; };
+		BCDF845712EB552A38F7DE2A /* MessagesImportInboxDrainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 791540D5125ABD137F556B58 /* MessagesImportInboxDrainer.swift */; };
 		BE33ADBB23CDC9ABFF5B2E0F /* RuneScribeTestSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 415BD6C69E96BAF82603E6EB /* RuneScribeTestSupport */; };
 		C0CF74DC37DD18955598A48F /* RuneScribeTestSupport in Frameworks */ = {isa = PBXBuildFile; productRef = B9866BDCD5A898F67A3260A2 /* RuneScribeTestSupport */; };
 		C305C65784148EA3C86B0EDC /* RuneScribeThemeMoonleafModule in Frameworks */ = {isa = PBXBuildFile; productRef = 09FD485949D234648935441D /* RuneScribeThemeMoonleafModule */; };
@@ -95,6 +100,7 @@
 		C4C352A747B7E570A1713FF6 /* Runtime-Probe-Catalog-v1.3.json in Resources */ = {isa = PBXBuildFile; fileRef = 2CCBF91A4CD4AF1B48E319CA /* Runtime-Probe-Catalog-v1.3.json */; };
 		C8CC6BD65F9BF9B0600C8F63 /* RuneScribeThemeWildwoodModule in Frameworks */ = {isa = PBXBuildFile; productRef = 63C37183F979025E712FE1EA /* RuneScribeThemeWildwoodModule */; };
 		D7BA1BFC3B16E087C8A97CAD /* Runtime-Probe-Catalog-v1.3.json in Resources */ = {isa = PBXBuildFile; fileRef = 2CCBF91A4CD4AF1B48E319CA /* Runtime-Probe-Catalog-v1.3.json */; };
+		D976E3A0DC445C9FC464B7E6 /* RuneScribeMessagesShared in Frameworks */ = {isa = PBXBuildFile; productRef = 5983BF36BD050784AA10F0B7 /* RuneScribeMessagesShared */; };
 		DB267BDE0EA21B4EE3621035 /* RuneScribeThemeMoonleafModule in Frameworks */ = {isa = PBXBuildFile; productRef = 7E882999675FF418B476A8C0 /* RuneScribeThemeMoonleafModule */; };
 		DB7B1DE2531A5636DF5FC9CF /* ThemeCanonicalRenderHarness.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09E0D1BAFC49BAB116BBE7B6 /* ThemeCanonicalRenderHarness.swift */; };
 		DC52EB95FA4F9F3F5043C2D5 /* raven-forge-spp-splash.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 73480FBCDA99CED16BC695D5 /* raven-forge-spp-splash.mp4 */; };
@@ -102,6 +108,7 @@
 		DF507FCE9560AFB1813D59E7 /* RuneScribePlatform in Frameworks */ = {isa = PBXBuildFile; productRef = CE59E4D588F69BF2E639C88F /* RuneScribePlatform */; };
 		DF96354EF55869EE06DB0AB6 /* RuneScribMacParityHostApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADD2BEB44E13EC5A004F6636 /* RuneScribMacParityHostApp.swift */; };
 		E0D344E8AB8FD067801E6E67 /* RuneScribeContracts in Frameworks */ = {isa = PBXBuildFile; productRef = 76FB922C8FCA530F81C93F60 /* RuneScribeContracts */; };
+		E11F537AB6C1ED20B72A6DB1 /* MessagesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97A0B111339796FA899F60FA /* MessagesViewController.swift */; };
 		E187EDBC3B3509BEB5A9FD01 /* RuneScribeThemeMoonleafModule in Frameworks */ = {isa = PBXBuildFile; productRef = 53F50182A21E9655B7BCF177 /* RuneScribeThemeMoonleafModule */; };
 		E8945513767815C9E3871E78 /* RuneScribeRuntimeComposition.swift in Sources */ = {isa = PBXBuildFile; fileRef = C340B435AF5F194973D4BD73 /* RuneScribeRuntimeComposition.swift */; };
 		EB863784B843E3598C964876 /* RuneScribeThemeMoonleafModule in Frameworks */ = {isa = PBXBuildFile; productRef = 08D0C982F44BE4A0B08DF074 /* RuneScribeThemeMoonleafModule */; };
@@ -125,6 +132,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = B0EAA089C274A9658D6E37A7;
 			remoteInfo = RuneScribMacParityHost;
+		};
+		291BE07B66E9B23C97614A77 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5FD9792BC82FD2A7455D1745 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1777E7A8351C38C593F29DCF;
+			remoteInfo = RuneScribeMessagesExtension;
 		};
 		2AFCA44169FBCE9C02D119EF /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -163,6 +177,20 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		9C648A114FA5DAB458DC9BBA /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				67D9DEEE9980890A251182F9 /* RuneScribeMessagesExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		002F7864AE4DEA2BBD03D1E7 /* AppHostRoutingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppHostRoutingTests.swift; sourceTree = "<group>"; };
 		0691B53984A2F145E83175B4 /* RuneScribArchitectureTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RuneScribArchitectureTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -182,10 +210,14 @@
 		6130DE995C4AA7EC41BAF902 /* KeychainMigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainMigrationTests.swift; sourceTree = "<group>"; };
 		70806C8FC5D83F211738FAAD /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		73480FBCDA99CED16BC695D5 /* raven-forge-spp-splash.mp4 */ = {isa = PBXFileReference; path = "raven-forge-spp-splash.mp4"; sourceTree = "<group>"; };
+		791540D5125ABD137F556B58 /* MessagesImportInboxDrainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessagesImportInboxDrainer.swift; sourceTree = "<group>"; };
+		7952D2A1D45641B3A3BC79F4 /* Messages.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Messages.framework; path = System/Library/Frameworks/Messages.framework; sourceTree = SDKROOT; };
 		8208DAC0E11E112FE53A2CF4 /* ArchitectureGuardrailTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArchitectureGuardrailTests.swift; sourceTree = "<group>"; };
 		84D3A9AA89B94306C6B926AB /* RuntimeCompositionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuntimeCompositionTests.swift; sourceTree = "<group>"; };
 		88D90CA91E41675F50F2F0E4 /* CompatibilityBaselineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompatibilityBaselineTests.swift; sourceTree = "<group>"; };
+		8FCE189DF2AC76174C2C5171 /* RuneScribeMessagesExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = RuneScribeMessagesExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		94EBA085D60AFAD558BC69CD /* RuneScribeParityUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneScribeParityUITests.swift; sourceTree = "<group>"; };
+		97A0B111339796FA899F60FA /* MessagesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessagesViewController.swift; sourceTree = "<group>"; };
 		9B9CA154D72FA203A0E62B33 /* DestinationCompatibilityMatrixTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DestinationCompatibilityMatrixTests.swift; path = Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/DestinationCompatibilityMatrixTests.swift; sourceTree = "<group>"; };
 		9C02B55AFAF19D9D920A814D /* Deterministic-Seed-Catalog-v1.3.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "Deterministic-Seed-Catalog-v1.3.json"; sourceTree = "<group>"; };
 		A9AB41A04A01C3ECB14E8D8B /* RuneScrib.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = RuneScrib.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -202,6 +234,7 @@
 		C8794218367CD5682362E58C /* ComplianceGuardTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComplianceGuardTests.swift; sourceTree = "<group>"; };
 		CFAA78FECCD4D76A157BC566 /* RuneScribeMacParityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneScribeMacParityTests.swift; sourceTree = "<group>"; };
 		D2F5EA4DE2C44E252CBAD296 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		EABB1C71C46954CA9C22995F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		F19B0376ECBEEEFF33C99731 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		F9D4EC5C62BEDD1A51E12CAC /* RuneScribApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneScribApp.swift; sourceTree = "<group>"; };
 		FA608DAC88F63B1040378BDD /* RuneScribMacParityUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RuneScribMacParityUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -235,6 +268,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				C0CF74DC37DD18955598A48F /* RuneScribeTestSupport in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7AA03094DFE408CD8251C78C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D976E3A0DC445C9FC464B7E6 /* RuneScribeMessagesShared in Frameworks */,
+				B8947529F37B5EC31E7D9220 /* Messages.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -300,25 +342,34 @@
 			files = (
 				E0D344E8AB8FD067801E6E67 /* RuneScribeContracts in Frameworks */,
 				A86EDA53424B9C65FC09E8D5 /* RuneScribeRuntimeCore in Frameworks */,
-				9B01C258EBB2B91127ABE1BC /* RuneScribeUIRuntime in Frameworks */,
-				9AA4B4737E553835B70F9291 /* RuneScribePlatform in Frameworks */,
-				ADE58C68BC79EBBE8A2CA9C5 /* RuneScribeCoreModule in Frameworks */,
-				B98E838AC8959237CB19A737 /* RuneScribeProgressionModule in Frameworks */,
-				2C30E427CFA26A7350205404 /* RuneScribeNorseThemeModule in Frameworks */,
-				376EA6FEB49E1396C70B9220 /* RuneScribeThemeMoonleafModule in Frameworks */,
-				28AAA89BFC5932A189636208 /* RuneScribeThemeSunspireModule in Frameworks */,
-				BACDA3BF9E691F058222B9D8 /* RuneScribeThemeWildwoodModule in Frameworks */,
-				03EA37E99484E64D6EB3EC5A /* RuneScribeThemeGloamthornModule in Frameworks */,
-				987EDDB9819FB28125EC078A /* RuneScribeCloudSyncModule in Frameworks */,
-				B7154359FA3819AC64607317 /* RuneScribeGameCenterModule in Frameworks */,
-				2B4FCAB266A85EBA67667F2F /* RuneScribeThemeCoordinatorModule in Frameworks */,
-				469C9325BA26BDA76E53BD44 /* RuneScribeUIModule in Frameworks */,
+				9B01C258EBB2B91127ABE1BC /* RuneScribeMessagesShared in Frameworks */,
+				9AA4B4737E553835B70F9291 /* RuneScribeUIRuntime in Frameworks */,
+				ADE58C68BC79EBBE8A2CA9C5 /* RuneScribePlatform in Frameworks */,
+				B98E838AC8959237CB19A737 /* RuneScribeCoreModule in Frameworks */,
+				2C30E427CFA26A7350205404 /* RuneScribeProgressionModule in Frameworks */,
+				376EA6FEB49E1396C70B9220 /* RuneScribeNorseThemeModule in Frameworks */,
+				28AAA89BFC5932A189636208 /* RuneScribeThemeMoonleafModule in Frameworks */,
+				BACDA3BF9E691F058222B9D8 /* RuneScribeThemeSunspireModule in Frameworks */,
+				03EA37E99484E64D6EB3EC5A /* RuneScribeThemeWildwoodModule in Frameworks */,
+				987EDDB9819FB28125EC078A /* RuneScribeThemeGloamthornModule in Frameworks */,
+				B7154359FA3819AC64607317 /* RuneScribeCloudSyncModule in Frameworks */,
+				2B4FCAB266A85EBA67667F2F /* RuneScribeGameCenterModule in Frameworks */,
+				469C9325BA26BDA76E53BD44 /* RuneScribeThemeCoordinatorModule in Frameworks */,
+				5B4262788EC918CF1CEDF703 /* RuneScribeUIModule in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		202589F8457A9F69EA363308 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				7952D2A1D45641B3A3BC79F4 /* Messages.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		2B9A530DB883B542FF1AFEE7 /* docs */ = {
 			isa = PBXGroup;
 			children = (
@@ -354,6 +405,7 @@
 				EE4967BD5360F78915C6036F /* Packages */,
 				9875A592B5AF26023CDC6CEC /* RuneScrib */,
 				D8A25D577325F05220F4D89A /* RuneScribArchitectureTests */,
+				A3D2790485B9EF5241784B77 /* RuneScribeMessagesExtension */,
 				D4AB11C27235965DA1BF0E1A /* RuneScribIOSTests */,
 				B03791E99B717082B44F5378 /* RuneScribIOSUITests */,
 				9AF8B44ED4130B0663AAD6AF /* RuneScribMacAppUITests */,
@@ -362,6 +414,7 @@
 				EC820C2DB89AA33F3C1A4976 /* RuneScribTests */,
 				F34BE723EA79D2658637728A /* ThemeFidelityTests */,
 				D7A8F98E94985EC79E62D61F /* ThemeFidelityXCUITests */,
+				202589F8457A9F69EA363308 /* Frameworks */,
 				EAFA06AF269D7ED7E4731EE3 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -423,6 +476,15 @@
 				BA4DDCBBBBC405F5414582E7 /* RuneScribeMacAppUITests.swift */,
 			);
 			path = RuneScribMacAppUITests;
+			sourceTree = "<group>";
+		};
+		A3D2790485B9EF5241784B77 /* RuneScribeMessagesExtension */ = {
+			isa = PBXGroup;
+			children = (
+				EABB1C71C46954CA9C22995F /* Info.plist */,
+				97A0B111339796FA899F60FA /* MessagesViewController.swift */,
+			);
+			path = RuneScribeMessagesExtension;
 			sourceTree = "<group>";
 		};
 		B03791E99B717082B44F5378 /* RuneScribIOSUITests */ = {
@@ -487,6 +549,7 @@
 				A9AB41A04A01C3ECB14E8D8B /* RuneScrib.app */,
 				1E4FF66651C4BB9C0C94DB4B /* RuneScrib.app */,
 				0691B53984A2F145E83175B4 /* RuneScribArchitectureTests.xctest */,
+				8FCE189DF2AC76174C2C5171 /* RuneScribeMessagesExtension.appex */,
 				1B43D8CCE7DAD248C5D613D8 /* RuneScribIOSTests.xctest */,
 				4FB98D2047D98487CA5D043D /* RuneScribIOSUITests.xctest */,
 				C20A6D89B252A66318E1C671 /* RuneScribMacAppUITests.xctest */,
@@ -519,6 +582,7 @@
 			isa = PBXGroup;
 			children = (
 				F19B0376ECBEEEFF33C99731 /* AppDelegate.swift */,
+				791540D5125ABD137F556B58 /* MessagesImportInboxDrainer.swift */,
 				F9D4EC5C62BEDD1A51E12CAC /* RuneScribApp.swift */,
 				C340B435AF5F194973D4BD73 /* RuneScribeRuntimeComposition.swift */,
 			);
@@ -545,6 +609,25 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		1777E7A8351C38C593F29DCF /* RuneScribeMessagesExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7AD5451567871B3D32C020DC /* Build configuration list for PBXNativeTarget "RuneScribeMessagesExtension" */;
+			buildPhases = (
+				3E9BEE8396EB426E85849A94 /* Sources */,
+				7AA03094DFE408CD8251C78C /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = RuneScribeMessagesExtension;
+			packageProductDependencies = (
+				5983BF36BD050784AA10F0B7 /* RuneScribeMessagesShared */,
+			);
+			productName = RuneScribeMessagesExtension;
+			productReference = 8FCE189DF2AC76174C2C5171 /* RuneScribeMessagesExtension.appex */;
+			productType = "com.apple.product-type.app-extension.messages";
+		};
 		271E332C6AC3B88822FC04DF /* RuneScribMacParityUITests */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = A0E0C2DDFDBF5B49B408F65E /* Build configuration list for PBXNativeTarget "RuneScribMacParityUITests" */;
@@ -596,15 +679,18 @@
 				AF8CFE1D0A2C27387331A0AF /* Sources */,
 				CF008865DBE6EA0114CB2AEB /* Resources */,
 				E6BD39A26392AE6FE2BE49DC /* Frameworks */,
+				9C648A114FA5DAB458DC9BBA /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				80B248253490EEA9B7274FA0 /* PBXTargetDependency */,
 			);
 			name = "RuneScrib-iOS";
 			packageProductDependencies = (
 				76FB922C8FCA530F81C93F60 /* RuneScribeContracts */,
 				5E51F0E25CDF33AA3544E166 /* RuneScribeRuntimeCore */,
+				F84B22EB85860A6E5AB4FE11 /* RuneScribeMessagesShared */,
 				13B5BAB3ED96974D3FAE69DD /* RuneScribeUIRuntime */,
 				B3DFFDF31121756FBA7CFE9C /* RuneScribePlatform */,
 				24F3E761D75A529FFF45CDE4 /* RuneScribeCoreModule */,
@@ -802,6 +888,10 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 2620;
 				TargetAttributes = {
+					1777E7A8351C38C593F29DCF = {
+						DevelopmentTeam = 9AQ2C2838M;
+						ProvisioningStyle = Automatic;
+					};
 					271E332C6AC3B88822FC04DF = {
 						DevelopmentTeam = "";
 						ProvisioningStyle = Manual;
@@ -858,6 +948,7 @@
 			targets = (
 				6F186131C8C4C80632D23A6E /* RuneScrib-macOS */,
 				31B4924C70AF8C14A282AF11 /* RuneScrib-iOS */,
+				1777E7A8351C38C593F29DCF /* RuneScribeMessagesExtension */,
 				E1E13F36C6719C0391C636A6 /* RuneScribTests */,
 				D286A58674744CBB19D5476D /* RuneScribIOSTests */,
 				2DD54B0EDB51920A4B33A6A2 /* RuneScribIOSUITests */,
@@ -945,6 +1036,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		3E9BEE8396EB426E85849A94 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E11F537AB6C1ED20B72A6DB1 /* MessagesViewController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		4A96ECE4F6D0AB49F62AF2B7 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1005,6 +1104,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				55BBA4421D3374DFFDED21C7 /* AppDelegate.swift in Sources */,
+				043E9534595FABC5D3E33F32 /* MessagesImportInboxDrainer.swift in Sources */,
 				199233F0AC33FEF97975F320 /* RuneScribApp.swift in Sources */,
 				B6B430C316B5F38F6DD36441 /* RuneScribeRuntimeComposition.swift in Sources */,
 				01C55610EF12C17DA83396B2 /* Shaders.metal in Sources */,
@@ -1030,6 +1130,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				1CC0EAA7DFAE0294F058AAD4 /* AppDelegate.swift in Sources */,
+				BCDF845712EB552A38F7DE2A /* MessagesImportInboxDrainer.swift in Sources */,
 				DCF8F4F29B85C086E1ED3EC6 /* RuneScribApp.swift in Sources */,
 				E8945513767815C9E3871E78 /* RuneScribeRuntimeComposition.swift in Sources */,
 				50068904E3E0D02FB1D93624 /* Shaders.metal in Sources */,
@@ -1053,6 +1154,11 @@
 			isa = PBXTargetDependency;
 			target = B0EAA089C274A9658D6E37A7 /* RuneScribMacParityHost */;
 			targetProxy = 094AD52451990707C51B4689 /* PBXContainerItemProxy */;
+		};
+		80B248253490EEA9B7274FA0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1777E7A8351C38C593F29DCF /* RuneScribeMessagesExtension */;
+			targetProxy = 291BE07B66E9B23C97614A77 /* PBXContainerItemProxy */;
 		};
 		B4847232AD12DC5AFAA252AC /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -1091,6 +1197,31 @@
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RuneScrib.app/Contents/MacOS/RuneScrib";
 			};
 			name = Release;
+		};
+		172D0751DE2BD39E31609432 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "iMessage App Icon";
+				CODE_SIGN_ENTITLEMENTS = Config/RuneScribeMessagesExtension.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 9AQ2C2838M;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = RuneScribeMessagesExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.runescribe.app.messages;
+				PRODUCT_NAME = RuneScribeMessagesExtension;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
 		};
 		1B774E764000774373DDEC38 /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -1131,7 +1262,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 42;
+				CURRENT_PROJECT_VERSION = 43;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = "";
@@ -1151,7 +1282,7 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
-				MARKETING_VERSION = 1.0.42;
+				MARKETING_VERSION = 1.0.43;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "$(RUNESCRIBE_APP_BUNDLE_IDENTIFIER)";
@@ -1311,6 +1442,31 @@
 				SDKROOT = macosx;
 			};
 			name = Debug;
+		};
+		578B99B56A61360E6FD7D40F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "iMessage App Icon";
+				CODE_SIGN_ENTITLEMENTS = Config/RuneScribeMessagesExtension.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 9AQ2C2838M;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = RuneScribeMessagesExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.runescribe.app.messages;
+				PRODUCT_NAME = RuneScribeMessagesExtension;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
 		};
 		64340CCFDB78528559AF93C1 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -1476,7 +1632,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 42;
+				CURRENT_PROJECT_VERSION = 43;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = "";
@@ -1502,7 +1658,7 @@
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
-				MARKETING_VERSION = 1.0.42;
+				MARKETING_VERSION = 1.0.43;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -1693,6 +1849,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
+		7AD5451567871B3D32C020DC /* Build configuration list for PBXNativeTarget "RuneScribeMessagesExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				172D0751DE2BD39E31609432 /* Debug */,
+				578B99B56A61360E6FD7D40F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 		87DF0CCCB789C3FB894F91D5 /* Build configuration list for PBXNativeTarget "RuneScrib-macOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -1874,6 +2039,10 @@
 			isa = XCSwiftPackageProductDependency;
 			productName = RuneScribeThemeMoonleafModule;
 		};
+		5983BF36BD050784AA10F0B7 /* RuneScribeMessagesShared */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = RuneScribeMessagesShared;
+		};
 		5E51F0E25CDF33AA3544E166 /* RuneScribeRuntimeCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = RuneScribeRuntimeCore;
@@ -1997,6 +2166,10 @@
 		F029EB25BD69B97731BD8FA3 /* RuneScribeThemeWildwoodModule */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = RuneScribeThemeWildwoodModule;
+		};
+		F84B22EB85860A6E5AB4FE11 /* RuneScribeMessagesShared */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = RuneScribeMessagesShared;
 		};
 		FC00F092BEFF6E296536B9D8 /* RuneScribeCoreModule */ = {
 			isa = XCSwiftPackageProductDependency;

@@ -1,5 +1,6 @@
 import Foundation
 @_spi(ThemeFidelityQualification) import RuneScribeContracts
+import RuneScribeMessagesShared
 @_spi(ThemeFidelityQualification) import RuneScribeRuntimeCore
 import RuneScribeUIPresentationContracts
 import RuneScribeUIRuntime
@@ -15,7 +16,7 @@ public enum RuneScribeUIModuleBootstrap {
 
     public static let descriptor = ModuleDescriptor(
         moduleID: "com.runescribe.module.ui",
-        moduleVersion: SemanticVersion(major: UInt(1), minor: UInt(0), patch: UInt(42)),
+        moduleVersion: SemanticVersion(major: UInt(1), minor: UInt(0), patch: UInt(43)),
         kind: .ui,
         entryPoint: "RuneScribeUIModule",
         role: RuneScribeRoles.primaryUI,
@@ -83,10 +84,15 @@ public enum RuneScribeUIModuleBootstrap {
 
     @_spi(ThemeFidelityQualification)
     public static func factory(
-        qualificationResolution: ThemeFidelityQualificationLaunch.Resolution
+        qualificationResolution: ThemeFidelityQualificationLaunch.Resolution,
+        messagesImportStateHandler: @escaping MessagesImportStateHandler =
+            MessagesImportStateHandlers.unavailable
     ) -> AnyModuleFactory {
         AnyModuleFactory(qualificationDescriptor: descriptor) {
-            RuneScribeUIModule(qualificationResolution: qualificationResolution)
+            RuneScribeUIModule(
+                qualificationResolution: qualificationResolution,
+                messagesImportStateHandler: messagesImportStateHandler
+            )
         }
     }
 }
@@ -99,16 +105,21 @@ public final class RuneScribeUIModule: RuntimeConstructibleModule {
     private var session: RuneScribeUISession?
     private var rootPresentationClient: RuntimeRootPresentationClient?
     private nonisolated let qualificationResolution: ThemeFidelityQualificationLaunch.Resolution
+    private nonisolated let messagesImportStateHandler: MessagesImportStateHandler
 
     public nonisolated init() {
         qualificationResolution = ThemeFidelityQualificationLaunch.resolve()
+        messagesImportStateHandler = MessagesImportStateHandlers.unavailable
     }
 
     @_spi(ThemeFidelityQualification)
     public nonisolated init(
-        qualificationResolution: ThemeFidelityQualificationLaunch.Resolution
+        qualificationResolution: ThemeFidelityQualificationLaunch.Resolution,
+        messagesImportStateHandler: @escaping MessagesImportStateHandler =
+            MessagesImportStateHandlers.unavailable
     ) {
         self.qualificationResolution = qualificationResolution
+        self.messagesImportStateHandler = messagesImportStateHandler
     }
 
     public func start(context: ModuleContext) async throws {
@@ -168,7 +179,8 @@ public final class RuneScribeUIModule: RuntimeConstructibleModule {
             unlockFeedbackClient: unlockFeedbackClient,
             inboundFileImportSession: inboundFileImportSession,
             resourcePresentation: resourcePresentation,
-            productMetadata: productMetadata
+            productMetadata: productMetadata,
+            messagesImportStateHandler: messagesImportStateHandler
         )
 
         do {

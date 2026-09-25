@@ -1,6 +1,7 @@
 import Combine
 import Foundation
 import RuneScribeContracts
+import RuneScribeMessagesShared
 import RuneScribeRuntimeCore
 import RuneScribeUIRuntime
 
@@ -75,6 +76,8 @@ final class RuneScribeUISession: ObservableObject {
     private var latestThemeCoordinatorRevision: UInt64?
     var settingsTask: Task<Void, Never>?
     private var cloudGameCenterStatusTask: Task<Void, Never>?
+    private let messagesImportStateHandler: MessagesImportStateHandler
+    var messagesHandoffIDByImportID: [ImportID: String] = [:]
     var observationGeneration: UInt64 = 0
     var revealQueue = ProgressionRevealQueueModel()
 
@@ -89,7 +92,9 @@ final class RuneScribeUISession: ObservableObject {
         unlockFeedbackClient: RuntimeUnlockFeedbackClient? = nil,
         inboundFileImportSession: RuntimeInboundFileImportSession = .unavailable,
         resourcePresentation: RuntimeApplicationResourcePresentation,
-        productMetadata: RuneScribeUIProductMetadata
+        productMetadata: RuneScribeUIProductMetadata,
+        messagesImportStateHandler: @escaping MessagesImportStateHandler =
+            MessagesImportStateHandlers.unavailable
     ) {
         applicationClientHandle = applicationClient
         runtimeIOHandle = runtimeIO
@@ -101,6 +106,7 @@ final class RuneScribeUISession: ObservableObject {
         unlockFeedbackClientHandle = unlockFeedbackClient
         self.inboundFileImportSession = inboundFileImportSession
         self.resourcePresentation = resourcePresentation
+        self.messagesImportStateHandler = messagesImportStateHandler
         appVersion = productMetadata.version
         buildNumber = productMetadata.buildNumber
     }
@@ -642,6 +648,10 @@ final class RuneScribeUISession: ObservableObject {
     }
 
     private func adopt(_ nextSnapshot: RuneScribeApplicationSnapshot) {
+        reportMessagesImportTransition(
+            from: snapshot?.importState,
+            to: nextSnapshot.importState
+        )
         let retainedContactIDs = Set(nextSnapshot.contactLibrary.contacts.map { $0.id.rawValue })
         contactSystemIdentifiers = contactSystemIdentifiers.filter {
             retainedContactIDs.contains($0.key)
@@ -650,6 +660,30 @@ final class RuneScribeUISession: ObservableObject {
         lastError = nextSnapshot.lastFailure.map(Self.message(for:))
         adoptImportPresentation(nextSnapshot.importState)
         adoptMessagePresentation(nextSnapshot.messageState)
+    }
+
+    func reportMessagesImportTransition(
+        from previous: ImportStateDTO?,
+        to next: ImportStateDTO
+    ) {
+        guard let importID = previous?.pending?.id,
+              let handoffID = messagesHandoffIDByImportID[importID]
+        else { return }
+
+        let terminalState: MessagesImportAppState?
+        switch next.phase {
+        case .completed:
+            terminalState = .completed
+        case .idle where next.pending == nil:
+            terminalState = .declined
+        default:
+            terminalState = nil
+        }
+        guard let terminalState else { return }
+        messagesHandoffIDByImportID.removeValue(forKey: importID)
+        Task {
+            await messagesImportStateHandler(handoffID, terminalState)
+        }
     }
 
     private func adoptTheme(_ nextSnapshot: ThemeCoordinatorSnapshotDTO) {

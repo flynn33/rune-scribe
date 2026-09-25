@@ -1,7 +1,9 @@
 #if os(iOS)
+import Foundation
 import MessageUI
 import RuneScribeContracts
 import SwiftUI
+import UIKit
 
 public enum MessageComposeTerminalResult: Equatable, Sendable {
     case sent
@@ -67,24 +69,29 @@ public struct MessageComposeCompletionGate: Equatable, Sendable {
 
 /// Thin SwiftUI bridge to the system Messages compose sheet. The user taps Send
 /// in Apple's own UI. Canonical themed first and established deliveries use a
-/// `.runescribe` attachment; only the first includes the cipher key. This bridge
-/// rejects an attachment that the composer cannot accept and records key delivery
-/// only after an eligible sent result.
+/// `.runescribe` attachment; only the first includes the cipher key. When the
+/// themed renderer succeeds, the same validated PNG preview is proposed as a second
+/// attachment. This bridge rejects an attachment that the composer cannot accept and
+/// records key delivery only after an eligible sent result. Actual Messages transcript
+/// behavior remains a physical-device qualification boundary.
 public struct MessageComposeView: UIViewControllerRepresentable {
     private let messageText: String
     private let recipients: [String]?
     private let attachment: OpaqueShareTransfer?
+    private let previewImageData: Data?
     private let onFinish: ((SharePresentationCompletion) -> Void)?
 
     public init(
         messageText: String,
         recipients: [String]? = nil,
         attachment: OpaqueShareTransfer? = nil,
+        previewImageData: Data? = nil,
         onFinish: ((SharePresentationCompletion) -> Void)? = nil
     ) {
         self.messageText = messageText
         self.recipients = recipients
         self.attachment = attachment
+        self.previewImageData = previewImageData
         self.onFinish = onFinish
     }
 
@@ -129,6 +136,19 @@ public struct MessageComposeView: UIViewControllerRepresentable {
                 attachmentURL,
                 withAlternateFilename: filename
             )
+        }
+        if let previewImageData {
+            let validatedPreview = RuneScribeMessagePreviewAttachment.validatedPNG(
+                previewImageData
+            )
+            requiredAttachmentAccepted = requiredAttachmentAccepted
+                && validatedPreview.map {
+                    composer.addAttachmentData(
+                        $0,
+                        typeIdentifier: "public.png",
+                        filename: "Rune-Scribe.png"
+                    )
+                } == true
         }
 
         switch MessageComposeAttachmentSetupPolicy.decide(
@@ -227,6 +247,14 @@ public struct MessageComposeView: UIViewControllerRepresentable {
                 .failed
             }
         }
+    }
+}
+
+@_spi(RuntimeTesting)
+public enum RuneScribeMessagePreviewAttachment {
+    public static func validatedPNG(_ data: Data) -> Data? {
+        guard UIImage(data: data) != nil else { return nil }
+        return data
     }
 }
 #endif

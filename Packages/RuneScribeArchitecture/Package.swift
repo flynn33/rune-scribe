@@ -15,6 +15,10 @@ let package = Package(
             targets: ["RuneScribeUIPresentationContracts"]
         ),
         .library(name: "RuneScribeRuntimeCore", targets: ["RuneScribeRuntimeCore"]),
+        .library(
+            name: "RuneScribeMessagesShared",
+            targets: ["RuneScribeMessagesShared"]
+        ),
         .library(name: "RuneScribeUIRuntime", targets: ["RuneScribeUIRuntime"]),
         .library(name: "RuneScribePlatform", targets: ["RuneScribePlatform"]),
         .library(name: "RuneScribeCoreModule", targets: ["RuneScribeCoreModule"]),
@@ -74,9 +78,14 @@ let package = Package(
             ]
         ),
         .target(
+            name: "RuneScribeMessagesShared",
+            dependencies: ["RuneScribeContracts"]
+        ),
+        .target(
             name: "RuneScribeUIRuntime",
             dependencies: [
                 "RuneScribeContracts",
+                "RuneScribeMessagesShared",
                 "RuneScribeRuntimeCore",
                 "RuneScribeUIPresentationContracts",
             ]
@@ -149,6 +158,7 @@ let package = Package(
             name: "RuneScribeUIModule",
             dependencies: [
                 "RuneScribeContracts",
+                "RuneScribeMessagesShared",
                 "RuneScribeRuntimeCore",
                 "RuneScribeUIPresentationContracts",
                 "RuneScribeUIRuntime",
@@ -158,6 +168,10 @@ let package = Package(
         .target(
             name: "RuneScribeTestSupport",
             dependencies: ["RuneScribeContracts"]
+        ),
+        .testTarget(
+            name: "RuneScribeMessagesSharedTests",
+            dependencies: ["RuneScribeMessagesShared"]
         ),
         .testTarget(
             name: "RuneScribeRuntimeCoreTests",

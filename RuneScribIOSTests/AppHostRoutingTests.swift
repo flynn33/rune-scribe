@@ -1,6 +1,7 @@
 import Foundation
 @_spi(ThemeFidelityQualification) import RuneScribeContracts
 import RuneScribeCoreModule
+import RuneScribeMessagesShared
 import RuneScribePlatform
 @_spi(RuntimeTesting) @testable import RuneScribeRuntimeCore
 import RuneScribeTestSupport
@@ -11,6 +12,68 @@ import XCTest
 
 @MainActor
 final class AppHostRoutingTests: XCTestCase {
+    func testMessagesInboxDrainerDeliversOnceAndRecordsPresentedState() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(
+            "RuneScribeMessagesDrainerTests-\(UUID().uuidString)",
+            isDirectory: true
+        )
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let inbox = MessagesAppGroupInbox(directoryURL: directory)
+        let invitation = try MessagesInvitationValidator.validate(
+            messagesFixtureURL()
+        )
+        _ = try await inbox.recordConfirmation(
+            for: invitation,
+            at: Date(timeIntervalSince1970: 1_700_000_000)
+        )
+        let drainer = MessagesImportInboxDrainer(inbox: inbox)
+        var delivered: [URL] = []
+
+        await drainer.drain { URL in
+            delivered.append(URL)
+            return .accepted
+        }
+        await drainer.drain { URL in
+            delivered.append(URL)
+            return .accepted
+        }
+
+        XCTAssertEqual(delivered, [invitation.URL])
+        let stored = try await inbox.envelope(handoffID: invitation.handoffID)
+        XCTAssertEqual(stored?.appState, .presented)
+        let recoverable = try await inbox.pendingEnvelopes()
+        XCTAssertEqual(recoverable.map(\.handoffID), [invitation.handoffID])
+
+        await drainer.recordTerminalState(
+            handoffID: invitation.handoffID,
+            state: .completed
+        )
+        let completed = try await inbox.pendingEnvelopes()
+        XCTAssertTrue(completed.isEmpty)
+    }
+
+    func testMessagesInboxDrainerRetainsRejectedDeliveryForRecovery() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(
+            "RuneScribeMessagesDrainerTests-\(UUID().uuidString)",
+            isDirectory: true
+        )
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let inbox = MessagesAppGroupInbox(directoryURL: directory)
+        let invitation = try MessagesInvitationValidator.validate(
+            messagesFixtureURL()
+        )
+        _ = try await inbox.recordConfirmation(
+            for: invitation,
+            at: Date(timeIntervalSince1970: 1_700_000_000)
+        )
+        let drainer = MessagesImportInboxDrainer(inbox: inbox)
+
+        await drainer.drain { _ in .rejected }
+
+        let pending = try await inbox.pendingEnvelopes()
+        XCTAssertEqual(pending.map(\.handoffID), [invitation.handoffID])
+    }
+
     func testAppDelegateIgnoresUnsupportedAndBrowsingActivitiesWithoutURLs() async {
         let fixture = makeFixture()
         let delegate = AppDelegate(runtime: fixture.composition)

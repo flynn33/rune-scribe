@@ -8,6 +8,26 @@ release work and reviewed against the project version before merge. The format f
 <!-- NEW ENTRIES BELOW -->
 ## [Unreleased]
 
+## [1.0.43] - 2026-09-25
+
+- Add an iOS Messages extension route for cipher invitations. The composed
+  `MSMessage` uses the themed cipher artwork as its template image, carries the
+  validated HTTPS invitation in `MSMessage.url`, and repeats that URL in the
+  composer body as a visible fallback.
+- Keep the extension as a handoff surface only. **Continue to Rune Scribe** attempts
+  to open the exact validated invitation URL; the containing app remains the only
+  import-confirmation and cipher-mutation authority. A key-free App Group envelope
+  provides recovery if the open handoff does not complete.
+- Add a durable containing-app fingerprint guard so repeated taps, confirmations,
+  cold starts, warm starts, URL delivery, and App Group recovery cannot commit the
+  same imported cipher more than once.
+- Add the `RuneScribeMessagesExtension` target (`com.runescribe.app.messages`) and
+  shared App Group (`group.com.runescribe.app`) configuration. Automatic-signing
+  builds compile and sign locally.
+- Physical-device Messages transcript behavior, artwork-tap handoff, deleted-app
+  product/App Store fallback, visible/tappable body URL, and green-bubble/SMS URL
+  retention have not been run. This source is not device-qualified or shipped.
+
 ## [1.0.42] - 2026-09-19
 
 - Add the Rune Scribe Universal Link, website association package, and recipient

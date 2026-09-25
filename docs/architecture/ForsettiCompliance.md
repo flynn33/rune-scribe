@@ -1,6 +1,6 @@
 # Rune Scribe Forsetti Compliance
 
-Current Core, Progression, and UI module version `1.0.42` matches the application
+Current Core, Progression, and UI module version `1.0.43` matches the application
 candidate. This version note does not change the report-only P11 boundary.
 
 > **Superseded architecture assessment:** This document records a historical qualification snapshot. Its architectural conclusions are not current compliance claims. The [controlling Forsetti policy](FORSETTI_CONTROLLING_POLICY.md) governs; measured build, test, parity, and compatibility evidence remains historical evidence.
@@ -77,12 +77,14 @@ The arrows above describe runtime composition. Compile-time dependencies are str
 |---|---|---|
 | `RuneScribeContracts` | Stable identifiers, capability/service vocabulary, key-free DTOs, service protocols, inbound inputs, and safe event payloads | Foundation only |
 | `RuneScribeRuntimeCore` | Historical manifest validation, factory registry, policy, scoped services, events, directed messages, eligibility, activation, and shutdown; remediation makes it the continuing per-call control plane | Contracts and Foundation only |
-| `RuneScribeUIRuntime` | Root-view type erasure, exactly-one contribution selection, boot and recovery presentation | Contracts and SwiftUI only |
+| `RuneScribeMessagesShared` | Extension-safe invitation validation and key-free App Group recovery envelopes | Contracts, Foundation, and CryptoKit only |
+| `RuneScribeUIRuntime` | Root-view type erasure, exactly-one contribution selection, boot/recovery presentation, and native Messages composition | Contracts, Messages Shared, Runtime Core, presentation contracts, and Apple UI frameworks |
 | `RuneScribePlatform` | Keychain, protected files, inbound reads, share artifacts, Contacts, clipboard, fonts, resources, clock, and UUID adapters | Contracts and narrowly required Apple frameworks |
 | `RuneScribeCoreModule` | Cipher/key domain, persistence, crypto/codecs, contacts, fonts, import/message state, sharing lifetime, PIN/lock policy, safe snapshots | Contracts, Runtime Core, CryptoKit/CommonCrypto |
 | `RuneScribeUIModule` | All screens, UI session, commands/navigation, accessibility, Metal, splash, QR, document/share surfaces, and MessageUI | Contracts, Runtime Core, UI Runtime, UI frameworks |
 | `RuneScribeTestSupport` | Deterministic in-memory contract adapters for package and hosted tests only | Contracts only; excluded from shipping app linkage and binaries |
-| `RuneScrib-macOS` / `RuneScrib-iOS` | Composition, lifecycle/input forwarding, root shell, resources, Info.plists, entitlements, signing configuration | All six shipping products; never Test Support; no product logic |
+| `RuneScrib-macOS` / `RuneScrib-iOS` | Composition, lifecycle/input forwarding, root shell, resources, Info.plists, entitlements, signing configuration | Approved shipping products; never Test Support; no product logic |
+| `RuneScribeMessagesExtension` | Handoff-only Messages UI and exact validated-URL open request | Messages Shared and Apple Messages/UIKit only; no cipher library or import mutation |
 
 The complete physical graph and per-component ownership are in [`ModuleGraph.md`](ModuleGraph.md). Contract, capability, and extension details are in [`ContractsAndCapabilities.md`](ContractsAndCapabilities.md).
 

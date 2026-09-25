@@ -28,6 +28,19 @@ sender claim as unverified and keeps the key transient. The recipient must confi
 cipher before it is saved or used for Reply. Later themed messages do not resend the
 key; they use the confirmed local cipher identity rather than trusting the wire label.
 
+Cipher invitations also have a dedicated Messages extension route. The sender composes
+an `MSMessage` with the themed 4:3 artwork in `MSMessageTemplateLayout.image`, the exact
+validated HTTPS invitation in `MSMessage.url`, and the same URL in visible composer
+body text. No PNG or `.runescribe` attachment is added on this route. The extension's
+only action is **Continue to Rune Scribe**; it asks the system to open that URL, while a
+key-free App Group envelope provides recovery. The containing app remains the only
+import-confirmation and mutation authority.
+
+The physical-device matrix for installed-app cold start, installed-app already running,
+deleted-app fallback, visible/tappable body URL, and green-bubble/SMS URL retention has
+not been run. The source, simulator, and signing results do not prove transcript or tap
+behavior, and the feature remains device-unqualified.
+
 ## Themed presentation fallback
 
 Both platforms validate the encrypted Core payload independently from optional
@@ -56,8 +69,10 @@ retry, corruption, and reporting behavior. Live container, account, record, and 
 configuration is a separate external-service action when credentials are available; it
 does not determine product shippability.
 
-Manual hardware observations are superseded by repository-controlled macOS hosted,
-iPhone Simulator, iPad Simulator, and deterministic evidence. Version 1.0.42 build 42 is
+Manual hardware observations are superseded for the previously covered behavior by
+repository-controlled macOS hosted, iPhone Simulator, iPad Simulator, and deterministic
+evidence. The new Messages extension device matrix above is an explicit exception.
+Version 1.0.43 build 43 is
 the current UI/Xcode remediation candidate and is not shipped. The linked
 [qualification report](verification/ui-xcode-remediation/QualificationSummary.md)
 records the earlier 1.0.41 source; fresh current-source qualification is required.
