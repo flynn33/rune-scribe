@@ -39,6 +39,7 @@
 		3828C5D79EBACBAE2932DCA1 /* ComplianceGuardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8794218367CD5682362E58C /* ComplianceGuardTests.swift */; };
 		3B8992804CD3C3970A71DE57 /* Deterministic-Seed-Catalog-v1.3.json in Resources */ = {isa = PBXBuildFile; fileRef = 9C02B55AFAF19D9D920A814D /* Deterministic-Seed-Catalog-v1.3.json */; };
 		40A0F491D108F48D91D1E3A6 /* RuneScribeThemeSunspireModule in Frameworks */ = {isa = PBXBuildFile; productRef = D531AAF50C10D2A6FABCD7ED /* RuneScribeThemeSunspireModule */; };
+		4134723917B6B365CF7CD02E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1806EBDCAE409D6A29FAAD4F /* Assets.xcassets */; };
 		453F9C67E7131C528E6E781E /* RuneScribeThemeCoordinatorModule in Frameworks */ = {isa = PBXBuildFile; productRef = 7E0CAEB200DFACF10D6F3618 /* RuneScribeThemeCoordinatorModule */; };
 		469C9325BA26BDA76E53BD44 /* RuneScribeThemeCoordinatorModule in Frameworks */ = {isa = PBXBuildFile; productRef = C2F0441EABEA238EBD5DF206 /* RuneScribeThemeCoordinatorModule */; };
 		49A2F2518A57128E5F05A105 /* RuneScribeUIRuntime in Frameworks */ = {isa = PBXBuildFile; productRef = 9C0E34DE3867BB9FDF5211F1 /* RuneScribeUIRuntime */; };
@@ -195,6 +196,7 @@
 		002F7864AE4DEA2BBD03D1E7 /* AppHostRoutingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppHostRoutingTests.swift; sourceTree = "<group>"; };
 		0691B53984A2F145E83175B4 /* RuneScribArchitectureTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RuneScribArchitectureTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		09E0D1BAFC49BAB116BBE7B6 /* ThemeCanonicalRenderHarness.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeCanonicalRenderHarness.swift; sourceTree = "<group>"; };
+		1806EBDCAE409D6A29FAAD4F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		1B43D8CCE7DAD248C5D613D8 /* RuneScribIOSTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = RuneScribIOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		1E4FF66651C4BB9C0C94DB4B /* RuneScrib.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RuneScrib.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		27DF8479CF8F5BC1D2E2A08D /* Canonical-Render-Catalog-v1.3.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "Canonical-Render-Catalog-v1.3.json"; sourceTree = "<group>"; };
@@ -378,6 +380,14 @@
 			path = docs;
 			sourceTree = "<group>";
 		};
+		400F471F868EB72E682F57B1 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				1806EBDCAE409D6A29FAAD4F /* Assets.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 		440678049B6FEABABD99B823 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
@@ -483,6 +493,7 @@
 			children = (
 				EABB1C71C46954CA9C22995F /* Info.plist */,
 				97A0B111339796FA899F60FA /* MessagesViewController.swift */,
+				400F471F868EB72E682F57B1 /* Resources */,
 			);
 			path = RuneScribeMessagesExtension;
 			sourceTree = "<group>";
@@ -614,6 +625,7 @@
 			buildConfigurationList = 7AD5451567871B3D32C020DC /* Build configuration list for PBXNativeTarget "RuneScribeMessagesExtension" */;
 			buildPhases = (
 				3E9BEE8396EB426E85849A94 /* Sources */,
+				1C92495D047A13A4458EBBCC /* Resources */,
 				7AA03094DFE408CD8251C78C /* Frameworks */,
 			);
 			buildRules = (
@@ -962,6 +974,14 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		1C92495D047A13A4458EBBCC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4134723917B6B365CF7CD02E /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		3D7818CB5FE09FE0BB5D139B /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1203,6 +1223,7 @@
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = "iMessage App Icon";
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = "";
 				CODE_SIGN_ENTITLEMENTS = Config/RuneScribeMessagesExtension.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
@@ -1448,6 +1469,7 @@
 			buildSettings = {
 				APPLICATION_EXTENSION_API_ONLY = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = "iMessage App Icon";
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = "";
 				CODE_SIGN_ENTITLEMENTS = Config/RuneScribeMessagesExtension.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;

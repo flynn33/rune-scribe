@@ -292,6 +292,9 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.runescribe.app.messages
         PRODUCT_NAME: RuneScribeMessagesExtension
         GENERATE_INFOPLIST_FILE: NO
+        # The Messages extension has no tintable UI assets; do not inherit the
+        # containing app's AccentColor catalog requirement.
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: ""
         APPLICATION_EXTENSION_API_ONLY: YES
         SKIP_INSTALL: YES
         CODE_SIGN_STYLE: Automatic
