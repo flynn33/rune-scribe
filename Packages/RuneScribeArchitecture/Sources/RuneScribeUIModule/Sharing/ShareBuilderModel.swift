@@ -3,15 +3,13 @@ import Foundation
 import RuneScribeContracts
 
 enum ShareBuilderPurpose: Equatable, Sendable {
-    case encryptedMessage(requiresKeyDelivery: Bool)
+    case encryptedMessage
     case cipherInvitation
 
     var securitySummary: String {
         switch self {
-        case .encryptedMessage(true):
-            "Key included — this first delivery contains the shared cipher."
-        case .encryptedMessage(false):
-            "Uses your shared key — this message does not resend the cipher."
+        case .encryptedMessage:
+            "This message uses your shared cipher. Share the cipher separately from Cipher Manager."
         case .cipherInvitation:
             "Contains shared cipher — anyone who imports this invitation receives the decoder for this cipher."
         }
@@ -19,8 +17,7 @@ enum ShareBuilderPurpose: Equatable, Sendable {
 
     var securityAccessibilityIdentifier: String {
         switch self {
-        case .encryptedMessage(true): "share-builder.security.first-delivery"
-        case .encryptedMessage(false): "share-builder.security.established"
+        case .encryptedMessage: "share-builder.security.message"
         case .cipherInvitation: "share-builder.security.cipher-invitation"
         }
     }
@@ -46,11 +43,10 @@ struct ShareBuilderSource: Identifiable, Equatable, Sendable {
         runes: String,
         senderName: String,
         cipherID: UUID,
-        messageHandle: EncodedMessageHandle,
-        requiresKeyDelivery: Bool
+        messageHandle: EncodedMessageHandle
     ) -> Self {
         Self(
-            purpose: .encryptedMessage(requiresKeyDelivery: requiresKeyDelivery),
+            purpose: .encryptedMessage,
             inscription: runes,
             displayName: senderName,
             cipherID: cipherID,

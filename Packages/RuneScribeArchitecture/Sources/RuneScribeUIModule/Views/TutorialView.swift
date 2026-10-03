@@ -47,7 +47,7 @@ enum RuneScribeTutorialCatalog {
             summary: "A recipient must import the right cipher before the message can be revealed.",
             details: [
                 "Review every import confirmation before accepting it.",
-                "The first delivery can include the cipher needed for the conversation; later messages reuse the imported cipher.",
+                "Share a cipher from Cipher Manager before sending messages. Messages never include the cipher.",
             ]
         ),
     ]

@@ -1,4 +1,5 @@
 import CryptoKit
+import MessageUI
 import Messages
 import RuneScribeContracts
 @_spi(RuntimeTesting) import RuneScribeUIRuntime
@@ -7,7 +8,7 @@ import XCTest
 
 final class NativeShareOutcomeTests: XCTestCase {
     @MainActor
-    func testInteractiveCipherMessageUsesArtworkURLAndVisibleFallbackBody() throws {
+    func testInteractiveCipherMessageUsesArtworkURLWithoutFallbackBody() throws {
         let image = UIGraphicsImageRenderer(size: CGSize(width: 1_200, height: 900)).image {
             UIColor.systemPurple.setFill()
             $0.fill(CGRect(x: 0, y: 0, width: 1_200, height: 900))
@@ -22,10 +23,6 @@ final class NativeShareOutcomeTests: XCTestCase {
         )
 
         XCTAssertEqual(prepared.message.url, validURL)
-        XCTAssertEqual(
-            prepared.body,
-            "Rune Scribe invitation fallback:\n\(validURL.absoluteString)"
-        )
         let layout = try XCTUnwrap(
             prepared.message.layout as? MSMessageTemplateLayout
         )
@@ -35,6 +32,15 @@ final class NativeShareOutcomeTests: XCTestCase {
             layout.subcaption,
             "Tap the artwork to continue in Rune Scribe."
         )
+        XCTAssertFalse(Mirror(reflecting: prepared).children.contains {
+            $0.label == "body"
+        })
+        if MFMessageComposeViewController.canSendText() {
+            let composer = MFMessageComposeViewController()
+            RuneScribeInteractiveMessageFactory.configure(composer, with: prepared)
+            XCTAssertTrue(composer.message === prepared.message)
+            XCTAssertNil(composer.body)
+        }
     }
 
     @MainActor

@@ -16,7 +16,6 @@ public enum RuneScribeInteractiveMessageError: Error, Equatable, Sendable {
 @_spi(RuntimeTesting)
 public struct RuneScribePreparedInteractiveMessage {
     public let message: MSMessage
-    public let body: String
 }
 
 @_spi(RuntimeTesting)
@@ -50,10 +49,14 @@ public enum RuneScribeInteractiveMessageFactory {
         message.summaryText = "Rune Scribe cipher invitation"
         message.accessibilityLabel = "Rune Scribe cipher invitation. Tap to continue."
 
-        return RuneScribePreparedInteractiveMessage(
-            message: message,
-            body: "Rune Scribe invitation fallback:\n\(invitation.URL.absoluteString)"
-        )
+        return RuneScribePreparedInteractiveMessage(message: message)
+    }
+
+    public static func configure(
+        _ composer: MFMessageComposeViewController,
+        with prepared: RuneScribePreparedInteractiveMessage
+    ) {
+        composer.message = prepared.message
     }
 }
 
@@ -295,8 +298,10 @@ private struct InteractiveMessageComposeView: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> MFMessageComposeViewController {
         let composer = MFMessageComposeViewController()
         composer.messageComposeDelegate = context.coordinator
-        composer.message = presentation.prepared.message
-        composer.body = presentation.prepared.body
+        RuneScribeInteractiveMessageFactory.configure(
+            composer,
+            with: presentation.prepared
+        )
         onPresented()
         return composer
     }

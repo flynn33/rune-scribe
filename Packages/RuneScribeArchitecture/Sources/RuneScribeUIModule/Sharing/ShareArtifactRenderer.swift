@@ -6,8 +6,10 @@ import SwiftUI
 
 #if os(macOS)
 import AppKit
+private typealias ShareArtifactPlatformFont = NSFont
 #elseif os(iOS)
 import UIKit
+private typealias ShareArtifactPlatformFont = UIFont
 #endif
 
 enum ShareArtifactRenderError: Error, Equatable, Sendable {
@@ -297,7 +299,6 @@ struct ShareArtifactRenderPlan: Equatable, Sendable {
 
 enum ThemeArtifactCompositionPolicy {
     static let maximumPageCount = 16
-    private static let glyphsPerLine = 24
 
     static func plan(
         request: ShareArtifactRenderRequest,
@@ -409,9 +410,14 @@ enum ThemeArtifactCompositionPolicy {
             selectedAnchor = nil
         }
 
+        let fontName = fontPostScriptNameOverride?.rawValue
+            ?? script.fontPostScriptName?.rawValue
+            ?? "NotoSansRunic-Regular"
         let pages = try paginate(
             inscription,
-            maximumLines: Int(layout.maximumGlyphLines)
+            layout: layout,
+            fontName: fontName,
+            pointSize: script.recommendedPointSizes.maximum
         )
         let relicResourceID: ThemeResourceID = switch colorMode {
         case .highContrast: relic.highContrastResourceID
@@ -447,9 +453,7 @@ enum ThemeArtifactCompositionPolicy {
             sealScale: seal.map {
                 min($0.allowedScale.maximum, max($0.allowedScale.minimum, 0.18))
             } ?? 0,
-            fontPostScriptName: fontPostScriptNameOverride?.rawValue
-                ?? script.fontPostScriptName?.rawValue
-                ?? "NotoSansRunic-Regular",
+            fontPostScriptName: fontName,
             fontResourceID: fontPostScriptNameOverride == nil
                 ? script.fontResourceID : nil,
             glyphStyle: ThemeArtifactGlyphStyle(
@@ -465,9 +469,34 @@ enum ThemeArtifactCompositionPolicy {
 
     private static func paginate(
         _ inscription: String,
-        maximumLines: Int
+        layout: ThemeShareLayoutPreset,
+        fontName: String,
+        pointSize: Double
     ) throws -> [ShareArtifactRenderPage] {
+        let font: ShareArtifactPlatformFont
+        #if os(macOS)
+        font = NSFont(name: fontName, size: pointSize)
+            ?? NSFont.systemFont(ofSize: pointSize)
+        let lineHeight = font.ascender - font.descender + font.leading
+        #else
+        font = UIFont(name: fontName, size: pointSize)
+            ?? UIFont.systemFont(ofSize: pointSize)
+        let lineHeight = font.lineHeight
+        #endif
+        let maximumWidth = Double(ShareArtifactRenderPlan.outputWidth)
+            * layout.glyphSafeRegion.width * 0.9
+        let maximumHeight = Double(ShareArtifactRenderPlan.outputHeight)
+            * layout.glyphSafeRegion.height * 0.9
+        let maximumLines = min(
+            Int(layout.maximumGlyphLines),
+            Int(maximumHeight / lineHeight)
+        )
         guard maximumLines > 0 else { throw ShareArtifactRenderError.invalidRequest }
+
+        func fits(_ text: String) -> Bool {
+            (text as NSString).size(withAttributes: [.font: font]).width
+                <= maximumWidth
+        }
 
         let hardLines = inscription.split(
             separator: "\n",
@@ -481,13 +510,20 @@ enum ThemeArtifactCompositionPolicy {
                 renderedLines.append("")
                 continue
             }
-            renderedLines.append(contentsOf: stride(
-                from: 0,
-                to: characters.count,
-                by: glyphsPerLine
-            ).map { start in
-                String(characters[start..<min(characters.count, start + glyphsPerLine)])
-            })
+            var line = ""
+            for character in characters {
+                let candidate = line + String(character)
+                if !line.isEmpty && !fits(candidate) {
+                    renderedLines.append(line)
+                    line = String(character)
+                } else {
+                    line = candidate
+                }
+                guard fits(line) else {
+                    throw ShareArtifactRenderError.inscriptionTooLong
+                }
+            }
+            renderedLines.append(line)
         }
 
         let pageCount = max(
@@ -895,12 +931,14 @@ struct ThemeArtifactCanvas: View {
                         )
                     )
                     .minimumScaleFactor(CGFloat(plan.layout.minimumGlyphScale))
+                    .lineLimit(Int(plan.layout.maximumGlyphLines))
                     .multilineTextAlignment(.center)
                     .foregroundStyle(color(plan.glyphStyle.color))
                     .frame(
                         width: geometry.size.width * CGFloat(glyphRegion.width),
                         height: geometry.size.height * CGFloat(glyphRegion.height)
                     )
+                    .clipped()
                     .position(point(for: glyphRegion, in: geometry.size))
                     .accessibilityHidden(true)
                     .onAppear {

@@ -256,9 +256,10 @@ require(
 readme = read("README.md")
 normalized_readme = re.sub(r"\s+", " ", readme)
 require(
-    "Every **later themed** message keeps the `.runescribe` attachment but carries **no "
-    "key**" in normalized_readme,
-    "README does not preserve the canonical established-message package and first-key boundary",
+    "Every themed message keeps the `.runescribe` attachment but carries **no key**"
+    in normalized_readme
+    and "Share the cipher explicitly from Cipher Manager" in normalized_readme,
+    "README does not describe key-free messages and explicit cipher sharing",
 )
 require(
     f"version-{marketing}%20build%20{build}" in readme,
@@ -548,14 +549,14 @@ content_view = read(
 )
 normalized_content_view = re.sub(r"\s+", " ", re.sub(r"\s*///\s*", " ", content_view))
 require(
-    "Every delivery also carries the canonical themed `.runescribe` package; only the "
-    "first includes key material." in normalized_content_view,
-    "ContentView commentary does not describe the canonical package on every delivery",
+    "Every delivery carries the canonical themed `.runescribe` message package."
+    in normalized_content_view,
+    "ContentView commentary does not describe the message package on every delivery",
 )
 require(
-    "Established deliveries keep the envelope and presentation metadata but never resend "
-    "the key." in normalized_content_view,
-    "ContentView commentary does not preserve established-message presentation metadata",
+    "Its encrypted envelope and presentation metadata never include the cipher key."
+    in normalized_content_view,
+    "ContentView commentary does not describe the key-free message payload",
 )
 
 stale_transport_policy = re.compile(

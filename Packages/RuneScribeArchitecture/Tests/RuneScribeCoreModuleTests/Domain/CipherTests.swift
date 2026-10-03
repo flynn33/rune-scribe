@@ -142,7 +142,7 @@ extension CipherTests {
         XCTAssertEqual(cipher.compatibility.originalRecordVersion, 1)
         XCTAssertEqual(cipher.keyDeliveryState, .migratedUnverified)
         XCTAssertTrue(cipher.hasCompletedKeyDelivery)
-        XCTAssertFalse(MessageSend.shouldIncludeKey(cipher))
+        XCTAssertFalse(cipher.keyDeliveryState.requiresDelivery)
     }
 
     func testLegacyUnlinkedDeliveredCipherMigratesToNotLinked() throws {
@@ -158,7 +158,7 @@ extension CipherTests {
         XCTAssertNil(cipher.contactID)
         XCTAssertEqual(cipher.keyDeliveryState, .notLinked)
         XCTAssertFalse(cipher.hasCompletedKeyDelivery)
-        XCTAssertFalse(MessageSend.shouldIncludeKey(cipher))
+        XCTAssertFalse(cipher.keyDeliveryState.requiresDelivery)
     }
 
     func testPersistedInProgressDeliveryRecoversToPending() throws {
@@ -174,7 +174,7 @@ extension CipherTests {
         )
 
         XCTAssertEqual(recovered.keyDeliveryState, .pending)
-        XCTAssertTrue(MessageSend.shouldIncludeKey(recovered))
+        XCTAssertTrue(recovered.keyDeliveryState.requiresDelivery)
     }
 
     func testContactAndDeliveryTransitionsAreExplicit() {
@@ -183,7 +183,7 @@ extension CipherTests {
 
         cipher.setContactID(contactID)
         XCTAssertEqual(cipher.keyDeliveryState, .pending)
-        XCTAssertTrue(MessageSend.shouldIncludeKey(cipher))
+        XCTAssertTrue(cipher.keyDeliveryState.requiresDelivery)
         cipher.beginKeyDelivery()
         XCTAssertEqual(cipher.keyDeliveryState, .inProgress)
         cipher.cancelKeyDelivery()
@@ -191,7 +191,7 @@ extension CipherTests {
         cipher.beginKeyDelivery()
         cipher.completeKeyDelivery()
         XCTAssertEqual(cipher.keyDeliveryState, .completed)
-        XCTAssertFalse(MessageSend.shouldIncludeKey(cipher))
+        XCTAssertFalse(cipher.keyDeliveryState.requiresDelivery)
         cipher.setContactID(nil)
         XCTAssertEqual(cipher.keyDeliveryState, .notLinked)
     }

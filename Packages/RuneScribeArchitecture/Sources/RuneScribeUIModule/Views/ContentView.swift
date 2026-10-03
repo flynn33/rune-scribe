@@ -28,7 +28,6 @@ private struct MessageSharePreparation: Equatable, Sendable {
     let senderName: String
     let cipherID: UUID
     let shareHandle: EncodedMessageHandle
-    let requiresKeyDelivery: Bool
 }
 
 struct ContentViewSettledArtifactSeed {
@@ -291,15 +290,9 @@ struct ContentView: View {
         transformDirection == .encode ? session.activeCipher : nil
     }
 
-    /// The visible message text is always the runes. The plain product link is appended only on
-    /// first delivery. Every delivery also carries the canonical themed `.runescribe` package;
-    /// only the first includes key material. Established deliveries keep the envelope and
-    /// presentation metadata but never resend the key. The key never travels in this text.
-    private func outgoingMessageText(includeProductLink: Bool) -> String {
-        includeProductLink
-            ? "\(targetSnapshot)\n\n\(RuneScribeShare.productLink)"
-            : targetSnapshot
-    }
+    /// Every delivery carries the canonical themed `.runescribe` message package.
+    /// Its encrypted envelope and presentation metadata never include the cipher key.
+    private var outgoingMessageText: String { targetSnapshot }
 
     // MARK: - Body
 
@@ -386,9 +379,7 @@ struct ContentView: View {
         }
         #if os(iOS)
         .sheet(isPresented: $showMessageCompose) {
-            MessageComposeView(messageText: outgoingMessageText(
-                                   includeProductLink: pendingMessageArtifact?.requiresKeyDelivery == true
-                               ),
+            MessageComposeView(messageText: outgoingMessageText,
                                recipients: messageRecipients(),
                                attachment: pendingMessageTransfer,
                                previewImageData: pendingMessagePreviewImageData,
@@ -1434,9 +1425,7 @@ struct ContentView: View {
                     runes: result.runes,
                     senderName: activeCipher.label,
                     cipherID: result.cipherID.rawValue,
-                    shareHandle: shareHandle,
-                    requiresKeyDelivery: activeCipher.contactID != nil
-                        && !activeCipher.delivered
+                    shareHandle: shareHandle
                 )
                 preparedShare = share
             case .decode:
@@ -1555,8 +1544,8 @@ struct ContentView: View {
     }
 
     private func confirmCopy() {
-        // Copy is plain runes only. Share and Send via iMessage always attach the
-        // canonical `.runescribe` package; only first delivery embeds the cipher.
+        // Copy is plain runes only. Share and Send via iMessage attach the
+        // canonical message package without the cipher.
         guard allowsPlainResultCopy else { return }
         Task {
             guard await session.copyToClipboard(targetSnapshot) else { return }
@@ -1694,22 +1683,15 @@ struct ContentView: View {
         }
     }
 
-    /// A light line telling the sender whether this message carries the cipher key.
+    /// A light line reminding the sender how to share the cipher separately.
     @ViewBuilder
     private func keyIndicator(for cipher: CipherViewState?) -> some View {
         if cipher != nil {
-            let included = messageSharePreparation.map { preparation in
-                MessageKeyDeliveryDisclosurePolicy.requiresKeyDelivery(
-                    cipherID: preparation.cipherID,
-                    ciphers: session.ciphers,
-                    encodeTimeFallback: preparation.requiresKeyDelivery
-                )
-            } ?? false
             HStack(spacing: 6) {
-                Image(systemName: included ? "key.fill" : "lock.fill")
+                Image(systemName: "lock.fill")
                     .font(.system(size: 10))
-                    .foregroundColor(included ? .runeGold : .runeBlue)
-                Text(included ? "Key included" : "Uses your shared key")
+                    .foregroundColor(.runeBlue)
+                Text("Share cipher separately from Cipher Manager")
                     .font(.system(size: 11, design: .monospaced))
                     .foregroundColor(.runeSilver)
                 Spacer()
@@ -1766,12 +1748,7 @@ struct ContentView: View {
             runes: preparation.runes,
             senderName: preparation.senderName,
             cipherID: preparation.cipherID,
-            messageHandle: preparation.shareHandle,
-            requiresKeyDelivery: MessageKeyDeliveryDisclosurePolicy.requiresKeyDelivery(
-                cipherID: preparation.cipherID,
-                ciphers: session.ciphers,
-                encodeTimeFallback: preparation.requiresKeyDelivery
-            )
+            messageHandle: preparation.shareHandle
         )
         shareBuilderSource = source
     }
@@ -1831,17 +1808,6 @@ struct ContentView: View {
         pendingMessagePreviewImageData = nil
         messageShareLaunchID = nil
         await transfer?.close()
-        if completionResult == .deliveryRecorded,
-           let preparation = messageSharePreparation,
-           preparation.requiresKeyDelivery {
-            messageSharePreparation = MessageSharePreparation(
-                runes: preparation.runes,
-                senderName: preparation.senderName,
-                cipherID: preparation.cipherID,
-                shareHandle: preparation.shareHandle,
-                requiresKeyDelivery: false
-            )
-        }
     }
 
     private func beginMessageArtifactPreparation(

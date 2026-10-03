@@ -22,22 +22,22 @@ bounded resources, and matching hashes before their Core payload is admitted.
 
 ## iOS Intake
 
-iOS supports opening a Messages attachment directly in Rune Scribe. When a first
-message includes an embedded key, the app may show a decrypted preview but labels the
-sender claim as unverified and keeps the key transient. The recipient must confirm the
-cipher before it is saved or used for Reply. Later themed messages do not resend the
-key; they use the confirmed local cipher identity rather than trusting the wire label.
+iOS supports opening a Messages attachment directly in Rune Scribe. A regular message
+package contains the encrypted message without an embedded cipher. The recipient
+imports a separately shared cipher from Cipher Manager before decoding; messages use
+the confirmed local cipher identity rather than trusting the wire sender label.
 
 Cipher invitations also have a dedicated Messages extension route. The sender composes
-an `MSMessage` with the themed 4:3 artwork in `MSMessageTemplateLayout.image`, the exact
-validated HTTPS invitation in `MSMessage.url`, and the same URL in visible composer
-body text. No PNG or `.runescribe` attachment is added on this route. The extension's
+an `MSMessage` with the themed 4:3 artwork in `MSMessageTemplateLayout.image` and the
+exact validated HTTPS invitation in `MSMessage.url`. The invitation composer body is
+empty; the artwork caption and subcaption remain. No PNG or `.runescribe` attachment is
+added on this route. The extension's
 only action is **Continue to Rune Scribe**; it asks the system to open that URL, while a
 key-free App Group envelope provides recovery. The containing app remains the only
 import-confirmation and mutation authority.
 
 The physical-device matrix for installed-app cold start, installed-app already running,
-deleted-app fallback, visible/tappable body URL, and green-bubble/SMS URL retention has
+deleted-app fallback, tappable artwork and invitation URL, and green-bubble/SMS behavior has
 not been run. The source, simulator, and signing results do not prove transcript or tap
 behavior, and the feature remains device-unqualified.
 
@@ -51,7 +51,8 @@ it cannot block authenticated message decryption or grant content.
 
 Normal compose and result routes use the same responsive, scrollable workspace policy.
 Multi-page themed output uses the canonical Artifact preview and preserves its current
-page across iPhone/iPad rotation and Mac window resizing. iOS paging controls keep a
+page across iPhone/iPad rotation and Mac window resizing. Rune lines are measured and
+paginated within the tablet inscription rect. iOS paging controls keep a
 44-point minimum interaction region; Mac controls keep a 28-point minimum. App Lock
 hides and disables the underlying editor and Settings content from both interaction and
 the accessibility tree until the PIN is accepted.
@@ -72,8 +73,7 @@ does not determine product shippability.
 Manual hardware observations are superseded for the previously covered behavior by
 repository-controlled macOS hosted, iPhone Simulator, iPad Simulator, and deterministic
 evidence. The new Messages extension device matrix above is an explicit exception.
-Version 1.0.43 build 43 is
-the current UI/Xcode remediation candidate and is not shipped. The linked
+Version 1.0.44 build 44 is the current source candidate and is not shipped. The linked
 [qualification report](verification/ui-xcode-remediation/QualificationSummary.md)
 records the earlier 1.0.41 source; fresh current-source qualification is required.
 Version 1.0.40 retained evidence records the iPhone

@@ -1,6 +1,6 @@
 # Rune Scribe Support
 
-**Current product source:** version 1.0.43 (build 43)
+**Current product source:** version 1.0.44 (build 44)
 **Publication boundary:** Current source requires fresh Store qualification; not shipped
 
 Earlier source-bound results and screenshots are indexed in the
@@ -8,10 +8,12 @@ Earlier source-bound results and screenshots are indexed in the
 The version 1.0.40 counts below are retained historical context and are not evidence for
 the new candidate.
 
-For 1.0.43, the package compiles and the focused Messages Shared,
-durable-fingerprint, handoff, and rendered-link tests pass. The full package run did not
-complete in this publication pass, so the source does not have a current aggregate test
-result. Documentation, roadmap, architecture, and shipping-mutation guards pass. The
+The earlier 1.0.43 source compiled and passed focused Messages Shared,
+durable-fingerprint, handoff, and rendered-link tests. For 1.0.44, focused local tests
+cover the invitation body source contract, key-free regular messages, Cipher Manager
+share import/decryption, and rune inscription bounds; an unsigned iOS build succeeded.
+The simulator cannot initialize a Messages composer, and no device transcript was run.
+The full package run has no current aggregate result. The
 earlier iOS and macOS Release builds, 101/101 local product inspection, and Store archives
 remain historical evidence. The earlier iOS and macOS archives exported
 successfully for App Store Connect with matching distribution identities, Store
@@ -31,23 +33,26 @@ superseded v4.3 package audit is noncontrolling verification history.
   alternate actions.
 - On iOS, the current Cipher Library **Share** and cipher-invitation Share Builder route
   compose a themed `MSMessage` artwork bubble with the validated HTTPS invitation in
-  both `MSMessage.url` and visible body text. The Messages extension only hands off via
+  `MSMessage.url` and no composer body. Captions remain. The Messages extension only hands off via
   **Continue to Rune Scribe**; the containing app owns confirmation and persistence.
 - After encoding, **Quick Share** uses the current validated per-Codex defaults. Use
   **Customize Share** to choose a Codex, Relic, optional Seal/Frame, and effects policy
   for that operation without changing the cipher or re-encrypting the message.
+- Regular message packages contain no cipher. Share it explicitly from Cipher Manager;
+  the rune text remains in the regular Messages composer body. Longer inscriptions
+  paginate within the tablet's inscription rect.
 - Long themed output is presented in the canonical Artifact preview with truthful
   `Page n of m` navigation. Use Previous and Next to review every page; rotating an
   iPhone/iPad or resizing the Mac window preserves the selected page.
 - On iOS, a Messages attachment can open directly in Rune Scribe. macOS does not claim
   automatic Messages import; use the file, Import, or a `runescribe://` link.
 - The new custom-bubble transcript, artwork tap, cold/warm installed-app handoff,
-  deleted-app product/App Store fallback, body-link visibility, and green-bubble/SMS
+  deleted-app product/App Store fallback, and green-bubble/SMS
   retention have not been run on two physical iPhones. Simulator and signing results do
   not establish those behaviors.
-- A first-delivery message can show a decrypted preview, but its embedded cipher and
-  claimed sender remain unverified until you confirm the cipher. Rune Scribe does not
-  create or rebind a contact from the sender label in the attachment.
+- A recipient must import and confirm the separately shared cipher before decoding
+  a regular message. Rune Scribe does not create or rebind a contact from the sender
+  label in the message attachment.
 - A valid encrypted message remains readable with the Base Norse appearance when the
   sender's Codex is locked, unavailable, incompatible, corrupt, or not installed.
 - Requested themed presentation is used only after the installed provider confirms the

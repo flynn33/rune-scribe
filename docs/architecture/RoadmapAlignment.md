@@ -4,7 +4,7 @@
 
 ## Authority and scope
 
-**Current application:** version 1.0.43 build 43
+**Current application:** version 1.0.44 build 44
 
 The current UI/Xcode remediation is mapped in the
 [September 2026 amendment](../product-roadmap/Rune-Scribe-UI-Xcode-Remediation-Amendment-2026-09.md)
@@ -44,7 +44,7 @@ effective only where they do not conflict with that authority.
 
 ## Current result
 
-Version 1.0.43 build 43 carries the source-complete authorized roadmap baseline, Theme
+Version 1.0.44 build 44 carries the source-complete authorized roadmap baseline, Theme
 Fidelity source remediation, and the bounded UI/Xcode repair described by W01-W09.
 The linked UI/Xcode qualification report records the earlier 1.0.41 source and Store
 artifacts; fresh current-source qualification is required. The retained version 1.0.40
@@ -58,7 +58,7 @@ matching Apple distribution identities, Store profiles, production entitlements,
 architectures, and package signatures. Those artifacts predate later merged theme,
 Universal Link, tutorial, and workspace changes and do not qualify the current source.
 Those 1.0.40 results remain historical rather than evidence for the new source. The
-1.0.43 candidate is deliberately **NOT SHIPPED**; a fresh qualification run must make
+1.0.44 candidate is deliberately **NOT SHIPPED**; a fresh qualification run must make
 the current-source decision. The repository now contains:
 
 - app-owned runtime composition, bounded contracts, capability policy, thin hosts,
@@ -75,18 +75,20 @@ the current-source decision. The repository now contains:
   vNext cipher/message files, legacy link and QR compatibility, fail-soft receiving,
   Encounter recording, and provenance state;
 - an iOS Messages extension cipher-invitation route with themed `MSMessage` artwork,
-  the validated HTTPS invitation in both `MSMessage.url` and visible composer body,
+  the validated HTTPS invitation in `MSMessage.url` and an empty composer body,
   handoff-only extension UI, containing-app import authority, and a key-free App Group
   recovery inbox; physical transcript/tap/fallback/SMS behavior remains unrun;
+- key-free regular message packages, explicit cipher sharing from Cipher Manager, and
+  rune lines measured and paginated within the tablet inscription rect;
 - local-first private progression synchronization with deterministic merge, offline and
   account-change policy, corruption quarantine, runtime-owned CloudKit I/O, and no
   secret-bearing cloud fields; and
 - optional Game Center mapping/report policy with a frozen 15-achievement, 220-point
   catalog, monotonic outbox, runtime-owned GameKit I/O, and no local grant authority.
 
-For 1.0.43, the repository-controlled documentation, roadmap, architecture,
-shipping-mutation, and focused Messages tests pass. The full package run did not complete
-in this publication pass, and fresh iOS/macOS Release-product qualification remains
+For 1.0.44, focused local repair tests and an unsigned iOS build pass. A Messages
+composer send could not be exercised on the simulator. The full package run has no
+current aggregate result, and fresh iOS/macOS Release-product qualification remains
 outstanding. Retained
 prior evidence records the iPhone 17 Pro headless UI run on iOS 26.5 with 7 passed, 1
 iPad-only skipped, and 0 failed and the iPad Pro 13-inch (M5) run with 5 passed, 3
@@ -240,7 +242,7 @@ For the retained roadmap-completion baseline, those gates established:
 - **MANUAL HARDWARE VALIDATION SUPERSEDED**
 - **NOT SHIPPED**
 
-The version 1.0.43 build 43 candidate must satisfy the same product acceptance boundary:
+The version 1.0.44 build 44 candidate must satisfy the same product acceptance boundary:
 
 - **FINAL-SOURCE REPOSITORY GATES REQUIRED**
 - **REPOSITORY QUALIFICATION REQUIRED**

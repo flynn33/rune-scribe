@@ -68,11 +68,11 @@ public struct MessageComposeCompletionGate: Equatable, Sendable {
 }
 
 /// Thin SwiftUI bridge to the system Messages compose sheet. The user taps Send
-/// in Apple's own UI. Canonical themed first and established deliveries use a
-/// `.runescribe` attachment; only the first includes the cipher key. When the
+/// in Apple's own UI. Canonical themed deliveries use a key-free
+/// `.runescribe` message attachment. When the
 /// themed renderer succeeds, the same validated PNG preview is proposed as a second
 /// attachment. This bridge rejects an attachment that the composer cannot accept and
-/// records key delivery only after an eligible sent result. Actual Messages transcript
+/// records the send result. Actual Messages transcript
 /// behavior remains a physical-device qualification boundary.
 public struct MessageComposeView: UIViewControllerRepresentable {
     private let messageText: String

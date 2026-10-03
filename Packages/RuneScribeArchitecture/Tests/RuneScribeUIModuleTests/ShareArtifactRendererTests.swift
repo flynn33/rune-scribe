@@ -1,3 +1,4 @@
+import AppKit
 import CoreGraphics
 import CryptoKit
 import Foundation
@@ -83,7 +84,7 @@ final class ShareArtifactRendererTests: XCTestCase {
         )
 
         XCTAssertEqual(first, second)
-        XCTAssertEqual(first.pages.count, 2)
+        XCTAssertGreaterThan(first.pages.count, 2)
         XCTAssertEqual(first.relicResourceID, descriptor.codex.relics.first {
             $0.metadata.id == selection.relicID
         }?.highContrastResourceID)
@@ -213,21 +214,13 @@ final class ShareArtifactRendererTests: XCTestCase {
         let layout = try XCTUnwrap(relic.layouts.first(where: {
             $0.id == relic.defaultLayoutID
         }))
-        let pageCapacity = Int(layout.maximumGlyphLines) * 24
-        XCTAssertGreaterThan(pageCapacity, 1)
-
         let cases = [
-            ("short", 1, 1),
-            ("medium", max(2, pageCapacity / 2), 1),
-            ("long", pageCapacity, 1),
-            ("paginated", pageCapacity + 1, 2),
-            (
-                "maximum-paginated",
-                pageCapacity * ShareArtifactRenderPolicy.maximumPageCount,
-                ShareArtifactRenderPolicy.maximumPageCount
-            ),
+            ("short", 1),
+            ("medium", 40),
+            ("long", 100),
+            ("paginated", 200),
         ]
-        for (label, characterCount, expectedPageCount) in cases {
+        for (label, characterCount) in cases {
             let inscription = String(repeating: "ᚠ", count: characterCount)
             let request = try ShareArtifactRenderRequest(
                 selection: selection,
@@ -242,14 +235,29 @@ final class ShareArtifactRendererTests: XCTestCase {
                 descriptor: descriptor
             )
 
-            XCTAssertEqual(plan.pages.count, expectedPageCount, label)
+            XCTAssertFalse(plan.pages.isEmpty, label)
             XCTAssertEqual(
                 plan.pages.map(\.inscription).joined().replacingOccurrences(of: "\n", with: ""),
                 inscription,
                 label
             )
+            let font = NSFont(name: plan.fontPostScriptName, size: plan.glyphStyle.pointSize)
+                ?? NSFont.systemFont(ofSize: plan.glyphStyle.pointSize)
+            let safeWidth = Double(ShareArtifactRenderPlan.outputWidth)
+                * layout.glyphSafeRegion.width * 0.9
+            let safeHeight = Double(ShareArtifactRenderPlan.outputHeight)
+                * layout.glyphSafeRegion.height * 0.9
+            let lineHeight = font.ascender - font.descender + font.leading
             XCTAssertTrue(plan.pages.allSatisfy { page in
-                page.inscription.split(separator: "\n").allSatisfy { $0.count <= 24 }
+                let lines = page.inscription.split(
+                    separator: "\n", omittingEmptySubsequences: false
+                )
+                return lines.count <= Int(layout.maximumGlyphLines)
+                    && Double(lines.count) * lineHeight <= safeHeight
+                    && lines.allSatisfy {
+                        (String($0) as NSString).size(withAttributes: [.font: font]).width
+                            <= safeWidth
+                    }
             }, label)
             XCTAssertTrue(plan.pages.allSatisfy { $0.count == plan.pages.count }, label)
         }
@@ -269,7 +277,7 @@ final class ShareArtifactRendererTests: XCTestCase {
         XCTAssertEqual(hardLines.pages.count, 1)
         XCTAssertEqual(hardLines.pages.first?.inscription, hardLineInscription)
 
-        let overflowCount = pageCapacity * ShareArtifactRenderPolicy.maximumPageCount + 1
+        let overflowCount = ShareArtifactRenderRequest.maximumInscriptionCharacters
         XCTAssertLessThanOrEqual(
             overflowCount,
             ShareArtifactRenderRequest.maximumInscriptionCharacters

@@ -12,7 +12,7 @@ On iOS, Cipher Library **Share** and the cipher-invitation route in Share Builde
 an `MSMessage`. `MSMessageTemplateLayout.image` receives the existing themed render
 letterboxed into a 300 × 225-point 4:3 canvas with the agreed safe inset and no
 instructional text in the bitmap. The exact validated HTTPS invitation is assigned to
-both `MSMessage.url` and visible composer body text. This route attaches neither a PNG
+`MSMessage.url`; the composer body is empty. This route attaches neither a PNG
 nor a `.runescribe` file.
 
 The embedded `RuneScribeMessagesExtension` (`com.runescribe.app.messages`) is a handoff
@@ -30,10 +30,9 @@ are forbidden in the extension.
 
 ## Compatibility and fallback
 
-The HTTPS invitation remains visible in the composer body so recipients have an
-accessible import/product-page path when a custom bubble cannot be hosted, Messages
-degrades transport, or SMS/green-bubble delivery is used. This is not a silent
-`.runescribe` substitute. Explicit Export and QR remain separate user actions.
+The invitation is carried by `MSMessage.url` and the tappable artwork. Messages
+transport and recipient behavior, including SMS/green-bubble fallback, require
+physical-device qualification. Explicit Export and QR remain separate user actions.
 
 ## Evidence boundary
 
@@ -44,10 +43,10 @@ feature is accepted, two physical iPhones must cover:
 1. recipient with Rune Scribe installed, app cold;
 2. recipient with Rune Scribe installed, app already running;
 3. recipient with Rune Scribe deleted;
-4. visible and tappable body HTTPS URL; and
-5. green-bubble/SMS retention of that URL.
+4. tappable artwork and invitation URL; and
+5. green-bubble/SMS behavior.
 
 Each row must record what appeared in the transcript, what the first artwork tap did,
 and whether the containing-app import confirmation ran exactly once. These rows have not
 been run. Artwork-tap import, deleted-app product/App Store fallback, and SMS fallback
-therefore remain unproven, and version 1.0.43 is not device-qualified or shipped.
+therefore remain unproven, and version 1.0.44 is not device-qualified or shipped.

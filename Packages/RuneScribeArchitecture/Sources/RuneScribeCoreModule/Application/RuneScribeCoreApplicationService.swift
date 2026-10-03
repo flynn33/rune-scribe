@@ -958,43 +958,16 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
                 retainedShareHandle = shareHandle
             }
 
-            let includeKey = MessageSend.shouldIncludeKey(cipher)
-            if includeKey {
-                let runtimeOutstandingArtifactIDs: Set<ShareArtifactID>?
-                if let progressionOutboxClient {
-                    runtimeOutstandingArtifactIDs = try await progressionOutboxClient
-                        .outstandingShareCompletionArtifactIDs()
-                } else {
-                    runtimeOutstandingArtifactIDs = nil
-                }
-                let hasOutstandingKeyDeliveryArtifact = try await artifactRegistry
-                    .hasOutstandingKeyDeliveryArtifact(
-                        cipherID: cipher.id,
-                    runtimeOutstandingArtifactIDs: runtimeOutstandingArtifactIDs,
-                    inspectsDurableJournal: persistsMetadata
-                )
-                guard !hasOutstandingKeyDeliveryArtifact else {
-                    throw RuneScribeProductError.failure(
-                        RuneScribeFailureDTO(code: .invalidInput)
-                    )
-                }
-            }
             // Always validate that the runes belong to the requested cipher;
             // the sender label remains the explicit user-selected share value.
             let payload = try MessageSend.payload(
                 runes: command.runes,
                 senderName: command.senderName,
-                cipher: cipher,
-                includeKey: includeKey
+                cipher: cipher
             )
             let artifactID = ShareArtifactID(rawValue: try await runtimeIO.nextUUID())
             let artifact: ShareArtifactDTO
             if let presentation = command.presentation {
-                let fontBytes: Data? = if includeKey && cipher.fontRef != .bundled {
-                    try await fontIntegration?.data(for: cipher.fontRef)
-                } else {
-                    nil
-                }
                 let bytes = try RuneScribePackage.themed(
                     kind: .encryptedMessage,
                     payloadVersion: UInt16(MessageSharePayload.version),
@@ -1004,8 +977,8 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
                         safePreviewData: presentation.safePreviewData,
                         signedProvenance: presentation.signedProvenance
                     ),
-                    legacyFontReference: includeKey ? cipher.fontRef : nil,
-                    legacyFontData: fontBytes
+                    legacyFontReference: nil,
+                    legacyFontData: nil
                 ).encoded()
                 artifact = try await artifactRegistry.createFile(
                     data: bytes,
@@ -1014,36 +987,14 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
                     displayName: "Rune Scribe Message",
                     contentType: RuneScribeWireFormat.contentType,
                     fileExtension: RuneScribeWireFormat.fileExtension,
-                    requiresKeyDelivery: includeKey,
+                    requiresKeyDelivery: false,
                     messageCipherID: cipher.id,
                     encodedMessageHandle: retainedShareHandle,
                     presentationSelection: presentation.metadata.selection,
                     persistsMetadata: persistsMetadata
                 )
-            } else if includeKey {
-                let fontBytes: Data?
-                if cipher.fontRef == .bundled {
-                    fontBytes = nil
-                } else {
-                    fontBytes = try await fontIntegration?.data(for: cipher.fontRef)
-                }
-                let bytes = try payload.encodedFile(fontBytes: fontBytes)
-                artifact = try await artifactRegistry.createFile(
-                    data: bytes,
-                    id: artifactID,
-                    filename: MessageSend.filename,
-                    displayName: "Rune Scribe Message",
-                    contentType: RuneScribeWireFormat.contentType,
-                    fileExtension: RuneScribeWireFormat.fileExtension,
-                    requiresKeyDelivery: true,
-                    messageCipherID: cipher.id,
-                    encodedMessageHandle: retainedShareHandle,
-                    persistsMetadata: persistsMetadata
-                )
             } else {
-                // Presentation failure must not demote an established delivery to
-                // runes-only text. The canonical typed package still carries the
-                // encrypted envelope; only the first delivery embeds the cipher.
+                // Presentation failure still carries the encrypted envelope.
                 let bytes = try payload.encodedFile(fontBytes: nil)
                 artifact = try await artifactRegistry.createFile(
                     data: bytes,

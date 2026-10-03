@@ -10,7 +10,7 @@ as a string of Unicode runes. Send a friend your cipher — by QR, iMessage, lin
 or file — and they can read it; without it, the runes are just runes.
 
 ![Platform](https://img.shields.io/badge/platform-macOS%2015%20%7C%20iOS%2017-3A7FD5?style=flat-square)
-![Version](https://img.shields.io/badge/version-1.0.43%20build%2043-3A7FD5?style=flat-square)
+![Version](https://img.shields.io/badge/version-1.0.44%20build%2044-3A7FD5?style=flat-square)
 ![Swift](https://img.shields.io/badge/Swift-6.0-D4971A?style=flat-square)
 ![SwiftUI](https://img.shields.io/badge/UI-SwiftUI%20%2B%20Metal-3A7FD5?style=flat-square)
 ![Tests](https://img.shields.io/badge/tests-focused%20Messages%20%7C%20architecture%20guards-2ea043?style=flat-square)
@@ -37,12 +37,11 @@ A product of **Raven Forge Software**.
 - **💬 Send over iMessage & Share** — encode a message and send it straight through
   **iMessage** (iOS) or the **system Share sheet** (both platforms). The runes ride
   in the bubble; a themed `.runescribe` file carries the sealed message and bounded
-  appearance metadata. On the **first** eligible message to a contact it also carries
-  the cipher key. Later themed messages keep the file and never resend the key; Copy
-  Runes remains the compact compatibility action.
+  appearance metadata without the cipher key. Share the cipher explicitly from
+  Cipher Manager; Copy Runes remains the compact compatibility action.
 - **🤝 Share a cipher safely** — on iOS, **Share** and the cipher-invitation path in
   **Customize Share** compose a themed `MSMessage` artwork bubble. The same validated
-  HTTPS invitation is stored in `MSMessage.url` and repeated in the composer body.
+  HTTPS invitation is stored in `MSMessage.url`; the composer body is empty.
   The Messages extension offers only **Continue to Rune Scribe**; the containing app
   owns import confirmation and persistence. Explicit Export and QR remain available.
 - **🔒 App lock** — an optional **4-digit PIN** gates the app on launch and when it
@@ -142,8 +141,8 @@ Scribe message server.
   cipher-invitation route in **Customize Share** prepare an `MSMessage` whose template
   image is the existing themed render, letterboxed into a 300 × 225-point 4:3 canvas
   with a safe inset. The bitmap contains no instructional text. The validated HTTPS
-  invitation is both `MSMessage.url` and visible composer body text. This route attaches
-  neither PNG nor `.runescribe` data.
+  invitation is in `MSMessage.url`; the invitation composer body is empty. The artwork
+  caption and subcaption remain. This route attaches neither PNG nor `.runescribe` data.
 - **Messages extension handoff.** Tapping the custom bubble is intended to open the
   `com.runescribe.app.messages` extension. Its only action is **Continue to Rune
   Scribe**, which asks the system to open the exact invitation URL. The containing app
@@ -174,43 +173,40 @@ Themed presentation is resolved against the installed provider's artifact and re
 inventory before rendering. Unknown selections or resource metadata/digest drift use
 the Base Norse fallback without changing admission or decryption of a valid Core payload.
 
-> **Import note.** Cipher material is never saved merely because a message opens.
-> A first-delivery attachment presents the normal cipher confirmation sheet on both
-> platforms. On macOS, use **Cipher Library → Import**, open the `.runescribe` file,
-> or paste a `runescribe://` import link.
+> **Import note.** Share the cipher explicitly from Cipher Manager before sending
+> messages. A message attachment contains no cipher material. On macOS, recipients
+> can use **Cipher Library → Import**, open the shared cipher file, or paste a
+> `runescribe://` import link.
 
 > **Guard the cipher.** A shared QR image or `.runescribe` file carries the actual
 > **256-bit key** — anyone who has it can read your runes, so hand it over privately
 > and don't post it publicly.
 
-> **Messages qualification boundary.** Source tests, simulator builds, and signed
+> **Messages qualification boundary.** Source tests, simulator builds, and earlier signed
 > product inspection do not prove a recipient transcript or tap result. The sender-to-
-> recipient rows for installed/cold, installed/running, deleted-app fallback, visible
-> body URL, and green-bubble/SMS URL retention have not been run on two physical
+> recipient rows for installed/cold, installed/running, deleted-app fallback, tappable
+> artwork and invitation URL, and green-bubble/SMS behavior have not been run on two physical
 > iPhones. The artwork-tap import/fallback behavior is therefore not yet accepted.
 
 ---
 
 ## 💬 Sending a message
 
-Encode a message and Rune Scribe makes sending the obvious next step — **Send via
-iMessage** (iOS) or **Share** (both platforms). On the **first** message to a contact,
-what goes out is:
+Encode a message and use **Send via iMessage** (iOS) or **Share** (both platforms).
+Each message sends:
 
 1. **The runes, as plain text** — what a human sees in the bubble. Meaningless without
    the key, so they leak nothing.
 2. **A themed `.runescribe` file attachment** carrying the **sealed envelope**, sender
    display name, chosen Codex/Relic/Seal/Frame IDs, bounded static preview, and
-   provenance state — and, on this first message (when the cipher is linked to the
-   contact and hasn't been delivered yet), the **cipher key** itself. The compose screen
-   says which: **“Key included”** vs **“Uses your shared key.”**
-3. **A plain “get the app” link** to the Rune Scribe page, for a recipient who doesn't
-   have the app yet.
+   provenance state. The message package has **no cipher key**.
+3. **A themed PNG preview** in the iOS Messages composer when rendering succeeds.
 
-Every **later themed** message keeps the `.runescribe` attachment but carries **no
-key** and no product link. The recipient already holds the cipher. **Copy Runes** is
-the deliberate runes-only compatibility action. No Universal Links or Rune Scribe
-message server is involved.
+The recipient needs the cipher shared separately through **Cipher Manager → Share**
+before they can decode the message. Every themed message keeps the `.runescribe`
+attachment but carries **no key**. Rune lines are measured against the tablet's
+inscription rect and paginated before reaching its border. **Copy Runes** is the
+runes-only action.
 
 ```mermaid
 sequenceDiagram
@@ -222,25 +218,21 @@ sequenceDiagram
     actor Bob
 
     Alice->>App1: Type “Meet at dawn”, press Rune Scribe
-    App1-->>Alice: Runes  ᛗᛖᛖᛏ ᚨᛏ ᛞᚨᚹᚾ  ·  “Key included”
+    Alice->>App1: Share cipher from Cipher Manager
+    App1-->>Msg: Interactive cipher invitation
+    Bob->>App2: Open invitation and confirm cipher import
+    App1-->>Alice: Runes  ᛗᛖᛖᛏ ᚨᛏ ᛞᚨᚹᚾ
     Alice->>App1: Send via iMessage / Share
-    App1-->>Msg: Runes + themed .runescribe file (envelope + first-delivery key) + app link
+    App1-->>Msg: Runes + themed .runescribe message (envelope only) + PNG preview
     Alice->>Bob: iMessage
     Bob->>App2: Open the .runescribe file
-    App2-->>Bob: Preview message · confirm first-delivery cipher
-    App2-->>App2: Save the reviewed cipher
     App2-->>Bob: “Meet at dawn”  → Reply
 ```
 
-**Recipient with the app** opens the `.runescribe` attachment. Rune Scribe can preview
-the plaintext with an embedded first-delivery key, but labels the claimed sender as
-unverified and keeps the key transient. The recipient must review and confirm the
-cipher before it is saved or **Reply** becomes available. A later message authenticates
-with that locally stored cipher and displays the local cipher name; its mutable wire
-sender label cannot create a contact or rebind a relationship. **Recipient without the
-app** taps the plain "get the app" link to the Rune Scribe page. Rotating a key is
-manual: make a new cipher for that contact, and its next message re-embeds the new key
-for explicit confirmation.
+**Recipient with the app** opens the `.runescribe` message attachment and decodes
+with the cipher they previously imported. A message's mutable sender label cannot
+create a contact or rebind a relationship. To rotate a key, create a new cipher and
+share it explicitly before sending messages with it.
 
 Both platforms use the same confirmation boundary. See [Platform notes](docs/platform-notes.md)
 for the supported intake paths.
@@ -320,7 +312,7 @@ the current boundary and dependency rules.
 ## 🗺 Implementation roadmap
 
 The previously authorized version 1.0.39 build 39 roadmap-completion baseline remains a
-historical source-complete snapshot that was not shipped. Version 1.0.43 build 43 is the
+historical source-complete snapshot that was not shipped. Version 1.0.44 build 44 is the
 current UI/Xcode remediation candidate. The earlier 1.0.41 source-bound qualification,
 device matrix, visual evidence, and known limits are recorded in the
 [UI/Xcode remediation qualification](docs/verification/ui-xcode-remediation/QualificationSummary.md).
@@ -328,7 +320,7 @@ Version 1.0.40 build 40 remains a retained historical repository-qualification r
 that source passed 1,238/1,238 Swift tests, 255/255 Python tests, 60 Norse semantic rules,
 25/25 Norse mutations, 18/18 legacy mutations, 28/28 shipping negative mutations,
 27/27 evidence-hardening tests, and 101/101 local built-product checks. Those historical
-results are not relabeled as source-bound evidence for 1.0.43. The current candidate is
+results are not relabeled as source-bound evidence for 1.0.44. The current candidate is
 **not shipped**. The earlier signed 1.0.41 archives predate the subsequently merged
 theme, Universal Link, tutorial, and workspace changes. Fresh iOS and macOS archive and
 export qualification is required for the current source before upload; validation,
@@ -357,9 +349,9 @@ clean tests, iPhone/iPad/macOS Release builds, deterministic UI smoke coverage,
 accessibility/privacy/security checks, signing and entitlements, and no known
 release-blocking defects. Manual hardware observations and package self-binding
 bookkeeping are superseded and nonblocking for the older covered feature set. The
-1.0.43 Messages-focused tests and repository guards pass, but the full package run did
-not complete in this publication pass and the Messages physical-device matrix remains
-open. The repository's
+1.0.44 focused composer-source, message-package, explicit cipher-share, and inscription
+tests pass, and an unsigned iOS build succeeds. The full package run did not complete
+in this publication pass, and the Messages physical-device matrix remains open. The repository's
 `scripts/qualify-app-store-archives.sh` gate also creates and inspects fresh iOS and
 Mac App Store exports without uploading them. App Store Connect validation, upload,
 submission, and rollout remain owner-operated publication work.
@@ -547,11 +539,15 @@ in `project.yml` and `Config/`, the source of truth.
 ## ✅ Testing
 
 The retained 1.0.42 candidate recorded **1242 package tests** (1105 XCTest cases and
-137 Swift Testing cases). For 1.0.43, the package compiled and the focused Messages
-Shared, durable-fingerprint, handoff, and rendered-link tests passed. The full package
-run did not complete in this publication pass, so there is no current aggregate pass to
-report. The package suite uses deterministic in-memory adapters and does not access the
-operator's login Keychain.
+137 Swift Testing cases). The earlier 1.0.43 candidate compiled and passed focused
+Messages Shared, durable-fingerprint, handoff, and rendered-link tests. For 1.0.44,
+focused tests cover the removed invitation body literal, key-free regular packages,
+explicit cipher-share import/decryption, and inscription bounds; an unsigned iOS build
+succeeded. The simulator could not initialize a Messages composer, so its passing
+factory test does not verify an actual send. The full package run did not complete in
+this publication pass, so there is no current aggregate pass to report. The package
+suite uses deterministic in-memory adapters and does not access the operator's login
+Keychain.
 
 | Suite | What it covers |
 |---|---|
@@ -566,8 +562,8 @@ operator's login Keychain.
 
 Direct-device observations remain superseded for the older covered feature set. They do
 not prove the new Messages extension route: its physical sender/recipient transcript,
-artwork tap, installed-app cold/warm handoff, deleted-app fallback, visible body URL,
-and green-bubble/SMS URL-retention rows remain unrun release gates. The
+artwork tap, installed-app cold/warm handoff, deleted-app fallback, and green-bubble/SMS
+behavior remain unrun release gates. The
 legacy package's larger visual-evidence and self-binding matrix remains noncontrolling.
 Named documentation, roadmap, architecture, shipping-mutation, and focused Messages
 guards pass. Retained prior iPhone 17 Pro

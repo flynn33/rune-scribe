@@ -34,7 +34,7 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
             ),
             context: try Self.context(203)
         )
-        XCTAssertTrue(artifact.requiresKeyDelivery)
+        XCTAssertFalse(artifact.requiresKeyDelivery)
 
         do {
             _ = try await service.completeShareArtifact(
@@ -60,7 +60,7 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
         }).keyDeliveryState.requiresDelivery)
     }
 
-    func testFirstDeliveryAllowsOnlyOneLiveKeyBearingArtifactPerCipher() async throws {
+    func testConcurrentMessageArtifactsNeverCarryCipher() async throws {
         let harness = CoreProgressionHarness()
         let outbox = CoreIntegrationOutbox()
         let service = harness.service(outbox: outbox)
@@ -89,22 +89,16 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
             command,
             context: try Self.context(213)
         )
-        XCTAssertTrue(first.requiresKeyDelivery)
+        XCTAssertFalse(first.requiresKeyDelivery)
 
-        do {
-            _ = try await service.prepareMessageShare(
-                command,
-                context: try Self.context(214)
-            )
-            XCTFail("A live first-delivery artifact must block a sibling")
-        } catch {
-            XCTAssertEqual(
-                error as? RuneScribeProductError,
-                .failure(RuneScribeFailureDTO(code: .invalidInput))
-            )
-        }
+        let sibling = try await service.prepareMessageShare(
+            command,
+            context: try Self.context(214)
+        )
+        XCTAssertFalse(sibling.requiresKeyDelivery)
+        XCTAssertNotEqual(sibling.id, first.id)
         var activeArtifactCount = await harness.artifacts.count()
-        XCTAssertEqual(activeArtifactCount, 1)
+        XCTAssertEqual(activeArtifactCount, 2)
 
         await service.releaseShareArtifact(
             id: first.id,
@@ -114,13 +108,13 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
             command,
             context: try Self.context(216)
         )
-        XCTAssertTrue(replacement.requiresKeyDelivery)
+        XCTAssertFalse(replacement.requiresKeyDelivery)
         XCTAssertNotEqual(replacement.id, first.id)
         activeArtifactCount = await harness.artifacts.count()
-        XCTAssertEqual(activeArtifactCount, 1)
+        XCTAssertEqual(activeArtifactCount, 2)
     }
 
-    func testFirstDeliveryShareBuilderHandoffCancelsAndCompletesExactlyOnce() async throws {
+    func testMessageShareBuilderHandoffCancelsAndCompletesExactlyOnce() async throws {
         let harness = CoreProgressionHarness()
         let outbox = CoreIntegrationOutbox()
         let service = harness.service(outbox: outbox)
@@ -153,7 +147,7 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
             quickShareCommand,
             context: try Self.context(223)
         )
-        XCTAssertTrue(quickShare.requiresKeyDelivery)
+        XCTAssertFalse(quickShare.requiresKeyDelivery)
 
         await service.releaseShareArtifact(
             id: quickShare.id,
@@ -181,7 +175,7 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
             builderCommand,
             context: try Self.context(225)
         )
-        XCTAssertTrue(cancelledBuilder.requiresKeyDelivery)
+        XCTAssertFalse(cancelledBuilder.requiresKeyDelivery)
         await service.releaseShareArtifact(
             id: cancelledBuilder.id,
             context: try Self.context(226)
@@ -196,7 +190,7 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
             builderCommand,
             context: try Self.context(227)
         )
-        XCTAssertTrue(deliveredBuilder.requiresKeyDelivery)
+        XCTAssertFalse(deliveredBuilder.requiresKeyDelivery)
         let completionEvidence = try ShareArtifactCompletionEvidenceDTO(
             artifactID: deliveredBuilder.id,
             report: SharePresentationReportDTO(
@@ -213,8 +207,8 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
             CompleteShareArtifactCommand(evidence: completionEvidence),
             context: try Self.context(230)
         )
-        XCTAssertEqual(firstCompletion, .deliveryRecorded)
-        XCTAssertEqual(duplicateCompletion, .deliveryRecorded)
+        XCTAssertEqual(firstCompletion, .released)
+        XCTAssertEqual(duplicateCompletion, .released)
 
         let established = try await service.prepareMessageShare(
             quickShareCommand,
@@ -227,7 +221,7 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
         }.count, 1)
         XCTAssertEqual(facts.filter {
             $0.eventType.rawValue == "runescribe.cipher.first-delivery-completed"
-        }.count, 1)
+        }.count, 0)
     }
 
     func testOperationAwareCreateAndEncodeCommitExactFactsAndDurableHandle() async throws {
@@ -287,7 +281,7 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
         )
     }
 
-    func testEligibleTerminalsReuseMessageTokenWithoutRepeatingFirstDelivery() async throws {
+    func testEligibleTerminalsReuseMessageTokenWithoutDeliveringCipher() async throws {
         let harness = CoreProgressionHarness()
         let outbox = CoreIntegrationOutbox()
         let service = harness.service(outbox: outbox)
@@ -333,12 +327,12 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
             CompleteShareArtifactCommand(evidence: firstEvidence),
             context: try Self.context(9)
         )
-        XCTAssertEqual(firstCompletion, .deliveryRecorded)
+        XCTAssertEqual(firstCompletion, .released)
         let duplicateCompletion = try await service.completeShareArtifact(
             CompleteShareArtifactCommand(evidence: firstEvidence),
             context: try Self.context(10)
         )
-        XCTAssertEqual(duplicateCompletion, .deliveryRecorded)
+        XCTAssertEqual(duplicateCompletion, .released)
 
         let rejectedEstablished = try await service.prepareMessageShare(
             PrepareMessageShareCommand(
@@ -422,10 +416,10 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
         XCTAssertEqual(Set(shares.compactMap(\.payload.messageToken)).count, 1)
         XCTAssertEqual(facts.filter {
             $0.eventType.rawValue == "runescribe.cipher.first-delivery-completed"
-        }.count, 1)
+        }.count, 0)
     }
 
-    func testDeferredFirstDeliveryFactReconcilesAfterTokenRecovery() async throws {
+    func testMessageSendDoesNotMintFirstDeliveryFactAfterTokenRecovery() async throws {
         let harness = CoreProgressionHarness()
         let outbox = CoreIntegrationOutbox()
         let service = harness.service(outbox: outbox)
@@ -470,11 +464,11 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
             )),
             context: try Self.context(35)
         )
-        XCTAssertEqual(completion, .deliveryRecorded)
+        XCTAssertEqual(completion, .released)
         let before = try await CipherRepository(runtimeIO: harness.runtimeIO)
             .progressionEvidenceSnapshot()
         let relationshipBefore = try XCTUnwrap(before.relationships.first)
-        XCTAssertEqual(relationshipBefore.keyDeliveryState, .completed)
+        XCTAssertEqual(relationshipBefore.keyDeliveryState, .pending)
         XCTAssertFalse(relationshipBefore.firstDeliveryEventCommitted)
 
         await harness.tokens.setFailures([])
@@ -482,12 +476,12 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
         await relaunched.startInboundProcessing()
         let after = try await CipherRepository(runtimeIO: harness.runtimeIO)
             .progressionEvidenceSnapshot()
-        XCTAssertTrue(try XCTUnwrap(after.relationships.first)
+        XCTAssertFalse(try XCTUnwrap(after.relationships.first)
             .firstDeliveryEventCommitted)
         let facts = await outbox.facts()
         XCTAssertEqual(facts.filter {
             $0.eventType.rawValue == "runescribe.cipher.first-delivery-completed"
-        }.count, 1)
+        }.count, 0)
     }
 
     func testUnavailableOutboxRepeatedTerminalsKeepOnePhysicalArtifactBound() async throws {
@@ -599,20 +593,14 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
         XCTAssertEqual(artifactCount, 0)
 
         await harness.secure.failCipherLibraryWrite(afterSuccessfulWrites: 0)
-        do {
-            _ = try await service.prepareMessageShare(
-                command,
-                context: try Self.context(55)
-            )
-            XCTFail("A delivery-eligible retained terminal must block a sibling key artifact")
-        } catch {
-            XCTAssertEqual(
-                error as? RuneScribeProductError,
-                .failure(RuneScribeFailureDTO(code: .invalidInput))
-            )
-        }
+        let sibling = try await service.prepareMessageShare(
+            command,
+            context: try Self.context(55)
+        )
+        XCTAssertFalse(sibling.requiresKeyDelivery)
         artifactCount = await harness.artifacts.count()
-        XCTAssertEqual(artifactCount, 0)
+        XCTAssertEqual(artifactCount, 1)
+        await service.releaseShareArtifact(id: sibling.id, context: try Self.context(56))
 
         let recovered = try await service.prepareMessageShare(
             command,
@@ -882,7 +870,7 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
         }.count, 1)
         XCTAssertEqual(facts.filter {
             $0.eventType.rawValue == "runescribe.cipher.first-delivery-completed"
-        }.count, 1)
+        }.count, 0)
     }
 
     func testRelaunchReplaysDurableTerminalAfterCoreCommitFailureExactlyOnce() async throws {
@@ -942,8 +930,8 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
         ledger = try await CipherRepository(runtimeIO: harness.runtimeIO)
             .progressionEvidenceSnapshot()
         relationship = try XCTUnwrap(ledger.relationships.first)
-        XCTAssertEqual(relationship.keyDeliveryState, .completed)
-        XCTAssertTrue(relationship.firstDeliveryEventCommitted)
+        XCTAssertEqual(relationship.keyDeliveryState, .pending)
+        XCTAssertFalse(relationship.firstDeliveryEventCommitted)
         XCTAssertEqual(ledger.shareTerminals.count, 1)
         XCTAssertFalse(try XCTUnwrap(ledger.shareTerminals.first).cleanupPending)
 
@@ -951,14 +939,14 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
             CompleteShareArtifactCommand(evidence: evidence),
             context: try Self.context(95)
         )
-        XCTAssertEqual(duplicate, .deliveryRecorded)
+        XCTAssertEqual(duplicate, .released)
         let facts = await outbox.facts()
         XCTAssertEqual(facts.filter {
             $0.eventType.rawValue == "runescribe.share.completed"
         }.count, 1)
         XCTAssertEqual(facts.filter {
             $0.eventType.rawValue == "runescribe.cipher.first-delivery-completed"
-        }.count, 1)
+        }.count, 0)
     }
 
     func testPreparedLinkageAndHandleSurviveStartupUntilRuntimeRedelivery() async throws {
@@ -1015,10 +1003,10 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
             CompleteShareArtifactCommand(evidence: evidence),
             context: try Self.context(104)
         )
-        XCTAssertEqual(result, .deliveryRecorded)
+        XCTAssertEqual(result, .released)
         let ledger = try await CipherRepository(runtimeIO: harness.runtimeIO)
             .progressionEvidenceSnapshot()
-        XCTAssertEqual(try XCTUnwrap(ledger.relationships.first).keyDeliveryState, .completed)
+        XCTAssertEqual(try XCTUnwrap(ledger.relationships.first).keyDeliveryState, .pending)
         let facts = await outbox.facts()
         XCTAssertEqual(facts.filter {
             $0.eventType.rawValue == "runescribe.share.completed"
@@ -1093,10 +1081,7 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
         let firstDeliveryContexts = await outbox.operationIDs(
             eventType: "runescribe.cipher.first-delivery-completed"
         )
-        XCTAssertEqual(
-            firstDeliveryContexts,
-            [RuntimeOperationID(rawValue: "core-integration-2100")]
-        )
+        XCTAssertTrue(firstDeliveryContexts.isEmpty)
         let durableRegistry = ShareArtifactRegistry(runtimeIO: harness.runtimeIO)
         let earlierRecord = try await durableRegistry.durableRecord(
             artifactID: earlier.artifactID
@@ -1104,7 +1089,7 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
         let laterRecord = try await durableRegistry.durableRecord(
             artifactID: later.artifactID
         )
-        XCTAssertEqual(earlierRecord?.completionDisposition, .deliveryRecorded)
+        XCTAssertEqual(earlierRecord?.completionDisposition, .released)
         XCTAssertEqual(laterRecord?.completionDisposition, .released)
     }
 
@@ -2137,7 +2122,7 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
             $0.id == cipherID.rawValue
         })
         XCTAssertEqual(bound.contactID, newContactID.rawValue)
-        XCTAssertEqual(bound.keyDeliveryState, .completed)
+        XCTAssertEqual(bound.keyDeliveryState, .pending)
         let beforeLedger = try await repository.progressionEvidenceSnapshot()
         XCTAssertEqual(
             beforeLedger.relationships.count,
@@ -2161,7 +2146,7 @@ final class CoreApplicationProgressionIntegrationTests: XCTestCase {
             CompleteShareArtifactCommand(evidence: completionEvidence),
             context: try Self.context(60_005)
         )
-        XCTAssertEqual(redelivered, .deliveryRecorded)
+        XCTAssertEqual(redelivered, .released)
         let afterLedger = try await CipherRepository(runtimeIO: harness.runtimeIO)
             .progressionEvidenceSnapshot()
         XCTAssertEqual(afterLedger.relationships, existingRelationships)

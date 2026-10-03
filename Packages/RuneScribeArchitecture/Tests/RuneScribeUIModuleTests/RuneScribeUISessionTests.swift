@@ -2300,26 +2300,23 @@ final class RuneScribeUISessionTests: XCTestCase {
         XCTAssertNotNil(cipher.contactID)
         XCTAssertTrue(cipher.delivered)
         XCTAssertNotNil(fixture.session.contact(id: cipher.contactID))
-        let requiresKeyDelivery = cipher.contactID != nil && !cipher.delivered
         let source = ShareBuilderSource.encryptedMessage(
             runes: "ᚱᚢᚾᛖ",
             senderName: cipher.label,
             cipherID: cipher.id,
             messageHandle: EncodedMessageHandle(
                 rawValue: UUID(uuidString: "86000000-0000-0000-0000-000000000001")!
-            ),
-            requiresKeyDelivery: requiresKeyDelivery
+            )
         )
 
-        XCTAssertFalse(requiresKeyDelivery)
-        XCTAssertEqual(source.purpose, .encryptedMessage(requiresKeyDelivery: false))
+        XCTAssertEqual(source.purpose, .encryptedMessage)
         XCTAssertEqual(
             source.purpose.securityAccessibilityIdentifier,
-            "share-builder.security.established"
+            "share-builder.security.message"
         )
         XCTAssertEqual(
             source.purpose.securitySummary,
-            "Uses your shared key — this message does not resend the cipher."
+            "This message uses your shared cipher. Share the cipher separately from Cipher Manager."
         )
 
         await fixture.session.stop()
@@ -2765,8 +2762,7 @@ final class RuneScribeUISessionTests: XCTestCase {
             runes: "ᚱᚢᚾᛖ",
             senderName: "Freya",
             cipherID: cipherID,
-            messageHandle: handle,
-            requiresKeyDelivery: false
+            messageHandle: handle
         )
 
         do {
@@ -2837,8 +2833,7 @@ final class RuneScribeUISessionTests: XCTestCase {
             cipherID: UUID(uuidString: "AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA")!,
             messageHandle: EncodedMessageHandle(
                 rawValue: UUID(uuidString: "86050000-0000-0000-0000-000000000005")!
-            ),
-            requiresKeyDelivery: false
+            )
         )
         let renderedPreview = try await fixture.session.renderShareBuilderPreview(
             source: source,
@@ -3446,7 +3441,7 @@ final class RuneScribeUISessionTests: XCTestCase {
         XCTAssertTrue(action.contains("guard let shareHandle = result.shareHandle"))
         XCTAssertTrue(action.contains("shareHandle: shareHandle"))
         XCTAssertTrue(action.contains("messageSharePreparation = preparedShare"))
-        XCTAssertTrue(action.contains("requiresKeyDelivery: activeCipher.contactID != nil"))
+        XCTAssertFalse(action.contains("requiresKeyDelivery:"))
         XCTAssertFalse(action.contains("session.prepareMessageShare"))
         XCTAssertFalse(action.contains("canonicalMessageTransfer"))
 
@@ -3516,7 +3511,7 @@ final class RuneScribeUISessionTests: XCTestCase {
         let shareButton = try sourceSection(
             source,
             from: "    private func shareButton() -> some View {",
-            to: "    /// A light line telling the sender"
+            to: "    /// A light line reminding the sender"
         )
         XCTAssertTrue(
             shareButton.contains("beginMessageArtifactPreparation(destination: .systemShare)")
@@ -3533,10 +3528,7 @@ final class RuneScribeUISessionTests: XCTestCase {
         for requiredStatement in [
             "pendingMessageArtifact == nil",
             "messageArtifactPreparationTask == nil",
-            "MessageKeyDeliveryDisclosurePolicy.requiresKeyDelivery(",
             "cipherID: preparation.cipherID",
-            "ciphers: session.ciphers",
-            "encodeTimeFallback: preparation.requiresKeyDelivery",
             "shareBuilderSource = source",
             "handleMessageShareBuilderLifecycleEnded()",
         ] {

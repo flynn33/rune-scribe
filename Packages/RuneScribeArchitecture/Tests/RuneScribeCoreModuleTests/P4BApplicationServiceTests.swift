@@ -195,7 +195,7 @@ final class P4BApplicationServiceTests: XCTestCase {
         XCTAssertEqual(legacyCipherData.first, UInt8(RuneScribeWireFormat.cipherVersion))
     }
 
-    func testMessageShareCoreOwnsFirstDeliveryAndArtifactCleanup() async throws {
+    func testMessageShareNeverEmbedsCipherAndCleansUpArtifacts() async throws {
         let secure = P4BSecureStore()
         let artifacts = P4BShareStore()
         let service = RuneScribeCoreApplicationService(
@@ -228,7 +228,7 @@ final class P4BApplicationServiceTests: XCTestCase {
         XCTAssertEqual(cancelled.reference, .file(cancelled.id))
         XCTAssertEqual(cancelled.contentType, RuneScribeWireFormat.contentType)
         XCTAssertEqual(cancelled.fileExtension, RuneScribeWireFormat.fileExtension)
-        XCTAssertTrue(cancelled.requiresKeyDelivery)
+        XCTAssertFalse(cancelled.requiresKeyDelivery)
         let firstData = await artifacts.createdData(id: cancelled.id)
         let firstBytes = try XCTUnwrap(firstData)
         let firstPackage = try RuneScribePackage(decoding: firstBytes)
@@ -239,13 +239,7 @@ final class P4BApplicationServiceTests: XCTestCase {
         )
         let decodedFirst = try MessageSharePayload(decoding: firstPackage.corePayload)
         XCTAssertEqual(decodedFirst.senderName, "Untrusted Caller Name")
-        let embedded = try XCTUnwrap(decodedFirst.embeddedCipher)
-        let dtoBytes = try JSONEncoder().encode(cancelled)
-        XCTAssertFalse(dtoBytes.contains(embedded.keyMaterial))
-        XCTAssertFalse(
-            String(decoding: dtoBytes, as: UTF8.self)
-                .contains(embedded.keyMaterial.base64EncodedString())
-        )
+        XCTAssertNil(decodedFirst.embeddedCipher)
 
         let cancelledCompletion = try await service.completeShareArtifact(
             CompleteShareArtifactCommand(
@@ -268,16 +262,16 @@ final class P4BApplicationServiceTests: XCTestCase {
             )
         )
         XCTAssertEqual(delivered.reference, .file(delivered.id))
-        XCTAssertTrue(delivered.requiresKeyDelivery)
+        XCTAssertFalse(delivered.requiresKeyDelivery)
         let deliveredCompletion = try await service.completeShareArtifact(
             CompleteShareArtifactCommand(
                 artifactID: delivered.id,
                 outcome: .handedOff
             )
         )
-        XCTAssertEqual(deliveredCompletion, .deliveryRecorded)
+        XCTAssertEqual(deliveredCompletion, .released)
         let afterDelivery = try await summary(id: cipher.id, from: service)
-        XCTAssertTrue(afterDelivery.hasBeenDelivered)
+        XCTAssertFalse(afterDelivery.hasBeenDelivered)
 
         let followup = try await service.prepareMessageShare(
             PrepareMessageShareCommand(
@@ -354,7 +348,7 @@ final class P4BApplicationServiceTests: XCTestCase {
         XCTAssertFalse(afterShare.hasBeenDelivered)
     }
 
-    func testCustomFontBytesAppearOnlyInRequiredFirstDeliveryFile() async throws {
+    func testCustomFontBytesNeverAppearInMessageFile() async throws {
         let artifacts = P4BShareStore()
         let service = fullService(
             secure: P4BSecureStore(),
@@ -408,11 +402,12 @@ final class P4BApplicationServiceTests: XCTestCase {
                 cipherID: cipher.id
             )
         )
-        XCTAssertTrue(first.requiresKeyDelivery)
+        XCTAssertFalse(first.requiresKeyDelivery)
         let storedFirst = await artifacts.createdData(id: first.id)
         let firstBytes = try XCTUnwrap(storedFirst)
         let decodedFirst = try MessageSharePayload.decodeFile(firstBytes)
-        XCTAssertEqual(decodedFirst.fontBytes, fontBytes)
+        XCTAssertNil(decodedFirst.0.embeddedCipher)
+        XCTAssertNil(decodedFirst.fontBytes)
         _ = try await service.completeShareArtifact(
             CompleteShareArtifactCommand(artifactID: first.id, outcome: .handedOff)
         )
@@ -510,6 +505,37 @@ final class P4BApplicationServiceTests: XCTestCase {
             )
             XCTAssertEqual(completion, .released)
         }
+    }
+
+    func testExplicitCipherFileShareCarriesImportableCipher() async throws {
+        let artifacts = P4BShareStore()
+        let secure = P4BSecureStore()
+        let service = RuneScribeCoreApplicationService(
+            secureValueStore: secure,
+            runtimeIO: shareRuntimeIO(artifacts, secure: secure),
+            clock: P4BClock(),
+            uuid: P4BUUIDs()
+        )
+        await service.startInboundProcessing()
+        let cipher = try await service.createCipher(CreateCipherCommand(name: "Manager Share"))
+        let encoded = try await service.encode(
+            EncodeMessageCommand(plaintext: "manager secret", cipherID: cipher.id)
+        )
+
+        let artifact = try await service.prepareCipherShare(
+            PrepareCipherShareCommand(cipherID: cipher.id, representation: .file)
+        )
+        let bytes = await artifacts.createdData(id: artifact.id)
+        let storedData = try XCTUnwrap(bytes)
+        let (payload, _) = try CipherSharePayload.decodeFile(storedData)
+        XCTAssertEqual(payload.keyMaterial.count, 32)
+        XCTAssertEqual(payload.publicID.count, 8)
+        XCTAssertEqual(Set(payload.decorativeMapping), Set(0..<32))
+        let imported = payload.cipher(label: "Imported")
+        XCTAssertEqual(imported.origin, .imported)
+        let envelope = try RuneCodec().decode(encoded.runes, with: imported)
+        let sealed = try MessageEnvelope.unwrap(envelope)
+        XCTAssertEqual(try MessageCryptor().open(sealed, with: imported), "manager secret")
     }
 
     func testSharePreparationRequiresSuccessfulInboundStart() async throws {

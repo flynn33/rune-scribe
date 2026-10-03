@@ -8,12 +8,25 @@ release work and reviewed against the project version before merge. The format f
 <!-- NEW ENTRIES BELOW -->
 ## [Unreleased]
 
+## [1.0.44] - 2026-10-03
+
+- Remove the visible cipher-invitation fallback text from the iOS Messages composer.
+  The artwork retains its validated invitation URL in `MSMessage.url`; the composer
+  body is empty. Captions remain.
+- Keep cipher material out of regular message packages, including messages to newly
+  linked contacts. Runes remain the regular message body; cipher sharing remains an
+  explicit Cipher Manager action.
+- Fit rendered rune lines to the tablet's font and inscription area so longer
+  messages paginate before text reaches the border.
+- Local focused tests and an unsigned iOS build verify the source repair. The simulator
+  cannot initialize a Messages composer; no device transcript or shipment is claimed.
+
 ## [1.0.43] - 2026-09-25
 
 - Add an iOS Messages extension route for cipher invitations. The composed
   `MSMessage` uses the themed cipher artwork as its template image, carries the
-  validated HTTPS invitation in `MSMessage.url`, and repeats that URL in the
-  composer body as a visible fallback.
+  validated HTTPS invitation in `MSMessage.url`. In 1.0.43, the composer also repeated
+  the URL as visible fallback text; 1.0.44 removes that body text.
 - Keep the extension as a handoff surface only. **Continue to Rune Scribe** attempts
   to open the exact validated invitation URL; the containing app remains the only
   import-confirmation and cipher-mutation authority. A key-free App Group envelope
@@ -25,8 +38,8 @@ release work and reviewed against the project version before merge. The format f
   shared App Group (`group.com.runescribe.app`) configuration. Automatic-signing
   builds compile and sign locally.
 - Physical-device Messages transcript behavior, artwork-tap handoff, deleted-app
-  product/App Store fallback, visible/tappable body URL, and green-bubble/SMS URL
-  retention have not been run. This source is not device-qualified or shipped.
+  product/App Store fallback, and green-bubble/SMS behavior were not run. This
+  historical source was not device-qualified or shipped.
 
 ## [1.0.42] - 2026-09-19
 

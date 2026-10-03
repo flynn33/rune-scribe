@@ -10,28 +10,18 @@ import XCTest
 final class ShareBuilderModelTests: XCTestCase {
     func testFixedSecuritySummariesCoverEveryPurpose() {
         XCTAssertEqual(
-            ShareBuilderPurpose.encryptedMessage(requiresKeyDelivery: true)
+            ShareBuilderPurpose.encryptedMessage
                 .securitySummary,
-            "Key included — this first delivery contains the shared cipher."
-        )
-        XCTAssertEqual(
-            ShareBuilderPurpose.encryptedMessage(requiresKeyDelivery: false)
-                .securitySummary,
-            "Uses your shared key — this message does not resend the cipher."
+            "This message uses your shared cipher. Share the cipher separately from Cipher Manager."
         )
         XCTAssertEqual(
             ShareBuilderPurpose.cipherInvitation.securitySummary,
             "Contains shared cipher — anyone who imports this invitation receives the decoder for this cipher."
         )
         XCTAssertEqual(
-            ShareBuilderPurpose.encryptedMessage(requiresKeyDelivery: true)
+            ShareBuilderPurpose.encryptedMessage
                 .securityAccessibilityIdentifier,
-            "share-builder.security.first-delivery"
-        )
-        XCTAssertEqual(
-            ShareBuilderPurpose.encryptedMessage(requiresKeyDelivery: false)
-                .securityAccessibilityIdentifier,
-            "share-builder.security.established"
+            "share-builder.security.message"
         )
         XCTAssertEqual(
             ShareBuilderPurpose.cipherInvitation.securityAccessibilityIdentifier,
