@@ -73,7 +73,7 @@ does not determine product shippability.
 Manual hardware observations are superseded for the previously covered behavior by
 repository-controlled macOS hosted, iPhone Simulator, iPad Simulator, and deterministic
 evidence. The new Messages extension device matrix above is an explicit exception.
-Version 1.0.44 build 44 is the current source candidate and is not shipped. The linked
+Version 1.0.45 build 45 is the current source candidate and is not shipped. The linked
 [qualification report](verification/ui-xcode-remediation/QualificationSummary.md)
 records the earlier 1.0.41 source; fresh current-source qualification is required.
 Version 1.0.40 retained evidence records the iPhone

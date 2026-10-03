@@ -405,8 +405,8 @@ def change_version_build(root: Path) -> list[str]:
     path = root / relative
     source = read_text(root, relative)
     anchors = (
-        ('MARKETING_VERSION: "1.0.44"', 'MARKETING_VERSION: "1.0.45"'),
-        ('CURRENT_PROJECT_VERSION: "44"', 'CURRENT_PROJECT_VERSION: "45"'),
+        ('MARKETING_VERSION: "1.0.45"', 'MARKETING_VERSION: "1.0.46"'),
+        ('CURRENT_PROJECT_VERSION: "45"', 'CURRENT_PROJECT_VERSION: "46"'),
     )
     for old, new in anchors:
         if source.count(old) != 1:

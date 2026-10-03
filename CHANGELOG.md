@@ -8,6 +8,14 @@ release work and reviewed against the project version before merge. The format f
 <!-- NEW ENTRIES BELOW -->
 ## [Unreleased]
 
+## [1.0.45] - 2026-10-03
+
+- Remove an unused share-completion result variable that caused a Swift compiler
+  warning in `ContentView`. The completion call and error handling remain unchanged.
+- Advance the local source candidate to version 1.0.45 build 45. An unsigned macOS
+  build from the Downloads project passed without the reported warning. This source
+  candidate is not shipped.
+
 ## [1.0.44] - 2026-10-03
 
 - Remove the visible cipher-invitation fallback text from the iOS Messages composer.

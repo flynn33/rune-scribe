@@ -3,9 +3,9 @@
 Ready-to-paste material for App Store Connect (iOS App Store and Mac App Store).
 Keep this file in sync when shipping a new marketing version.
 
-**Last prepared for:** 1.0.44 (build 44) — 2026-10-03
+**Last prepared for:** 1.0.45 (build 45) — 2026-10-03
 
-> **Publication boundary:** version 1.0.44 build 44 is the current source candidate and
+> **Publication boundary:** version 1.0.45 build 45 is the current source candidate and
 > is not shipped. The
 > [earlier UI/Xcode qualification](verification/ui-xcode-remediation/QualificationSummary.md)
 > and signed Store exports cover the source measured at that time. They predate subsequently merged theme,
@@ -13,7 +13,7 @@ Keep this file in sync when shipping a new marketing version.
 > export qualification is required before upload. Validation, upload, submission,
 > release, and rollout remain owner-operated.
 
-The packet remains aligned to version 1.0.44 build 44, but does not claim that the
+The packet remains aligned to version 1.0.45 build 45, but does not claim that the
 current merged source is upload-ready before fresh qualification.
 
 ---
@@ -22,8 +22,8 @@ current merged source is upload-ready before fresh qualification.
 
 | Field | Value |
 |--------|--------|
-| **Version** | `1.0.44` |
-| **Build** | `44` |
+| **Version** | `1.0.45` |
+| **Build** | `45` |
 | **Bundle ID** | `com.runescribe.app` |
 | **Display name** | Rune Scribe |
 | **Category** | Lifestyle (`public.app-category.lifestyle`) |
@@ -259,7 +259,7 @@ team. The remaining steps are owner-operated publication actions.
 
 ### Before upload
 
-- [ ] Version and build match the configured App Store Connect record (`1.0.44` / `44` for this packet)
+- [ ] Version and build match the configured App Store Connect record (`1.0.45` / `45` for this packet)
 - [ ] Complete the full automated package regression against the final source
 - [x] Focused Messages Shared, durable-fingerprint, handoff, and rendered-link tests pass
 - [ ] Re-run iOS Simulator and arm64-only unsigned macOS Release qualification against the final source
@@ -306,7 +306,7 @@ submission, release, and rollout remain external.
 
 ---
 
-## Version 1.0.44 current-source candidate
+## Version 1.0.45 current-source candidate
 
 Internal release summary; this is **not a shipment claim**:
 
@@ -334,7 +334,7 @@ Internal release summary; this is **not a shipment claim**:
     key-free; Cipher Manager share carries the cipher. Rune lines fit the inscription rect
 12. Physical-device Messages transcript, artwork-tap, deleted-app fallback, and
     green-bubble/SMS behavior remain unrun and unqualified
-13. Marketing version **1.0.44**, build **44** is not shipped; earlier signed Store
+13. Marketing version **1.0.45**, build **45** is not shipped; earlier signed Store
     packages are retained evidence and must not be uploaded as the current source
 
 Platform-specific import notes: [`platform-notes.md`](platform-notes.md)

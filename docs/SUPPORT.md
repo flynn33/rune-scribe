@@ -1,6 +1,6 @@
 # Rune Scribe Support
 
-**Current product source:** version 1.0.44 (build 44)
+**Current product source:** version 1.0.45 (build 45)
 **Publication boundary:** Current source requires fresh Store qualification; not shipped
 
 Earlier source-bound results and screenshots are indexed in the
@@ -12,6 +12,8 @@ The earlier 1.0.43 source compiled and passed focused Messages Shared,
 durable-fingerprint, handoff, and rendered-link tests. For 1.0.44, focused local tests
 cover the invitation body source contract, key-free regular messages, Cipher Manager
 share import/decryption, and rune inscription bounds; an unsigned iOS build succeeded.
+The 1.0.45 source removes an unused share-completion variable; an unsigned macOS build
+from the Downloads project passed without that warning.
 The simulator cannot initialize a Messages composer, and no device transcript was run.
 The full package run has no current aggregate result. The
 earlier iOS and macOS Release builds, 101/101 local product inspection, and Store archives

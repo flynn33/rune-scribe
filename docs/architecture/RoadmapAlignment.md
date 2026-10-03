@@ -4,7 +4,7 @@
 
 ## Authority and scope
 
-**Current application:** version 1.0.44 build 44
+**Current application:** version 1.0.45 build 45
 
 The current UI/Xcode remediation is mapped in the
 [September 2026 amendment](../product-roadmap/Rune-Scribe-UI-Xcode-Remediation-Amendment-2026-09.md)
@@ -44,7 +44,7 @@ effective only where they do not conflict with that authority.
 
 ## Current result
 
-Version 1.0.44 build 44 carries the source-complete authorized roadmap baseline, Theme
+Version 1.0.45 build 45 carries the source-complete authorized roadmap baseline, Theme
 Fidelity source remediation, and the bounded UI/Xcode repair described by W01-W09.
 The linked UI/Xcode qualification report records the earlier 1.0.41 source and Store
 artifacts; fresh current-source qualification is required. The retained version 1.0.40
@@ -58,7 +58,7 @@ matching Apple distribution identities, Store profiles, production entitlements,
 architectures, and package signatures. Those artifacts predate later merged theme,
 Universal Link, tutorial, and workspace changes and do not qualify the current source.
 Those 1.0.40 results remain historical rather than evidence for the new source. The
-1.0.44 candidate is deliberately **NOT SHIPPED**; a fresh qualification run must make
+1.0.45 candidate is deliberately **NOT SHIPPED**; a fresh qualification run must make
 the current-source decision. The repository now contains:
 
 - app-owned runtime composition, bounded contracts, capability policy, thin hosts,
@@ -86,7 +86,8 @@ the current-source decision. The repository now contains:
 - optional Game Center mapping/report policy with a frozen 15-achievement, 220-point
   catalog, monotonic outbox, runtime-owned GameKit I/O, and no local grant authority.
 
-For 1.0.44, focused local repair tests and an unsigned iOS build pass. A Messages
+For 1.0.44, focused local repair tests and an unsigned iOS build passed. The 1.0.45
+warning fix passed an unsigned macOS build from the Downloads project. A Messages
 composer send could not be exercised on the simulator. The full package run has no
 current aggregate result, and fresh iOS/macOS Release-product qualification remains
 outstanding. Retained
@@ -242,7 +243,7 @@ For the retained roadmap-completion baseline, those gates established:
 - **MANUAL HARDWARE VALIDATION SUPERSEDED**
 - **NOT SHIPPED**
 
-The version 1.0.44 build 44 candidate must satisfy the same product acceptance boundary:
+The version 1.0.45 build 45 candidate must satisfy the same product acceptance boundary:
 
 - **FINAL-SOURCE REPOSITORY GATES REQUIRED**
 - **REPOSITORY QUALIFICATION REQUIRED**

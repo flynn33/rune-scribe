@@ -49,4 +49,4 @@ feature is accepted, two physical iPhones must cover:
 Each row must record what appeared in the transcript, what the first artwork tap did,
 and whether the containing-app import confirmation ran exactly once. These rows have not
 been run. Artwork-tap import, deleted-app product/App Store fallback, and SMS fallback
-therefore remain unproven, and version 1.0.44 is not device-qualified or shipped.
+therefore remain unproven, and version 1.0.45 is not device-qualified or shipped.

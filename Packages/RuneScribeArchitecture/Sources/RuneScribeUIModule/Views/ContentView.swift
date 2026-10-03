@@ -1791,9 +1791,8 @@ struct ContentView: View {
         evidence: ShareArtifactCompletionEvidenceDTO
     ) async {
         defer { messageArtifactCompletionGate.finish(for: artifact.id) }
-        var completionResult: ShareArtifactCompletionResultDTO?
         do {
-            completionResult = try await session.completeShareArtifact(evidence: evidence)
+            _ = try await session.completeShareArtifact(evidence: evidence)
         } catch {
             await session.releaseShareArtifact(id: artifact.id)
             if pendingMessageArtifact?.id == artifact.id {

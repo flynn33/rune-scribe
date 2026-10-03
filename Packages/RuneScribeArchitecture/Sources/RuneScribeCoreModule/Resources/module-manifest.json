@@ -4,7 +4,7 @@
   "runtimeVersion": "1.0.0",
   "moduleID": "com.runescribe.module.core",
   "displayName": "Rune Scribe Core",
-  "moduleVersion": "1.0.44",
+  "moduleVersion": "1.0.45",
   "moduleType": "service",
   "criticality": "required",
   "supportedPlatforms": [
