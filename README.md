@@ -10,7 +10,7 @@ as a string of Unicode runes. Send a friend your cipher — by QR, iMessage, lin
 or file — and they can read it; without it, the runes are just runes.
 
 ![Platform](https://img.shields.io/badge/platform-macOS%2015%20%7C%20iOS%2017-3A7FD5?style=flat-square)
-![Version](https://img.shields.io/badge/version-1.0.45%20build%2045-3A7FD5?style=flat-square)
+![Version](https://img.shields.io/badge/version-1.0.46%20build%2046-3A7FD5?style=flat-square)
 ![Swift](https://img.shields.io/badge/Swift-6.0-D4971A?style=flat-square)
 ![SwiftUI](https://img.shields.io/badge/UI-SwiftUI%20%2B%20Metal-3A7FD5?style=flat-square)
 ![Tests](https://img.shields.io/badge/tests-focused%20Messages%20%7C%20architecture%20guards-2ea043?style=flat-square)
@@ -33,12 +33,14 @@ A product of **Raven Forge Software**.
   link to a contact, or delete them.
 - **👥 Contacts & per-contact ciphers** — organise ciphers by person. Import from
   Apple Contacts (or add by hand); each imported contact is auto-assigned its own
-  fresh cipher, so every conversation has its own key.
+  fresh cipher, so every conversation has its own key. The first-use Manage Ciphers
+  prompt includes **Skip**; importing contacts is optional.
 - **💬 Send over iMessage & Share** — encode a message and send it straight through
   **iMessage** (iOS) or the **system Share sheet** (both platforms). The runes ride
-  in the bubble; a themed `.runescribe` file carries the sealed message and bounded
-  appearance metadata without the cipher key. Share the cipher explicitly from
-  Cipher Manager; Copy Runes remains the compact compatibility action.
+  alongside the rendered artwork in iOS Messages, without a trailing message file.
+  Other file-sharing destinations retain the sealed `.runescribe` package.
+  Share the cipher explicitly from Cipher Manager; Copy Runes remains the compact
+  compatibility action.
 - **🤝 Share a cipher safely** — on iOS, **Share** and the cipher-invitation path in
   **Customize Share** compose a themed `MSMessage` artwork bubble. The same validated
   HTTPS invitation is stored in `MSMessage.url`; the composer body is empty.
@@ -193,20 +195,16 @@ the Base Norse fallback without changing admission or decryption of a valid Core
 ## 💬 Sending a message
 
 Encode a message and use **Send via iMessage** (iOS) or **Share** (both platforms).
-Each message sends:
+On iOS, both the direct Messages action and Messages selected from Share send the
+rendered PNG artwork and the rune text, without the trailing `.runescribe` file.
+**Customize Share** uses the same Messages payload with the selected appearance.
+Messages is unavailable if the required artwork is missing or invalid.
 
-1. **The runes, as plain text** — what a human sees in the bubble. Meaningless without
-   the key, so they leak nothing.
-2. **A themed `.runescribe` file attachment** carrying the **sealed envelope**, sender
-   display name, chosen Codex/Relic/Seal/Frame IDs, bounded static preview, and
-   provenance state. The message package has **no cipher key**.
-3. **A themed PNG preview** in the iOS Messages composer when rendering succeeds.
-
-The recipient needs the cipher shared separately through **Cipher Manager → Share**
-before they can decode the message. Every themed message keeps the `.runescribe`
-attachment but carries **no key**. Rune lines are measured against the tablet's
-inscription rect and paginated before reaching its border. **Copy Runes** is the
-runes-only action.
+Other file-sharing destinations, including Mail and AirDrop, retain the typed message
+package with its sealed envelope and bounded appearance metadata. Message packages
+carry **no key**. Share the cipher explicitly from Cipher Manager before the recipient
+decodes the message. Rune lines are measured against the tablet's inscription rect and
+paginated before reaching its border. **Copy Runes** is the runes-only action.
 
 ```mermaid
 sequenceDiagram
@@ -223,15 +221,16 @@ sequenceDiagram
     Bob->>App2: Open invitation and confirm cipher import
     App1-->>Alice: Runes  ᛗᛖᛖᛏ ᚨᛏ ᛞᚨᚹᚾ
     Alice->>App1: Send via iMessage / Share
-    App1-->>Msg: Runes + themed .runescribe message (envelope only) + PNG preview
+    App1-->>Msg: Rendered PNG artwork + rune text
     Alice->>Bob: iMessage
-    Bob->>App2: Open the .runescribe file
+    Bob->>App2: Paste the rune text and decode
     App2-->>Bob: “Meet at dawn”  → Reply
 ```
 
-**Recipient with the app** opens the `.runescribe` message attachment and decodes
-with the cipher they previously imported. A message's mutable sender label cannot
-create a contact or rebind a relationship. To rotate a key, create a new cipher and
+**Recipient with the app** pastes the Messages rune text and decodes with the cipher
+they previously imported. A message package received through another file route can
+still be opened in Rune Scribe. Its mutable sender label cannot create a contact or
+rebind a relationship. To rotate a key, create a new cipher and
 share it explicitly before sending messages with it.
 
 Both platforms use the same confirmation boundary. See [Platform notes](docs/platform-notes.md)
@@ -312,15 +311,15 @@ the current boundary and dependency rules.
 ## 🗺 Implementation roadmap
 
 The previously authorized version 1.0.39 build 39 roadmap-completion baseline remains a
-historical source-complete snapshot that was not shipped. Version 1.0.45 build 45 is the
-current UI/Xcode remediation candidate. The earlier 1.0.41 source-bound qualification,
+historical source-complete snapshot that was not shipped. Version 1.0.46 build 46 is the
+current beta-fix source candidate. The earlier 1.0.41 source-bound qualification,
 device matrix, visual evidence, and known limits are recorded in the
 [UI/Xcode remediation qualification](docs/verification/ui-xcode-remediation/QualificationSummary.md).
 Version 1.0.40 build 40 remains a retained historical repository-qualification record:
 that source passed 1,238/1,238 Swift tests, 255/255 Python tests, 60 Norse semantic rules,
 25/25 Norse mutations, 18/18 legacy mutations, 28/28 shipping negative mutations,
 27/27 evidence-hardening tests, and 101/101 local built-product checks. Those historical
-results are not relabeled as source-bound evidence for 1.0.45. The current candidate is
+results are not relabeled as source-bound evidence for 1.0.46. The current candidate is
 **not shipped**. The earlier signed 1.0.41 archives predate the subsequently merged
 theme, Universal Link, tutorial, and workspace changes. Fresh iOS and macOS archive and
 export qualification is required for the current source before upload; validation,
@@ -351,8 +350,11 @@ release-blocking defects. Manual hardware observations and package self-binding
 bookkeeping are superseded and nonblocking for the older covered feature set. The
 1.0.44 focused composer-source, message-package, explicit cipher-share, and inscription
 tests passed, and an unsigned iOS build succeeded for that published source. The 1.0.45
-warning fix passed an unsigned macOS build from the Downloads project. No current full
-package aggregate or Messages physical-device matrix is claimed. The repository's
+warning fix passed an unsigned macOS build from the Downloads project. The 1.0.46
+beta fixes have [focused Xcode evidence](docs/verification/release-1.0.46/QualificationSummary.md)
+recorded before the version bump: 31 iPhone tests passed, 23 iPad tests passed, and
+one Messages-composer test was skipped on each device. No current full package
+aggregate or sent-recipient Messages result is claimed. The repository's
 `scripts/qualify-app-store-archives.sh` gate also creates and inspects fresh iOS and
 Mac App Store exports without uploading them. App Store Connect validation, upload,
 submission, and rollout remain owner-operated publication work.
@@ -546,9 +548,14 @@ focused tests covered the removed invitation body literal, key-free regular pack
 explicit cipher-share import/decryption, and inscription bounds; an unsigned iOS build
 succeeded. The simulator could not initialize a Messages composer, so its passing
 factory test did not verify an actual send. For 1.0.45, an unsigned macOS build from the
-Downloads project passed without the reported `completionResult` warning; there is no
-current aggregate pass to report. The package
-suite uses deterministic in-memory adapters and does not access the operator's login
+Downloads project passed without the reported `completionResult` warning. The 1.0.46
+beta fixes recorded 31 iPhone and 23 iPad tests passed before the version bump, with
+one Messages-composer skip on each simulator and 10 native-share tests passing again.
+The [qualification summary](docs/verification/release-1.0.46/QualificationSummary.md)
+records the excluded baseline activation failure and remaining recipient-test limits;
+there is no current aggregate pass to report. Fresh unsigned Xcode 27 Release builds
+for iOS Simulator and arm64 macOS passed after the version bump, with product versions
+reading 1.0.46 (46). The package suite uses deterministic in-memory adapters and does not access the operator's login
 Keychain.
 
 | Suite | What it covers |

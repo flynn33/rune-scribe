@@ -64,6 +64,60 @@ final class RuneScribeParityUITests: XCTestCase {
         XCTAssertTrue(editor.isHittable, app.debugDescription)
     }
 
+    func testMessageShareComposerContainsArtworkAndRunesOnly() throws {
+        let app = makeIsolatedApplication()
+        app.launch()
+        dismissSplashIfPresent(in: app)
+
+        let editor = app.textViews.matching(
+            NSPredicate(format: "label == %@", "Message to encode")
+        ).firstMatch
+        XCTAssertTrue(editor.waitForExistence(timeout: 15), app.debugDescription)
+        editor.tap()
+        editor.typeText("The mountains remember our stories.")
+        let encode = app.buttons["RUNE SCRIBE"]
+        XCTAssertTrue(encode.waitForExistence(timeout: 5), app.debugDescription)
+        encode.tap()
+        let share = app.buttons["message.quick-share"]
+        XCTAssertTrue(share.waitForExistence(timeout: 15), app.debugDescription)
+        let artwork = app.descendants(matching: .any)[
+            "theme.artifact-preview.relic.norse.runestone-tablet"
+        ].firstMatch
+        XCTAssertTrue(artwork.waitForExistence(timeout: 8), app.debugDescription)
+        keepScreenshot(app, named: "message-artwork-and-runes-before-sharing")
+        share.tap()
+        let activityList = app.otherElements["ActivityListView"]
+        XCTAssertTrue(activityList.waitForExistence(timeout: 15), app.debugDescription)
+        keepScreenshot(app, named: "message-share-destinations")
+
+        let messages = app.cells.matching(
+            NSPredicate(format: "label IN %@", ["Messages", "Message"])
+        ).firstMatch
+        guard messages.waitForExistence(timeout: 8) else {
+            throw XCTSkip(
+                "This simulator has no Messages share destination. NativeShareOutcomeTests "
+                    + "verifies the concrete image/text payload; a device is required "
+                    + "for the native composer screenshot."
+            )
+        }
+        messages.tap()
+        XCTAssertTrue(app.buttons["Cancel"].waitForExistence(timeout: 15), app.debugDescription)
+        XCTAssertFalse(
+            app.descendants(matching: .any).matching(
+                NSPredicate(format: "label CONTAINS[c] %@", ".runescribe")
+            ).firstMatch.exists,
+            app.debugDescription
+        )
+        XCTAssertFalse(
+            app.descendants(matching: .any).matching(
+                NSPredicate(format: "label CONTAINS[c] %@", "message.rune")
+            ).firstMatch.exists,
+            app.debugDescription
+        )
+        keepScreenshot(app, named: "message-composer-artwork-and-runes-only")
+        app.buttons["Cancel"].tap()
+    }
+
     func testNorseVisualPresentationAndScreenshots() throws {
         let app = makeIsolatedApplication()
         app.launch()
@@ -488,6 +542,76 @@ final class RuneScribeParityUITests: XCTestCase {
         XCTAssertTrue(builder.waitForNonExistence(timeout: 12), app.debugDescription)
         XCTAssertFalse(app.alerts["Couldn't Complete"].exists, app.debugDescription)
         XCTAssertTrue(app.buttons["Settings"].exists, app.debugDescription)
+    }
+
+    func testCipherLibraryContactsImportCanBeSkipped() {
+        let app = makeIsolatedApplication()
+        app.launch()
+        dismissSplashIfPresent(in: app)
+
+        openCipherLibrary(in: app, dismissContactsPrompt: false)
+        let skip = app.buttons["Skip"]
+        XCTAssertTrue(skip.waitForExistence(timeout: 8), app.debugDescription)
+        XCTAssertTrue(skip.isHittable, app.debugDescription)
+        XCTAssertTrue(app.buttons["Import from Contacts"].exists, app.debugDescription)
+        XCTAssertTrue(app.buttons["Add Manually"].exists, app.debugDescription)
+        let deviceName = app.windows.firstMatch.frame.width >= 700 ? "ipad" : "iphone"
+        keepScreenshot(app, named: "\(deviceName)-contacts-import-skip")
+        skip.tap()
+
+        XCTAssertTrue(skip.waitForNonExistence(timeout: 5), app.debugDescription)
+        XCTAssertFalse(app.staticTexts["CONTACTS"].exists, app.debugDescription)
+        XCTAssertFalse(app.alerts.firstMatch.exists, app.debugDescription)
+
+        let newCipher = app.buttons["New Cipher"]
+        XCTAssertTrue(newCipher.isHittable, app.debugDescription)
+        newCipher.tap()
+        let createCipher = app.alerts["New Cipher"]
+        XCTAssertTrue(createCipher.waitForExistence(timeout: 5), app.debugDescription)
+        createCipher.textFields["Label"].tap()
+        createCipher.textFields["Label"].typeText("Skipped Contacts Cipher")
+        createCipher.buttons["Create"].tap()
+        XCTAssertTrue(
+            app.staticTexts["Skipped Contacts Cipher"].waitForExistence(timeout: 8),
+            app.debugDescription
+        )
+        XCTAssertTrue(app.staticTexts["2 ciphers"].exists, app.debugDescription)
+        keepScreenshot(app, named: "\(deviceName)-cipher-library-after-skip")
+
+        tapCloseControl(in: app)
+        openCipherLibrary(in: app, dismissContactsPrompt: false)
+        XCTAssertFalse(skip.waitForExistence(timeout: 3), app.debugDescription)
+        XCTAssertTrue(newCipher.isHittable, app.debugDescription)
+
+        app.terminate()
+        app.launch()
+        dismissSplashIfPresent(in: app)
+        openCipherLibrary(in: app, dismissContactsPrompt: false)
+        XCTAssertFalse(skip.waitForExistence(timeout: 3), app.debugDescription)
+        XCTAssertTrue(newCipher.isHittable, app.debugDescription)
+        XCTAssertTrue(app.staticTexts["Skipped Contacts Cipher"].exists, app.debugDescription)
+    }
+
+    func testProductionCipherLibraryContactsPromptCanBeSkipped() throws {
+        let app = XCUIApplication()
+        app.launch()
+        dismissSplashIfPresent(in: app)
+        openCipherLibrary(in: app, dismissContactsPrompt: false)
+        guard app.staticTexts["Organize ciphers by contact?"].waitForExistence(timeout: 5) else {
+            throw XCTSkip(
+                "The first-use production prompt requires a fresh app installation. "
+                    + "The isolated contacts test exercises it on every run."
+            )
+        }
+        let skip = app.buttons["Skip"]
+        XCTAssertTrue(skip.waitForExistence(timeout: 8), app.debugDescription)
+        XCTAssertTrue(skip.isHittable, app.debugDescription)
+        keepScreenshot(app, named: "production-contacts-import-skip")
+        skip.tap()
+        XCTAssertTrue(skip.waitForNonExistence(timeout: 5), app.debugDescription)
+        XCTAssertTrue(app.buttons["New Cipher"].isHittable, app.debugDescription)
+        XCTAssertFalse(app.alerts.firstMatch.exists, app.debugDescription)
+        keepScreenshot(app, named: "production-cipher-library-after-skip")
     }
 
     func testCipherLibraryShareActionsExposeUsableHitRegions() {
@@ -1660,6 +1784,7 @@ final class RuneScribeParityUITests: XCTestCase {
 
     private func openCipherLibrary(
         in app: XCUIApplication,
+        dismissContactsPrompt: Bool = true,
         file: StaticString = #filePath,
         line: UInt = #line
     ) {
@@ -1709,22 +1834,17 @@ final class RuneScribeParityUITests: XCTestCase {
             file: file,
             line: line
         )
-        dismissContactsPromptIfPresent(in: app)
+        if dismissContactsPrompt {
+            dismissContactsPromptIfPresent(in: app)
+        }
     }
 
     private func dismissContactsPromptIfPresent(in app: XCUIApplication) {
-        let contactsPrompt = app.sheets["Organize ciphers by contact?"]
-        guard contactsPrompt.waitForExistence(timeout: 3) else { return }
-
-        let notNow = contactsPrompt.buttons["Not Now"]
-        if notNow.exists {
-            notNow.tap()
-        } else if app.otherElements["PopoverDismissRegion"].exists {
-            app.otherElements["PopoverDismissRegion"].firstMatch.tap()
-        } else {
-            contactsPrompt.swipeDown()
-        }
-        XCTAssertTrue(contactsPrompt.waitForNonExistence(timeout: 5), app.debugDescription)
+        let skip = app.buttons["Skip"]
+        guard skip.waitForExistence(timeout: 3) else { return }
+        XCTAssertTrue(skip.isHittable, app.debugDescription)
+        skip.tap()
+        XCTAssertTrue(skip.waitForNonExistence(timeout: 5), app.debugDescription)
     }
 
     private func chooseCipherAction(
@@ -1835,6 +1955,13 @@ final class RuneScribeParityUITests: XCTestCase {
         let skipIntro = app.buttons["Skip intro"]
         if skipIntro.waitForExistence(timeout: 12) {
             skipIntro.tap()
+        }
+        let guide = app.staticTexts["How Rune Scribe Works"]
+        if guide.waitForExistence(timeout: 5) {
+            let skip = app.buttons["Skip"]
+            XCTAssertTrue(skip.isHittable, app.debugDescription)
+            skip.tap()
+            XCTAssertTrue(guide.waitForNonExistence(timeout: 5), app.debugDescription)
         }
     }
 

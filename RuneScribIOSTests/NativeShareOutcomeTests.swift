@@ -8,6 +8,80 @@ import XCTest
 
 final class NativeShareOutcomeTests: XCTestCase {
     @MainActor
+    func testMessageShareSendsOnlyArtworkAndRunesToMessages() throws {
+        let image = UIGraphicsImageRenderer(size: CGSize(width: 4, height: 3)).image {
+            UIColor.systemIndigo.setFill()
+            $0.fill(CGRect(x: 0, y: 0, width: 4, height: 3))
+        }
+        let png = try XCTUnwrap(image.pngData())
+        let packageURL = URL(fileURLWithPath: "/tmp/message.rune-scribe")
+        let runes = "ᚠᚢᚦᚨᚱᚲ"
+        let items = RuneScribeIOSMessageActivityItemFactory.makeItems(
+            packageURL: packageURL,
+            messageText: runes,
+            previewImageData: png
+        )
+        let sources = items.compactMap { $0 as? any UIActivityItemSource }
+        XCTAssertEqual(sources.count, items.count)
+        let controller = UIActivityViewController(
+            activityItems: [],
+            applicationActivities: nil
+        )
+
+        let messageItems = sources.compactMap {
+            $0.activityViewController(controller, itemForActivityType: .message)
+        }
+        XCTAssertEqual(messageItems.count, 2)
+        let sharedImage = try XCTUnwrap(messageItems.compactMap { $0 as? UIImage }.first)
+        XCTAssertEqual(sharedImage.cgImage?.width, image.cgImage?.width)
+        XCTAssertEqual(sharedImage.cgImage?.height, image.cgImage?.height)
+        XCTAssertEqual(messageItems.compactMap { $0 as? NSString }.map(String.init), [runes])
+        XCTAssertTrue(messageItems.compactMap { $0 as? URL }.isEmpty)
+        XCTAssertTrue(RuneScribeIOSMessageActivityItemFactory.canShareToMessages(
+            previewImageData: png
+        ))
+
+        for destination in [UIActivity.ActivityType.mail, .airDrop, .copyToPasteboard] {
+            let destinationItems = sources.compactMap {
+                $0.activityViewController(controller, itemForActivityType: destination)
+            }
+            XCTAssertEqual(destinationItems.count, 1)
+            XCTAssertEqual(destinationItems.first as? URL, packageURL)
+        }
+    }
+
+    @MainActor
+    func testMessageShareDisallowsMessagesWhenArtworkIsMissingOrInvalid() throws {
+        let packageURL = URL(fileURLWithPath: "/tmp/message.rune-scribe")
+        let image = UIGraphicsImageRenderer(size: CGSize(width: 4, height: 3)).image {
+            UIColor.systemIndigo.setFill()
+            $0.fill(CGRect(x: 0, y: 0, width: 4, height: 3))
+        }
+        let jpeg = try XCTUnwrap(image.jpegData(compressionQuality: 0.8))
+        for previewImageData in [nil, Data([0x00, 0x01]), jpeg] as [Data?] {
+            let items = RuneScribeIOSMessageActivityItemFactory.makeItems(
+                packageURL: packageURL,
+                messageText: "ᚠᚢᚦᚨᚱᚲ",
+                previewImageData: previewImageData
+            )
+            XCTAssertFalse(RuneScribeIOSMessageActivityItemFactory.canShareToMessages(
+                previewImageData: previewImageData
+            ))
+            let controller = UIActivityViewController(
+                activityItems: [],
+                applicationActivities: nil
+            )
+            let sources = items.compactMap { $0 as? any UIActivityItemSource }
+            XCTAssertTrue(sources.compactMap {
+                $0.activityViewController(controller, itemForActivityType: .message)
+            }.isEmpty)
+            XCTAssertEqual(sources.compactMap {
+                $0.activityViewController(controller, itemForActivityType: .mail) as? URL
+            }, [packageURL])
+        }
+    }
+
+    @MainActor
     func testInteractiveCipherMessageUsesArtworkURLWithoutFallbackBody() throws {
         let image = UIGraphicsImageRenderer(size: CGSize(width: 1_200, height: 900)).image {
             UIColor.systemPurple.setFill()
@@ -143,6 +217,7 @@ final class NativeShareOutcomeTests: XCTestCase {
             $0.fill(CGRect(x: 0, y: 0, width: 4, height: 3))
         }
         let png = try XCTUnwrap(image.pngData())
+        let jpeg = try XCTUnwrap(image.jpegData(compressionQuality: 0.8))
 
         XCTAssertEqual(
             RuneScribeMessagePreviewAttachment.validatedPNG(png),
@@ -151,6 +226,7 @@ final class NativeShareOutcomeTests: XCTestCase {
         XCTAssertNil(
             RuneScribeMessagePreviewAttachment.validatedPNG(Data([0x00, 0x01]))
         )
+        XCTAssertNil(RuneScribeMessagePreviewAttachment.validatedPNG(jpeg))
     }
 
     func testActivityReportMapsTypedRouteAndCompletionStates() {

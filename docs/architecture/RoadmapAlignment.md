@@ -4,7 +4,7 @@
 
 ## Authority and scope
 
-**Current application:** version 1.0.45 build 45
+**Current application:** version 1.0.46 build 46
 
 The current UI/Xcode remediation is mapped in the
 [September 2026 amendment](../product-roadmap/Rune-Scribe-UI-Xcode-Remediation-Amendment-2026-09.md)
@@ -44,7 +44,7 @@ effective only where they do not conflict with that authority.
 
 ## Current result
 
-Version 1.0.45 build 45 carries the source-complete authorized roadmap baseline, Theme
+Version 1.0.46 build 46 carries the source-complete authorized roadmap baseline, Theme
 Fidelity source remediation, and the bounded UI/Xcode repair described by W01-W09.
 The linked UI/Xcode qualification report records the earlier 1.0.41 source and Store
 artifacts; fresh current-source qualification is required. The retained version 1.0.40
@@ -58,7 +58,7 @@ matching Apple distribution identities, Store profiles, production entitlements,
 architectures, and package signatures. Those artifacts predate later merged theme,
 Universal Link, tutorial, and workspace changes and do not qualify the current source.
 Those 1.0.40 results remain historical rather than evidence for the new source. The
-1.0.45 candidate is deliberately **NOT SHIPPED**; a fresh qualification run must make
+1.0.46 candidate is deliberately **NOT SHIPPED**; a fresh qualification run must make
 the current-source decision. The repository now contains:
 
 - app-owned runtime composition, bounded contracts, capability policy, thin hosts,
@@ -78,13 +78,22 @@ the current-source decision. The repository now contains:
   the validated HTTPS invitation in `MSMessage.url` and an empty composer body,
   handoff-only extension UI, containing-app import authority, and a key-free App Group
   recovery inbox; physical transcript/tap/fallback/SMS behavior remains unrun;
-- key-free regular message packages, explicit cipher sharing from Cipher Manager, and
-  rune lines measured and paginated within the tablet inscription rect;
+- iOS encoded Messages sends containing validated PNG artwork and rune text without
+  the trailing package attachment, retained key-free packages for other destinations,
+  explicit cipher sharing from Cipher Manager, and rune lines measured and paginated
+  within the tablet inscription rect;
 - local-first private progression synchronization with deterministic merge, offline and
   account-change policy, corruption quarantine, runtime-owned CloudKit I/O, and no
   secret-bearing cloud fields; and
 - optional Game Center mapping/report policy with a frozen 15-achievement, 220-point
   catalog, monotonic outbox, runtime-owned GameKit I/O, and no local grant authority.
+
+The 1.0.46 transport and contact-prompt changes are recorded in the
+[release report](../verification/release-1.0.46/QualificationSummary.md). The patched
+1.0.45 source passed the focused iPhone run (31 passed, 1 skipped) and iPad run
+(23 passed, 1 skipped), plus ten repeatability payload tests. The Messages composer
+case was skipped because these simulators cannot send iMessage; a separate activation
+test also fails on the original baseline and was excluded from the focused run.
 
 For 1.0.44, focused local repair tests and an unsigned iOS build passed. The 1.0.45
 warning fix passed an unsigned macOS build from the Downloads project. A Messages
@@ -243,7 +252,7 @@ For the retained roadmap-completion baseline, those gates established:
 - **MANUAL HARDWARE VALIDATION SUPERSEDED**
 - **NOT SHIPPED**
 
-The version 1.0.45 build 45 candidate must satisfy the same product acceptance boundary:
+The version 1.0.46 build 46 candidate must satisfy the same product acceptance boundary:
 
 - **FINAL-SOURCE REPOSITORY GATES REQUIRED**
 - **REPOSITORY QUALIFICATION REQUIRED**

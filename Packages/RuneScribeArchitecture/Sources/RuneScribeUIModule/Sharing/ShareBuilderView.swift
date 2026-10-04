@@ -396,6 +396,9 @@ struct ShareBuilderView: View {
             case .file:
                 RuneScribePreparedFileShareLauncher(
                     transfer: preparedShare.transfer,
+                    messageText: source.purpose == .encryptedMessage
+                        ? source.inscription : nil,
+                    previewImageData: preparedShare.previewImageData,
                     launchID: shareLaunchID,
                     onPresented: {
                         markSharePresented(

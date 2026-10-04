@@ -1,6 +1,6 @@
 # Rune Scribe Support
 
-**Current product source:** version 1.0.45 (build 45)
+**Current product source:** version 1.0.46 (build 46)
 **Publication boundary:** Current source requires fresh Store qualification; not shipped
 
 Earlier source-bound results and screenshots are indexed in the
@@ -12,10 +12,15 @@ The earlier 1.0.43 source compiled and passed focused Messages Shared,
 durable-fingerprint, handoff, and rendered-link tests. For 1.0.44, focused local tests
 cover the invitation body source contract, key-free regular messages, Cipher Manager
 share import/decryption, and rune inscription bounds; an unsigned iOS build succeeded.
-The 1.0.45 source removes an unused share-completion variable; an unsigned macOS build
-from the Downloads project passed without that warning.
-The simulator cannot initialize a Messages composer, and no device transcript was run.
-The full package run has no current aggregate result. The
+The 1.0.45 source removed an unused share-completion variable; an unsigned macOS build
+from the Downloads project passed without that warning. The 1.0.46 beta fixes have
+[focused Xcode evidence](verification/release-1.0.46/QualificationSummary.md) recorded
+before the version bump: 31 iPhone tests and 23 iPad tests passed, with one Messages
+composer test skipped on each device because no Messages share destination was available.
+The production contacts Skip flow passed on clean installs. No sent-recipient Messages
+transcript was run, and no current aggregate suite pass is claimed. Fresh unsigned
+Xcode 27 Release builds for iOS Simulator and arm64 macOS passed after the version
+bump; these compile/version checks do not qualify a Store archive or export. The
 earlier iOS and macOS Release builds, 101/101 local product inspection, and Store archives
 remain historical evidence. The earlier iOS and macOS archives exported
 successfully for App Store Connect with matching distribution identities, Store
@@ -40,14 +45,20 @@ superseded v4.3 package audit is noncontrolling verification history.
 - After encoding, **Quick Share** uses the current validated per-Codex defaults. Use
   **Customize Share** to choose a Codex, Relic, optional Seal/Frame, and effects policy
   for that operation without changing the cipher or re-encrypting the message.
-- Regular message packages contain no cipher. Share it explicitly from Cipher Manager;
-  the rune text remains in the regular Messages composer body. Longer inscriptions
+- Ordinary iOS Messages sends provide rendered artwork and rune text without the
+  trailing `.runescribe` file. This includes direct Messages, Quick Share, and Customize
+  Share. Other file-sharing destinations retain the key-free message package. Share
+  the cipher explicitly from Cipher Manager before decoding; longer inscriptions
   paginate within the tablet's inscription rect.
+- On the first-use Manage Ciphers contacts prompt, choose **Skip** to continue without
+  importing contacts. Contacts can be added later.
 - Long themed output is presented in the canonical Artifact preview with truthful
   `Page n of m` navigation. Use Previous and Next to review every page; rotating an
   iPhone/iPad or resizing the Mac window preserves the selected page.
-- On iOS, a Messages attachment can open directly in Rune Scribe. macOS does not claim
-  automatic Messages import; use the file, Import, or a `runescribe://` link.
+- On iOS, paste the received Messages rune text into Rune Scribe to decode with an
+  imported cipher. Supported message files received through another file route can
+  still open in Rune Scribe. macOS does not claim automatic Messages import; use the
+  file, Import, or a `runescribe://` link.
 - The new custom-bubble transcript, artwork tap, cold/warm installed-app handoff,
   deleted-app product/App Store fallback, and green-bubble/SMS
   retention have not been run on two physical iPhones. Simulator and signing results do
@@ -98,8 +109,9 @@ Received plaintext remains complete, selectable, and reflows within the availabl
 width. Rune Scribe does not label a message with a false line count or hide the rest
 behind an inactive disclosure control.
 
-If a themed preview cannot be rendered, Rune Scribe preserves the underlying secure
-share and clearly reports that the standard legacy appearance was used. If an import
+If a themed preview cannot be rendered, the underlying encrypted package remains
+available through file-sharing destinations. iOS Messages requires valid artwork and
+does not substitute a visible message file. If an import
 fails, retain the original file and record the platform, app version, and exact visible
 error; do not send cipher keys or decrypted text in a support request.
 
@@ -110,7 +122,8 @@ UI supports Dynamic Type, VoiceOver labels, keyboard and pointer focus, High Con
 Reduce Motion, monochrome presentation, and non-audio unlock feedback. Manual hardware
 observations are superseded by repository-controlled Simulator, hosted, and deterministic
 equivalents and are not a pending shippability boundary. The current source is a
-repository-qualified release candidate with no known release-blocking defects. Retained
+beta-fix candidate with focused evidence and the limits recorded in the qualification
+summary. Retained
 prior headless UI results remain regression context rather than current-candidate
 source-bound evidence. Fresh current-source archive and export qualification is required
 before owner upload; App Store Connect validation, upload, submission, release, and

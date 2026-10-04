@@ -29,6 +29,12 @@ first delivery advances only after an eligible terminal result. Duplicate callba
 for one operation are ignored. Artifact cleanup follows its lifetime policy regardless
 of whether the outcome is progression-eligible.
 
+For ordinary iOS message sends, the required attachment is the validated PNG artwork
+accepted by MessageUI; the Core package remains an operation-lifetime resource and is
+not attached. These message artifacts require no key delivery. Cipher invitations and
+explicit key-bearing exports retain their separate completion policy. See
+[ADR-RS-015](ADR-RS-015-encoded-messages-artwork-and-runes.md).
+
 ## Consequences
 
 - Existing iOS native-share and MessageUI adapters are a foundation but their contract

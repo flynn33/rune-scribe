@@ -1203,9 +1203,9 @@ public actor RuneScribeCoreApplicationService: RuneScribeOperationAwareApplicati
             }
 
             // A Messages completion is eligible for a message Artifact only when
-            // the system composer accepted the canonical package. This applies to
-            // established messages too: `requiresKeyDelivery` controls key inclusion,
-            // not whether the `.runescribe` transport may be omitted.
+            // the system composer accepted the required message attachment (the
+            // rendered artwork for key-free message sends). Cipher delivery is a
+            // separate operation governed by `requiresKeyDelivery`.
             let messageTransportConfirmed = durable.messageCipherID == nil
                 || evidence.report.routeClass != .messages
                 || evidence.report.requiredAttachmentAccepted == true

@@ -315,7 +315,7 @@ struct CipherLibraryView: View {
         .confirmationDialog("Organize ciphers by contact?", isPresented: $showContactsPrompt, titleVisibility: .visible) {
             Button("Import from Contacts") { showContactsManager = true }
             Button("Add Manually") { showContactsManager = true }
-            Button("Not Now", role: .cancel) { }
+            Button("Skip") { showContactsPrompt = false }
         } message: {
             Text("Link ciphers to people to keep them organized. You can also do this anytime in Settings → Contacts.")
         }

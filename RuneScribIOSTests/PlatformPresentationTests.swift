@@ -126,7 +126,7 @@ final class PlatformPresentationTests: XCTestCase {
         )
     }
 
-    func testMessageComposeAttachmentSetupRejectsMissingCanonicalPackage() {
+    func testMessageComposeAttachmentSetupRejectsMissingArtwork() {
         XCTAssertEqual(
             MessageComposeAttachmentSetupPolicy.decide(
                 requiredAttachmentWasPresent: false,

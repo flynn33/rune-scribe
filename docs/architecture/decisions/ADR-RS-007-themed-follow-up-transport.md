@@ -2,10 +2,15 @@
 
 **Controlling policy:** [Rune Scribe Controlling Forsetti Policy](../FORSETTI_CONTROLLING_POLICY.md)
 
-**Status:** Accepted; implemented for the source-complete Wave 4 path
+**Status:** Accepted for package routes; iOS Messages transport superseded by ADR-RS-015
 **Date:** 2026-08-09
 
-## Decision
+## Original decision
+
+The iOS Messages attachment requirement below is superseded by
+[ADR-RS-015](ADR-RS-015-encoded-messages-artwork-and-runes.md). Package construction and
+non-Messages file routes retain this decision. Regular message packages contain no
+cipher key; cipher delivery is a separate explicit invitation operation.
 
 Every themed or customized message share carries a versioned message package, even
 after the cipher key has already been delivered. A first-delivery package may include

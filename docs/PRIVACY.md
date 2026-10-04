@@ -1,7 +1,7 @@
 # Rune Scribe Privacy Policy
 
-**Effective date:** October 3, 2026
-**Applies to:** Rune Scribe 1.0.45 (build 45) for iOS and macOS
+**Effective date:** October 4, 2026
+**Applies to:** Rune Scribe 1.0.46 (build 46) for iOS and macOS
 
 Rune Scribe is a local-first encryption and sharing app from Raven Forge Software. It
 does not require a Raven Forge account and does not use advertising, tracking,
@@ -15,8 +15,9 @@ Data Protection Keychain storage. On macOS, legacy migration reads only the clas
 default keychain and never deletes its file-based source, including when an imported or
 restored keychain is the current default. The replacement bytes and accessibility class
 are verified, and explicit deletion records a this-device-only blocker that prevents
-legacy remigration. Optional Contacts access is used only to organize ciphers locally;
-contact names, addresses, system identifiers, and relationship identifiers are not sent
+legacy remigration. Optional Contacts access is used only to organize ciphers locally.
+The first-use Manage Ciphers prompt offers **Skip** without requesting contact access.
+Contact names, addresses, system identifiers, and relationship identifiers are not sent
 to iCloud or Game Center. On iOS, camera access is used only to scan a QR code; camera
 frames are processed on-device and are not retained or uploaded.
 
@@ -24,7 +25,9 @@ Sharing uses Apple-provided share, file, clipboard, Messages, AirDrop, print, an
 surfaces selected by the user. Rune Scribe does not operate a relay for those transfers.
 The destination app or service is governed by its own privacy terms after the user
 chooses to share.
-Regular message packages contain encrypted message data without cipher key material.
+Ordinary iOS Messages sends include rendered artwork and encrypted rune text without
+a trailing message file. Other file-sharing destinations retain message packages,
+which contain encrypted message data without cipher key material.
 Cipher Manager's explicit Share action creates a cipher invitation that carries the key.
 The iOS invitation has an empty Messages composer body; its validated URL stays in
 `MSMessage.url` with the themed artwork.

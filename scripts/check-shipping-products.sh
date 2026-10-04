@@ -348,8 +348,8 @@ errors << "platform marketing versions differ" unless marketing_versions.uniq.le
 errors << "platform build numbers differ" unless build_versions.uniq.length == 1
 errors << "marketing version is malformed" unless marketing_versions.first.to_s.match?(/\A\d+(?:\.\d+){1,2}\z/)
 errors << "build number is malformed" unless build_versions.first.to_s.match?(/\A\d+\z/)
-errors << "built marketing version differs from current 1.0.45" unless marketing_versions == ["1.0.45", "1.0.45"]
-errors << "built build number differs from current 45" unless build_versions == ["45", "45"]
+errors << "built marketing version differs from current 1.0.46" unless marketing_versions == ["1.0.46", "1.0.46"]
+errors << "built build number differs from current 46" unless build_versions == ["46", "46"]
 
 puts errors
 exit(errors.empty? ? 0 : 1)
@@ -2134,9 +2134,9 @@ errors << "project.yml package declarations differ" unless project.fetch("packag
 
 base_settings = project.dig("settings", "base")
 unless base_settings.is_a?(Hash) &&
-    base_settings["MARKETING_VERSION"] == "1.0.45" &&
-    base_settings["CURRENT_PROJECT_VERSION"] == "45"
-  errors << "project.yml version/build differ from current 1.0.45 (45)"
+    base_settings["MARKETING_VERSION"] == "1.0.46" &&
+    base_settings["CURRENT_PROJECT_VERSION"] == "46"
+  errors << "project.yml version/build differ from current 1.0.46 (46)"
 end
 
 expected_macos_entitlements = {
@@ -2601,9 +2601,9 @@ end
 
 configurations_for(objects, project_object, "generated project", errors).each do |configuration|
   settings = configuration.fetch("buildSettings", {})
-  unless settings["MARKETING_VERSION"] == "1.0.45" &&
-      settings["CURRENT_PROJECT_VERSION"] == "45"
-    errors << "generated project #{configuration['name']} version/build differ from current 1.0.45 (45)"
+  unless settings["MARKETING_VERSION"] == "1.0.46" &&
+      settings["CURRENT_PROJECT_VERSION"] == "46"
+    errors << "generated project #{configuration['name']} version/build differ from current 1.0.46 (46)"
   end
   forbidden_build_settings.each do |setting|
     errors << "generated project #{configuration['name']} injects #{setting}" if settings.key?(setting)

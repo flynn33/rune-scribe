@@ -67,13 +67,8 @@ public struct MessageComposeCompletionGate: Equatable, Sendable {
     }
 }
 
-/// Thin SwiftUI bridge to the system Messages compose sheet. The user taps Send
-/// in Apple's own UI. Canonical themed deliveries use a key-free
-/// `.runescribe` message attachment. When the
-/// themed renderer succeeds, the same validated PNG preview is proposed as a second
-/// attachment. This bridge rejects an attachment that the composer cannot accept and
-/// records the send result. Actual Messages transcript
-/// behavior remains a physical-device qualification boundary.
+/// Sends the rendered artwork and rune text through Apple's compose sheet.
+/// The scoped Core transfer tracks completion; its package is not attached.
 public struct MessageComposeView: UIViewControllerRepresentable {
     private let messageText: String
     private let recipients: [String]?
@@ -99,10 +94,7 @@ public struct MessageComposeView: UIViewControllerRepresentable {
         attachment?.presentationURL
     }
 
-    /// Whether this device can send this message at all. Pass
-    /// `requiredAttachment: true` for the canonical themed package so the
-    /// attachment cannot be silently dropped. Callers must preflight this before
-    /// presenting the composer.
+    /// Whether this device can send text and the required PNG artwork.
     ///
     /// The `MFMessageComposeViewController` capability probes are main-actor-isolated, so
     /// this accessor is too; it is only read from the view body / a button action.
@@ -112,14 +104,16 @@ public struct MessageComposeView: UIViewControllerRepresentable {
         guard requiredAttachment else { return true }
         return MFMessageComposeViewController.canSendAttachments()
             && MFMessageComposeViewController.isSupportedAttachmentUTI(
-                RuneScribeWireFormat.contentType
+                "public.png"
             )
     }
 
     public func makeCoordinator() -> Coordinator {
         Coordinator(
             onFinish: finish,
-            requiredAttachmentWasPresent: attachmentURL != nil
+            requiredAttachmentWasPresent: previewImageData.flatMap {
+                RuneScribeMessagePreviewAttachment.validatedPNG($0)
+            } != nil
         )
     }
 
@@ -129,30 +123,19 @@ public struct MessageComposeView: UIViewControllerRepresentable {
         composer.body = messageText
         if let recipients { composer.recipients = recipients }
 
-        var requiredAttachmentAccepted = false
-        if let attachmentURL {
-            let filename = "message.\(RuneScribeWireFormat.fileExtension)"
-            requiredAttachmentAccepted = composer.addAttachmentURL(
-                attachmentURL,
-                withAlternateFilename: filename
-            )
+        let validatedPreview = previewImageData.flatMap {
+            RuneScribeMessagePreviewAttachment.validatedPNG($0)
         }
-        if let previewImageData {
-            let validatedPreview = RuneScribeMessagePreviewAttachment.validatedPNG(
-                previewImageData
+        let requiredAttachmentAccepted = validatedPreview.map {
+            composer.addAttachmentData(
+                $0,
+                typeIdentifier: "public.png",
+                filename: "Rune-Scribe.png"
             )
-            requiredAttachmentAccepted = requiredAttachmentAccepted
-                && validatedPreview.map {
-                    composer.addAttachmentData(
-                        $0,
-                        typeIdentifier: "public.png",
-                        filename: "Rune-Scribe.png"
-                    )
-                } == true
-        }
+        } == true
 
         switch MessageComposeAttachmentSetupPolicy.decide(
-            requiredAttachmentWasPresent: attachmentURL != nil,
+            requiredAttachmentWasPresent: attachmentURL != nil && validatedPreview != nil,
             requiredAttachmentAccepted: requiredAttachmentAccepted
         ) {
         case .presentComposer(let accepted):
@@ -203,7 +186,7 @@ public struct MessageComposeView: UIViewControllerRepresentable {
         @preconcurrency MFMessageComposeViewControllerDelegate
     {
         let onFinish: ((SharePresentationReportDTO) -> Void)?
-        /// Whether this send was required to carry the scoped Core artifact.
+        /// Whether this send included the required PNG artwork.
         let requiredAttachmentWasPresent: Bool
         /// Whether the required attachment was actually accepted by the composer.
         var requiredAttachmentAccepted = false
@@ -253,7 +236,8 @@ public struct MessageComposeView: UIViewControllerRepresentable {
 @_spi(RuntimeTesting)
 public enum RuneScribeMessagePreviewAttachment {
     public static func validatedPNG(_ data: Data) -> Data? {
-        guard UIImage(data: data) != nil else { return nil }
+        guard data.starts(with: [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]),
+              UIImage(data: data) != nil else { return nil }
         return data
     }
 }

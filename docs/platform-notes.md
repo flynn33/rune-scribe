@@ -22,10 +22,19 @@ bounded resources, and matching hashes before their Core payload is admitted.
 
 ## iOS Intake
 
-iOS supports opening a Messages attachment directly in Rune Scribe. A regular message
-package contains the encrypted message without an embedded cipher. The recipient
-imports a separately shared cipher from Cipher Manager before decoding; messages use
-the confirmed local cipher identity rather than trusting the wire sender label.
+Ordinary iOS Messages sends carry rendered PNG artwork and rune text, with no trailing
+`.runescribe` message attachment. This applies to direct Messages, Messages chosen
+from Quick Share, and the encrypted-message route in Customize Share. Missing or invalid
+artwork prevents the Messages route from sending a package instead.
+
+The recipient imports a separately shared cipher from Cipher Manager, then pastes the
+rune text into Rune Scribe to decode it. Other file-sharing destinations retain the
+key-free encrypted message package; opening a supported file in Rune Scribe remains
+available. Messages use the confirmed local cipher identity rather than trusting a
+wire sender label.
+
+Manage Ciphers offers **Skip** on its first-use contacts prompt. Skipping dismisses the
+prompt and leaves cipher management usable without contact import.
 
 Cipher invitations also have a dedicated Messages extension route. The sender composes
 an `MSMessage` with the themed 4:3 artwork in `MSMessageTemplateLayout.image` and the
@@ -73,7 +82,9 @@ does not determine product shippability.
 Manual hardware observations are superseded for the previously covered behavior by
 repository-controlled macOS hosted, iPhone Simulator, iPad Simulator, and deterministic
 evidence. The new Messages extension device matrix above is an explicit exception.
-Version 1.0.45 build 45 is the current source candidate and is not shipped. The linked
+Version 1.0.46 build 46 is the current source candidate and is not shipped. The
+[beta-fix qualification](verification/release-1.0.46/QualificationSummary.md) records
+focused Xcode results before the version bump and their explicit Messages limitation. The linked
 [qualification report](verification/ui-xcode-remediation/QualificationSummary.md)
 records the earlier 1.0.41 source; fresh current-source qualification is required.
 Version 1.0.40 retained evidence records the iPhone
@@ -88,5 +99,6 @@ they predate later merged changes and must not be reused for the current source.
 qualification, upload, and submission remain owner-operated publication work. The separate v4.3 package audit is incomplete
 but noncontrolling.
 
-The same privacy rule applies on both platforms: a `.runescribe` file or import link
-carries the actual cipher key. Share it only through a private channel.
+The same privacy rule applies on both platforms: a cipher-invitation `.runescribe` file
+or import link carries the actual cipher key. Share it only through a private channel.
+Encrypted message packages contain no cipher key.

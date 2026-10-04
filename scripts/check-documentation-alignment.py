@@ -256,7 +256,7 @@ require(
 readme = read("README.md")
 normalized_readme = re.sub(r"\s+", " ", readme)
 require(
-    "Every themed message keeps the `.runescribe` attachment but carries **no key**"
+    "Message packages carry **no key**"
     in normalized_readme
     and "Share the cipher explicitly from Cipher Manager" in normalized_readme,
     "README does not describe key-free messages and explicit cipher sharing",
@@ -289,7 +289,7 @@ require("## 🗺 Implementation roadmap" in readme, "README lacks the implementa
 readme_roadmap = readme.split("## 🗺 Implementation roadmap", 1)[-1].split("## 🔐 Security & privacy", 1)[0]
 normalized_readme_roadmap = re.sub(r"\s+", " ", readme_roadmap)
 require(
-    f"Version {marketing} build {build} is the current UI/Xcode remediation candidate"
+    f"Version {marketing} build {build} is the current beta-fix source candidate"
     in normalized_readme_roadmap,
     "README roadmap version differs from the project version",
 )
@@ -352,7 +352,8 @@ require(
     "they do not replace the five unrun messages-extension rows above"
     in re.sub(r"\s+", " ", submission).lower()
     and "installed recipient with Rune Scribe cold" in submission
-    and "green-bubble/SMS send retains the HTTPS URL" in submission,
+    and "Observe and record cipher invitation behavior for green-bubble/SMS delivery"
+    in submission,
     "App Store packet lacks the unrun Messages-extension physical-device boundary",
 )
 require(
@@ -549,14 +550,23 @@ content_view = read(
 )
 normalized_content_view = re.sub(r"\s+", " ", re.sub(r"\s*///\s*", " ", content_view))
 require(
-    "Every delivery carries the canonical themed `.runescribe` message package."
+    "Messages receives this rune text alongside the rendered artwork."
     in normalized_content_view,
-    "ContentView commentary does not describe the message package on every delivery",
+    "ContentView does not describe the Messages artwork and rune transport",
 )
 require(
-    "Its encrypted envelope and presentation metadata never include the cipher key."
+    "outgoingMessageText: String { targetSnapshot }"
     in normalized_content_view,
-    "ContentView commentary does not describe the key-free message payload",
+    "ContentView does not keep the encoded rune snapshot as the message body",
+)
+message_composer = read(
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/RuntimeMessageComposeView.swift"
+)
+require(
+    "composer.body = messageText" in message_composer
+    and "composer.addAttachmentData(" in message_composer
+    and "addAttachmentURL(" not in message_composer,
+    "Messages composer must send artwork and rune text without the package URL",
 )
 
 stale_transport_policy = re.compile(

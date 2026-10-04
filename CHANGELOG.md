@@ -8,6 +8,19 @@ release work and reviewed against the project version before merge. The format f
 <!-- NEW ENTRIES BELOW -->
 ## [Unreleased]
 
+## [1.0.46] - 2026-10-04
+
+- Remove the trailing message file from ordinary iOS Messages sends. Direct Messages,
+  Quick Share, and Customize Share provide the rendered artwork and rune text; other
+  file destinations retain the importable message package. Separate cipher invitations
+  and explicit cipher exports retain their existing behavior.
+- Add a visible **Skip** action to the first-use Manage Ciphers contacts prompt so
+  users can continue without importing contacts.
+- Advance the source candidate to version 1.0.46 build 46. Focused Xcode runs before
+  the version bump recorded 31 iPhone and 23 iPad tests passed, with one Messages
+  composer test skipped on each device. Actual sent-recipient behavior remains owner
+  testing; no aggregate suite pass, Store upload, or shipment is claimed.
+
 ## [1.0.45] - 2026-10-03
 
 - Remove an unused share-completion result variable that caused a Swift compiler

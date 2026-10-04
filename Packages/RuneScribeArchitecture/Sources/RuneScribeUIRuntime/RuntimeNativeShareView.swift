@@ -109,17 +109,23 @@ public struct RuneScribeFileShareLink: View {
 /// after the runtime artifact and its presentation lease are ready.
 public struct RuneScribePreparedFileShareLauncher: View {
     @ObservedObject private var transfer: OpaqueShareTransfer
+    private let messageText: String?
+    private let previewImageData: Data?
     private let launchID: UUID
     private let onPresented: @MainActor () -> Void
     private let onFinish: @MainActor (SharePresentationCompletion) -> Void
 
     public init(
         transfer: OpaqueShareTransfer,
+        messageText: String? = nil,
+        previewImageData: Data? = nil,
         launchID: UUID,
         onPresented: @escaping @MainActor () -> Void = {},
         onFinish: @escaping @MainActor (SharePresentationCompletion) -> Void
     ) {
         self.transfer = transfer
+        self.messageText = messageText
+        self.previewImageData = previewImageData
         self.launchID = launchID
         self.onPresented = onPresented
         self.onFinish = onFinish
@@ -131,7 +137,13 @@ public struct RuneScribePreparedFileShareLauncher: View {
                 #if os(iOS)
                 RuneScribeIOSAutomaticActivityLauncher(
                     launchID: launchID,
-                    payload: .file(presentationURL),
+                    payload: messageText.map {
+                        .messageFile(
+                            presentationURL,
+                            messageText: $0,
+                            previewImageData: previewImageData
+                        )
+                    } ?? .file(presentationURL),
                     onPresented: reportPresented,
                     onFinish: finish
                 )
@@ -567,6 +579,7 @@ private struct RuneScribeIOSAutomaticActivityLauncher: View {
 
 private enum RuneScribeIOSActivityPayload {
     case file(URL)
+    case messageFile(URL, messageText: String, previewImageData: Data?)
     case text(String)
     case link(
         URL,
@@ -589,6 +602,12 @@ private enum RuneScribeIOSActivityPayload {
                     subject: nil
                 ),
             ]
+        case let .messageFile(url, messageText, previewImageData):
+            return RuneScribeIOSMessageActivityItemFactory.makeItems(
+                packageURL: url,
+                messageText: messageText,
+                previewImageData: previewImageData
+            )
         case .text(let text):
             return [text as NSString]
         case let .link(
@@ -608,6 +627,74 @@ private enum RuneScribeIOSActivityPayload {
                 message: message
             )
         }
+    }
+
+    @MainActor
+    var excludedActivityTypes: [UIActivity.ActivityType] {
+        guard case .messageFile(_, _, let previewImageData) = self,
+              !RuneScribeIOSMessageActivityItemFactory.canShareToMessages(
+                previewImageData: previewImageData
+              )
+        else { return [] }
+        return [.message]
+    }
+}
+
+/// Messages receives the rendered artwork and runes. Other destinations retain
+/// the importable package, including Mail, AirDrop, and explicit file export.
+@_spi(RuntimeTesting)
+@MainActor
+public enum RuneScribeIOSMessageActivityItemFactory {
+    public static func canShareToMessages(previewImageData: Data?) -> Bool {
+        guard let previewImageData else { return false }
+        return RuneScribeMessagePreviewAttachment.validatedPNG(previewImageData) != nil
+    }
+
+    public static func makeItems(
+        packageURL: URL,
+        messageText: String,
+        previewImageData: Data?
+    ) -> [Any] {
+        var items: [Any] = []
+        if let previewImageData,
+           let png = RuneScribeMessagePreviewAttachment.validatedPNG(previewImageData),
+           let image = UIImage(data: png) {
+            items.append(RuneScribeIOSMessageActivityItemSource(item: image))
+            items.append(RuneScribeIOSMessageActivityItemSource(
+                item: messageText as NSString
+            ))
+        }
+        items.append(RuneScribeIOSActivityItemSource(
+            url: packageURL,
+            previewTitle: "Rune Scribe message",
+            previewSystemImage: "doc.fill",
+            subject: nil,
+            omitFromMessages: true
+        ))
+        return items
+    }
+}
+
+private final class RuneScribeIOSMessageActivityItemSource: NSObject,
+    UIActivityItemSource
+{
+    private let item: Any
+
+    init(item: Any) {
+        self.item = item
+    }
+
+    func activityViewControllerPlaceholderItem(
+        _ activityViewController: UIActivityViewController
+    ) -> Any {
+        item
+    }
+
+    func activityViewController(
+        _ activityViewController: UIActivityViewController,
+        itemForActivityType activityType: UIActivity.ActivityType?
+    ) -> Any? {
+        activityType == .message ? item : nil
     }
 }
 
@@ -791,6 +878,7 @@ private final class RuneScribeIOSActivityPresenterController: UIViewController,
             activityItems: presentation.activityItems,
             applicationActivities: nil
         )
+        controller.excludedActivityTypes = presentation.payload.excludedActivityTypes
         controller.completionWithItemsHandler = {
             [weak self, weak controller, presentation] activityType, completed, _, error in
             guard let controller else {
@@ -900,19 +988,22 @@ private final class RuneScribeIOSActivityItemSource: NSObject,
     private let previewSystemImage: String
     private let previewImageData: Data?
     private let subject: String?
+    private let omitFromMessages: Bool
 
     init(
         url: URL,
         previewTitle: String,
         previewSystemImage: String,
         previewImageData: Data? = nil,
-        subject: String?
+        subject: String?,
+        omitFromMessages: Bool = false
     ) {
         self.url = url
         self.previewTitle = previewTitle
         self.previewSystemImage = previewSystemImage
         self.previewImageData = previewImageData
         self.subject = subject
+        self.omitFromMessages = omitFromMessages
     }
 
     func activityViewControllerPlaceholderItem(
@@ -925,7 +1016,8 @@ private final class RuneScribeIOSActivityItemSource: NSObject,
         _ activityViewController: UIActivityViewController,
         itemForActivityType activityType: UIActivity.ActivityType?
     ) -> Any? {
-        url
+        guard !omitFromMessages || activityType != .message else { return nil }
+        return url
     }
 
     func activityViewController(

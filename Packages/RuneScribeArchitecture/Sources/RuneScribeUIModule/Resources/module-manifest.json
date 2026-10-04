@@ -4,7 +4,7 @@
   "runtimeVersion": "1.0.0",
   "moduleID": "com.runescribe.module.ui",
   "displayName": "Rune Scribe Interface",
-  "moduleVersion": "1.0.45",
+  "moduleVersion": "1.0.46",
   "moduleType": "ui",
   "criticality": "required",
   "supportedPlatforms": [

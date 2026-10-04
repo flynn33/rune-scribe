@@ -290,8 +290,7 @@ struct ContentView: View {
         transformDirection == .encode ? session.activeCipher : nil
     }
 
-    /// Every delivery carries the canonical themed `.runescribe` message package.
-    /// Its encrypted envelope and presentation metadata never include the cipher key.
+    /// Messages receives this rune text alongside the rendered artwork.
     private var outgoingMessageText: String { targetSnapshot }
 
     // MARK: - Body
@@ -932,7 +931,7 @@ struct ContentView: View {
     private func resultMessageButton(resistsCompression: Bool) -> some View {
         Button {
             if !MessageComposeView.canSend(requiredAttachment: true) {
-                decodeError = "This device can’t attach Rune Scribe files to Messages. Use Share instead."
+                decodeError = "This device can’t send message artwork through Messages. Use Share instead."
                 return
             }
             beginMessageArtifactPreparation(destination: .messages)
@@ -1674,6 +1673,8 @@ struct ContentView: View {
            case .file = artifact.reference {
             RuneScribePreparedFileShareLauncher(
                 transfer: transfer,
+                messageText: outgoingMessageText,
+                previewImageData: pendingMessagePreviewImageData,
                 launchID: messageShareLaunchID,
                 onPresented: {
                     session.setRevealBlocker(.systemShare, active: true)

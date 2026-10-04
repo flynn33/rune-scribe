@@ -1,6 +1,6 @@
 # Rune Scribe Module Graph
 
-Current Core, Progression, and UI module version `1.0.45` matches the application
+Current Core, Progression, and UI module version `1.0.46` matches the application
 candidate. Theme provider versions remain independently governed by their accepted
 resource contracts.
 
