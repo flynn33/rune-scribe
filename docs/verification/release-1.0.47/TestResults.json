@@ -1,0 +1,44 @@
+{
+  "ios-final": {
+    "result": "Passed",
+    "totalTestCount": 12,
+    "passedTests": 12,
+    "failedTests": 0,
+    "skippedTests": 0
+  },
+  "mac-focused": {
+    "result": "Passed",
+    "totalTestCount": 5,
+    "passedTests": 5,
+    "failedTests": 0,
+    "skippedTests": 0
+  },
+  "mac-final-2": {
+    "result": "Failed",
+    "totalTestCount": 6,
+    "passedTests": 5,
+    "failedTests": 1,
+    "skippedTests": 0
+  },
+  "baseline-mac-sharebuilder": {
+    "result": "Failed",
+    "totalTestCount": 1,
+    "passedTests": 0,
+    "failedTests": 1,
+    "skippedTests": 0
+  },
+  "ios-verified": {
+    "result": "Passed",
+    "totalTestCount": 12,
+    "passedTests": 12,
+    "failedTests": 0,
+    "skippedTests": 0
+  },
+  "mac-verified": {
+    "result": "Passed",
+    "totalTestCount": 5,
+    "passedTests": 5,
+    "failedTests": 0,
+    "skippedTests": 0
+  }
+}

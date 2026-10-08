@@ -4,7 +4,7 @@
 
 ## Authority and scope
 
-**Current application:** version 1.0.46 build 46
+**Current application:** version 1.0.47 build 47
 
 The current UI/Xcode remediation is mapped in the
 [September 2026 amendment](../product-roadmap/Rune-Scribe-UI-Xcode-Remediation-Amendment-2026-09.md)
@@ -44,7 +44,7 @@ effective only where they do not conflict with that authority.
 
 ## Current result
 
-Version 1.0.46 build 46 carries the source-complete authorized roadmap baseline, Theme
+Version 1.0.47 build 47 carries the source-complete authorized roadmap baseline, Theme
 Fidelity source remediation, and the bounded UI/Xcode repair described by W01-W09.
 The linked UI/Xcode qualification report records the earlier 1.0.41 source and Store
 artifacts; fresh current-source qualification is required. The retained version 1.0.40
@@ -58,7 +58,7 @@ matching Apple distribution identities, Store profiles, production entitlements,
 architectures, and package signatures. Those artifacts predate later merged theme,
 Universal Link, tutorial, and workspace changes and do not qualify the current source.
 Those 1.0.40 results remain historical rather than evidence for the new source. The
-1.0.46 candidate is deliberately **NOT SHIPPED**; a fresh qualification run must make
+1.0.47 candidate is deliberately **NOT SHIPPED**; a fresh qualification run must make
 the current-source decision. The repository now contains:
 
 - app-owned runtime composition, bounded contracts, capability policy, thin hosts,
@@ -94,6 +94,12 @@ The 1.0.46 transport and contact-prompt changes are recorded in the
 (23 passed, 1 skipped), plus ten repeatability payload tests. The Messages composer
 case was skipped because these simulators cannot send iMessage; a separate activation
 test also fails on the original baseline and was excluded from the focused run.
+
+The 1.0.47 corrective source changes separate Messages composition from package
+sharing on iOS and macOS. Current qualification is recorded in the
+[1.0.47 report](../verification/release-1.0.47/QualificationSummary.md); historical
+1.0.46 results are not relabeled. The screenshot's sending platform and runtime path,
+and the actual recipient transcript, remain unverified.
 
 For 1.0.44, focused local repair tests and an unsigned iOS build passed. The 1.0.45
 warning fix passed an unsigned macOS build from the Downloads project. A Messages
@@ -252,7 +258,7 @@ For the retained roadmap-completion baseline, those gates established:
 - **MANUAL HARDWARE VALIDATION SUPERSEDED**
 - **NOT SHIPPED**
 
-The version 1.0.46 build 46 candidate must satisfy the same product acceptance boundary:
+The version 1.0.47 build 47 candidate must satisfy the same product acceptance boundary:
 
 - **FINAL-SOURCE REPOSITORY GATES REQUIRED**
 - **REPOSITORY QUALIFICATION REQUIRED**

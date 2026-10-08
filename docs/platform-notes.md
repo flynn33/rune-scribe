@@ -20,12 +20,18 @@ payloads must have the expected version, byte length, rune permutation, and chec
 Typed packages additionally require canonical sections, supported required versions,
 bounded resources, and matching hashes before their Core payload is admitted.
 
-## iOS Intake
+## Ordinary Messages transport
 
-Ordinary iOS Messages sends carry rendered PNG artwork and rune text, with no trailing
-`.runescribe` message attachment. This applies to direct Messages, Messages chosen
-from Quick Share, and the encrypted-message route in Customize Share. Missing or invalid
-artwork prevents the Messages route from sending a package instead.
+Candidate 1.0.47 (47) separates ordinary Messages composition from package sharing on
+both platforms. Direct iOS Messages, Quick Share, and encrypted-message Customize Share
+supply validated artwork and rune text without the `.runescribe` package.
+
+On iOS, the file-sharing sheet excludes Apple's native file-based Messages activity.
+A separate Messages activity presents an `MFMessageComposeViewController` with only PNG
+artwork and the rune body. On macOS, a custom picker entry forwards exactly an `NSImage`
+and rune `NSString` to the real Messages service. Missing or invalid artwork suppresses
+the Messages route; other destinations retain the package. macOS uses public AppKit
+completion callbacks and does not claim MessageUI's `sentConfirmed` result.
 
 The recipient imports a separately shared cipher from Cipher Manager, then pastes the
 rune text into Rune Scribe to decode it. Other file-sharing destinations retain the
@@ -35,6 +41,8 @@ wire sender label.
 
 Manage Ciphers offers **Skip** on its first-use contacts prompt. Skipping dismisses the
 prompt and leaves cipher management usable without contact import.
+
+## iOS Intake
 
 Cipher invitations also have a dedicated Messages extension route. The sender composes
 an `MSMessage` with the themed 4:3 artwork in `MSMessageTemplateLayout.image` and the
@@ -82,9 +90,12 @@ does not determine product shippability.
 Manual hardware observations are superseded for the previously covered behavior by
 repository-controlled macOS hosted, iPhone Simulator, iPad Simulator, and deterministic
 evidence. The new Messages extension device matrix above is an explicit exception.
-Version 1.0.46 build 46 is the current source candidate and is not shipped. The
-[beta-fix qualification](verification/release-1.0.46/QualificationSummary.md) records
-focused Xcode results before the version bump and their explicit Messages limitation. The linked
+Version 1.0.47 build 47 is the current source candidate and is not shipped. Current
+qualification belongs in the [1.0.47 report](verification/release-1.0.47/QualificationSummary.md).
+The screenshot's sending platform and exact runtime path, and the actual recipient
+transcript, remain unverified. The retained
+[1.0.46 beta-fix qualification](verification/release-1.0.46/QualificationSummary.md)
+records historical focused Xcode results and their explicit Messages limitation. The linked
 [qualification report](verification/ui-xcode-remediation/QualificationSummary.md)
 records the earlier 1.0.41 source; fresh current-source qualification is required.
 Version 1.0.40 retained evidence records the iPhone

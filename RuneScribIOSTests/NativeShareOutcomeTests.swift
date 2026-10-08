@@ -8,77 +8,124 @@ import XCTest
 
 final class NativeShareOutcomeTests: XCTestCase {
     @MainActor
-    func testMessageShareSendsOnlyArtworkAndRunesToMessages() throws {
+    func testMessageComposerPayloadContainsOnlyPNGAndExactRuneBody() throws {
         let image = UIGraphicsImageRenderer(size: CGSize(width: 4, height: 3)).image {
             UIColor.systemIndigo.setFill()
             $0.fill(CGRect(x: 0, y: 0, width: 4, height: 3))
         }
         let png = try XCTUnwrap(image.pngData())
-        let packageURL = URL(fileURLWithPath: "/tmp/message.rune-scribe")
-        let runes = "ᚠᚢᚦᚨᚱᚲ"
-        let items = RuneScribeIOSMessageActivityItemFactory.makeItems(
-            packageURL: packageURL,
+        let runes = "ᚠᚢᚦᚨᚱᚲ\nᚷᚹᚺ"
+        let configuration = try XCTUnwrap(RuneScribeMessageComposerConfiguration(
             messageText: runes,
             previewImageData: png
-        )
-        let sources = items.compactMap { $0 as? any UIActivityItemSource }
-        XCTAssertEqual(sources.count, items.count)
-        let controller = UIActivityViewController(
-            activityItems: [],
-            applicationActivities: nil
-        )
+        ))
+        XCTAssertEqual(configuration.body, runes)
+        XCTAssertEqual(configuration.attachmentData, png)
+        XCTAssertEqual(configuration.attachmentTypeIdentifier, "public.png")
+        XCTAssertEqual(configuration.attachmentFilename, "Rune-Scribe.png")
 
-        let messageItems = sources.compactMap {
-            $0.activityViewController(controller, itemForActivityType: .message)
-        }
-        XCTAssertEqual(messageItems.count, 2)
-        let sharedImage = try XCTUnwrap(messageItems.compactMap { $0 as? UIImage }.first)
-        XCTAssertEqual(sharedImage.cgImage?.width, image.cgImage?.width)
-        XCTAssertEqual(sharedImage.cgImage?.height, image.cgImage?.height)
-        XCTAssertEqual(messageItems.compactMap { $0 as? NSString }.map(String.init), [runes])
-        XCTAssertTrue(messageItems.compactMap { $0 as? URL }.isEmpty)
-        XCTAssertTrue(RuneScribeIOSMessageActivityItemFactory.canShareToMessages(
+        let activity = try XCTUnwrap(RuneScribeIOSMessageShareFactory.makeMessageActivity(
+            messageText: runes,
             previewImageData: png
         ))
+        XCTAssertEqual(activity.activityTitle, "Messages")
+        XCTAssertEqual(activity.activityType, RuneScribeIOSMessageShareFactory.messageActivityType)
+        XCTAssertEqual(activity.activityType?.rawValue, "com.runescribe.share.message-artwork")
+        XCTAssertNotEqual(activity.activityType, .message)
+    }
 
-        for destination in [UIActivity.ActivityType.mail, .airDrop, .copyToPasteboard] {
-            let destinationItems = sources.compactMap {
-                $0.activityViewController(controller, itemForActivityType: destination)
-            }
-            XCTAssertEqual(destinationItems.count, 1)
-            XCTAssertEqual(destinationItems.first as? URL, packageURL)
+    @MainActor
+    func testMessagePackageSheetExcludesNativeMessagesAndPreservesFileRoutes() throws {
+        let packageURL = URL(fileURLWithPath: "/tmp/message.runescribe")
+        let image = UIGraphicsImageRenderer(size: CGSize(width: 4, height: 3)).image {
+            UIColor.systemIndigo.setFill()
+            $0.fill(CGRect(x: 0, y: 0, width: 4, height: 3))
+        }
+        let activity = try XCTUnwrap(RuneScribeIOSMessageShareFactory.makeMessageActivity(
+            messageText: "ᚠᚢᚦᚨᚱᚲ",
+            previewImageData: try XCTUnwrap(image.pngData())
+        ))
+        let items = RuneScribeIOSMessageShareFactory.makeFileItems(packageURL: packageURL)
+        let controller = RuneScribeIOSMessageShareFactory.makeController(
+            packageURL: packageURL,
+            messageActivity: activity
+        )
+        XCTAssertEqual(controller.excludedActivityTypes, [.message])
+        XCTAssertEqual(items.count, 1)
+        let source = try XCTUnwrap(items.first as? any UIActivityItemSource)
+        XCTAssertEqual(source.activityViewControllerPlaceholderItem(controller) as? URL, packageURL)
+        for destination in [nil, .mail, .airDrop, .copyToPasteboard] as [UIActivity.ActivityType?] {
+            XCTAssertEqual(source.activityViewController(
+                controller,
+                itemForActivityType: destination
+            ) as? URL, packageURL)
         }
     }
 
     @MainActor
-    func testMessageShareDisallowsMessagesWhenArtworkIsMissingOrInvalid() throws {
-        let packageURL = URL(fileURLWithPath: "/tmp/message.rune-scribe")
+    func testMessageComposerRejectsMissingOrInvalidArtworkWithoutPackageFallback() throws {
         let image = UIGraphicsImageRenderer(size: CGSize(width: 4, height: 3)).image {
             UIColor.systemIndigo.setFill()
             $0.fill(CGRect(x: 0, y: 0, width: 4, height: 3))
         }
         let jpeg = try XCTUnwrap(image.jpegData(compressionQuality: 0.8))
         for previewImageData in [nil, Data([0x00, 0x01]), jpeg] as [Data?] {
-            let items = RuneScribeIOSMessageActivityItemFactory.makeItems(
-                packageURL: packageURL,
+            XCTAssertNil(RuneScribeMessageComposerConfiguration(
                 messageText: "ᚠᚢᚦᚨᚱᚲ",
                 previewImageData: previewImageData
-            )
-            XCTAssertFalse(RuneScribeIOSMessageActivityItemFactory.canShareToMessages(
+            ))
+            XCTAssertNil(RuneScribeIOSMessageShareFactory.makeMessageActivity(
+                messageText: "ᚠᚢᚦᚨᚱᚲ",
                 previewImageData: previewImageData
             ))
-            let controller = UIActivityViewController(
-                activityItems: [],
-                applicationActivities: nil
-            )
-            let sources = items.compactMap { $0 as? any UIActivityItemSource }
-            XCTAssertTrue(sources.compactMap {
-                $0.activityViewController(controller, itemForActivityType: .message)
-            }.isEmpty)
-            XCTAssertEqual(sources.compactMap {
-                $0.activityViewController(controller, itemForActivityType: .mail) as? URL
-            }, [packageURL])
         }
+    }
+
+    @MainActor
+    func testActivityCompletionPreservesComposerOutcomeAndRejectsLateCancellation() throws {
+        let sent = MessageComposeReportMapper.report(
+            for: .sent,
+            requiredAttachmentWasPresent: true,
+            requiredAttachmentAccepted: true
+        )
+        let sentAfterDismissal = RuneScribeIOSMessageShareFactory.completionReport(
+            storedComposerReport: sent,
+            activityType: nil,
+            completed: false,
+            error: nil
+        )
+        XCTAssertEqual(sentAfterDismissal, sent)
+
+        let cancelled = MessageComposeReportMapper.report(
+            for: .cancelled,
+            requiredAttachmentWasPresent: true,
+            requiredAttachmentAccepted: true
+        )
+        let cancelledAfterSystemCompletion = RuneScribeIOSMessageShareFactory.completionReport(
+            storedComposerReport: cancelled,
+            activityType: RuneScribeIOSMessageShareFactory.messageActivityType,
+            completed: true,
+            error: nil
+        )
+        XCTAssertEqual(cancelledAfterSystemCompletion, cancelled)
+
+        let missingComposerOutcome = RuneScribeIOSMessageShareFactory.completionReport(
+            storedComposerReport: nil,
+            activityType: RuneScribeIOSMessageShareFactory.messageActivityType,
+            completed: true,
+            error: nil
+        )
+        XCTAssertEqual(missingComposerOutcome.routeClass, .messages)
+        XCTAssertEqual(missingComposerOutcome.result, .failed)
+        XCTAssertNil(missingComposerOutcome.requiredAttachmentAccepted)
+
+        var gate = RuneScribeActivityCompletionGate()
+        let accepted = try XCTUnwrap(gate.accept(sentAfterDismissal))
+        XCTAssertEqual(accepted.routeClass, .messages)
+        XCTAssertEqual(accepted.result, .sentConfirmed)
+        XCTAssertEqual(accepted.requiredAttachmentAccepted, true)
+        XCTAssertNil(gate.accept(cancelledAfterSystemCompletion))
+        XCTAssertNil(gate.accept(activityType: nil, completed: false, error: nil))
     }
 
     @MainActor
@@ -175,7 +222,7 @@ final class NativeShareOutcomeTests: XCTestCase {
         }.first)
         XCTAssertEqual(
             linkSource.activityViewController(
-                UIActivityViewController(activityItems: [], applicationActivities: nil),
+                UIActivityViewController(activityItems: items, applicationActivities: nil),
                 itemForActivityType: .message
             ) as? URL,
             importURL
@@ -204,7 +251,7 @@ final class NativeShareOutcomeTests: XCTestCase {
         }.first)
         XCTAssertEqual(
             linkSource.activityViewController(
-                UIActivityViewController(activityItems: [], applicationActivities: nil),
+                UIActivityViewController(activityItems: items, applicationActivities: nil),
                 itemForActivityType: .message
             ) as? URL,
             importURL

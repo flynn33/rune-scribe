@@ -190,6 +190,15 @@ private final class NativeShareSelfTest {
         using fixture: NativeShareRuntimeFixture
     ) async throws -> NativeShareStepReport {
         let transfer = try await fixture.makeLinkTransfer()
+        let preview = NSImage(size: NSSize(width: 4, height: 3), flipped: false) { rect in
+            NSColor.systemIndigo.setFill()
+            rect.fill()
+            return true
+        }
+        guard let tiff = preview.tiffRepresentation,
+              let bitmap = NSBitmapImageRep(data: tiff),
+              let previewPNG = bitmap.representation(using: .png, properties: [:])
+        else { throw NativeShareSelfTestFailure.unexpected }
         var triggerCount = 0
         var finishCompletion: SharePresentationCompletion?
         var presentation: RuneScribeSharePresentationHandle?
@@ -197,6 +206,7 @@ private final class NativeShareSelfTest {
             RuneScribeCipherLinkShareLink(
                 transfer: transfer,
                 cipherLabel: "Synthetic Cipher",
+                previewImageData: previewPNG,
                 onShareTriggered: { triggerCount += 1 },
                 onFinish: { finishCompletion = $0 },
                 onPresentation: { presentation = $0 }

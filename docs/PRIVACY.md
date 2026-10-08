@@ -1,7 +1,7 @@
 # Rune Scribe Privacy Policy
 
-**Effective date:** October 4, 2026
-**Applies to:** Rune Scribe 1.0.46 (build 46) for iOS and macOS
+**Effective date:** October 8, 2026
+**Applies to:** Rune Scribe 1.0.47 (build 47) for iOS and macOS
 
 Rune Scribe is a local-first encryption and sharing app from Raven Forge Software. It
 does not require a Raven Forge account and does not use advertising, tracking,
@@ -25,8 +25,8 @@ Sharing uses Apple-provided share, file, clipboard, Messages, AirDrop, print, an
 surfaces selected by the user. Rune Scribe does not operate a relay for those transfers.
 The destination app or service is governed by its own privacy terms after the user
 chooses to share.
-Ordinary iOS Messages sends include rendered artwork and encrypted rune text without
-a trailing message file. Other file-sharing destinations retain message packages,
+Ordinary Messages routes on iOS and macOS supply rendered artwork and encrypted rune
+text without the message package. Other file-sharing destinations retain message packages,
 which contain encrypted message data without cipher key material.
 Cipher Manager's explicit Share action creates a cipher invitation that carries the key.
 The iOS invitation has an empty Messages composer body; its validated URL stays in

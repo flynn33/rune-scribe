@@ -20,7 +20,7 @@ public enum RuneScribeProgressionModuleBootstrap {
 
     public static let descriptor = ModuleDescriptor(
         moduleID: moduleID,
-        moduleVersion: SemanticVersion(major: UInt(1), minor: UInt(0), patch: UInt(46)),
+        moduleVersion: SemanticVersion(major: UInt(1), minor: UInt(0), patch: UInt(47)),
         kind: .service,
         criticality: .optional,
         entryPoint: "RuneScribeProgressionModule",

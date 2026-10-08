@@ -185,8 +185,8 @@ def validate(document, root)
 
   application_version = document["applicationVersion"]
   if exact_keys(application_version, EXPECTED_APPLICATION_VERSION_KEYS, "applicationVersion", errors)
-    errors << "applicationVersion.marketing must be 1.0.46" unless application_version["marketing"] == "1.0.46"
-    errors << "applicationVersion.build must be 46" unless application_version["build"] == "46"
+    errors << "applicationVersion.marketing must be 1.0.47" unless application_version["marketing"] == "1.0.47"
+    errors << "applicationVersion.build must be 47" unless application_version["build"] == "47"
   end
 
   authority = document["authority"]

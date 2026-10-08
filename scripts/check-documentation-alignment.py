@@ -563,7 +563,9 @@ message_composer = read(
     "Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/RuntimeMessageComposeView.swift"
 )
 require(
-    "composer.body = messageText" in message_composer
+    "body = messageText" in message_composer
+    and "composer.body = body" in message_composer
+    and "configuration?.configure(composer)" in message_composer
     and "composer.addAttachmentData(" in message_composer
     and "addAttachmentURL(" not in message_composer,
     "Messages composer must send artwork and rune text without the package URL",

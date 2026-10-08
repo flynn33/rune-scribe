@@ -49,6 +49,6 @@ feature is accepted, two physical iPhones must cover:
 Each row must record what appeared in the transcript, what the first artwork tap did,
 and whether the containing-app import confirmation ran exactly once. These rows have not
 been run. Artwork-tap import, deleted-app product/App Store fallback, and SMS fallback
-therefore remain unproven for the current 1.0.46 source candidate. The ordinary-message
+therefore remain unproven for the current 1.0.47 source candidate. The ordinary-message
 transport change in [ADR-RS-015](ADR-RS-015-encoded-messages-artwork-and-runes.md) does not
 alter this separate cipher-invitation route or establish shipment.

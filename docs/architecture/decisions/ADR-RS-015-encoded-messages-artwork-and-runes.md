@@ -1,46 +1,62 @@
-# ADR-RS-015: Ordinary iOS Messages Artwork and Rune Transport
+# ADR-RS-015: Ordinary Messages Artwork and Rune Transport
 
 **Controlling policy:** [Rune Scribe Controlling Forsetti Policy](../FORSETTI_CONTROLLING_POLICY.md)
 
-**Status:** Accepted; focused source/payload evidence, sent-recipient qualification pending
-**Date:** 2026-10-04
-**Supersedes:** The ordinary iOS Messages attachment requirement in ADR-RS-007
+**Status:** Accepted; source implemented, current qualification and sent-recipient verification recorded separately
+**Date:** 2026-10-04; corrected 2026-10-08 for candidate 1.0.47 (47)
+**Supersedes:** The ordinary Messages package requirement in ADR-RS-007 on iOS and macOS
 
 ## Decision
 
-Ordinary iOS Messages sends present the rendered PNG artwork and the encrypted rune
-text without a trailing `.runescribe` message file. This applies to direct MessageUI
-composition, Messages chosen from Quick Share, and encrypted-message Customize Share.
+Ordinary Messages routes supply rendered PNG artwork and encrypted rune text without
+passing a `.runescribe` message package to Messages. This applies to direct iOS
+MessageUI composition, Quick Share, and encrypted-message Customize Share on both
+platforms. The actual recipient transcript remains unverified.
 
-The direct composer requires valid PNG artwork and an active scoped transfer, attaches
-only that artwork, and places the runes in its body. Attachment acceptance records the
-actual PNG result. Core message artifacts remain key-free and require no key delivery.
-The transfer retains the existing operation, completion, and cleanup lifetime.
+The direct iOS composer requires valid PNG artwork and an active scoped transfer.
+`RuneScribeMessageComposerConfiguration` attaches only `Rune-Scribe.png` and places
+runes in the composer body. Attachment acceptance records the actual PNG result.
+Core message artifacts remain key-free and require no key delivery.
 
-The iOS activity adapter supplies image and text only to the Messages destination and
-returns no package item there. Other destinations retain the original package item.
-When artwork is missing or invalid, Messages is excluded rather than receiving a file
-as fallback. Native completion callbacks retain ADR-RS-006 semantics.
+For iOS Quick Share and Customize Share, the activity controller contains only package
+items for file destinations and excludes Apple's native `.message` activity.
+`RuneScribeMessageArtworkActivity` captures the validated PNG and rune body separately;
+it does not consume the sheet's package items. It presents its own
+`MFMessageComposeViewController` and records that composer's terminal result and
+attachment acceptance. Missing or invalid artwork prevents this Messages activity.
+
+For macOS, `.messageFile` retains the package URL for the ordinary share picker.
+Only the authoritative `.composeMessage` service is replaced by a custom picker service.
+Its handler forwards exactly a validated `NSImage` and rune `NSString` to the real
+Messages service. Invalid or missing artwork removes that Messages entry. The wrapper
+cannot finish the transfer: only the real native service's callbacks report
+`completedBySystem`, `cancelled`, or `failed`, never MessageUI's `sentConfirmed`. The existing
+once-only completion gate and scoped transfer lifetime remain in use.
 
 ## Compatibility and impact
 
 Package construction, wire formats, supported file import, Mail/AirDrop package routes,
 and explicit cipher export remain unchanged. The recipient imports the cipher through
-a separate invitation, then pastes the Messages rune text into Rune Scribe to decode.
-That rune-text intake carries the encrypted envelope rather than package presentation
-metadata or provenance. Supported package intake remains available for file routes.
+a separate invitation, then pastes the complete Messages rune text into Rune Scribe to
+decode. That rune-text intake carries the encrypted envelope rather than package
+presentation metadata or provenance. File routes retain supported package intake.
 No sender label creates a contact or rebinds a relationship.
 
 The interactive cipher invitation in ADR-RS-014 remains separate and unchanged. This
-decision does not introduce a service, dependency, persistence migration, or key
-transport. Rollback can restore the package attachment at the presentation adapter
-without changing stored ciphers or the package format.
+decision introduces no new dependency, persistence migration, or key transport.
+Native completion callbacks retain ADR-RS-006 semantics.
 
 ## Evidence boundary
 
-`NativeShareOutcomeTests` verifies the concrete destination-specific artwork, rune text,
-package omission, preserved non-Messages package, and invalid-artwork behavior.
-The direct composer source attaches PNG data and no package URL. The simulator's
-Messages destination was unavailable, so no native composer or sent-recipient
-transcript screenshot is claimed. See the
-[1.0.46 qualification summary](../../verification/release-1.0.46/QualificationSummary.md).
+The October 8 screenshot again shows an unwanted document card, but it does not
+establish the sending platform or exact runtime path. Source inspection found that
+the previous macOS launcher still passed only the package URL. The previous iOS route
+relied on activity-item omission; the corrective implementation removes that dependency
+by excluding the native file-based Messages activity and composing separately. Neither
+finding identifies the screenshot's exact mechanism.
+
+Current native payload and routing checks belong in the
+[1.0.47 qualification summary](../../verification/release-1.0.47/QualificationSummary.md).
+The [1.0.46 qualification summary](../../verification/release-1.0.46/QualificationSummary.md)
+retains earlier focused results and Simulator limitations without relabeling them.
+No actual sent-recipient transcript, physical-device handoff, or shipment is claimed.

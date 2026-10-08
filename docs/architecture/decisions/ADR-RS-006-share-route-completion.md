@@ -31,7 +31,11 @@ of whether the outcome is progression-eligible.
 
 For ordinary iOS message sends, the required attachment is the validated PNG artwork
 accepted by MessageUI; the Core package remains an operation-lifetime resource and is
-not attached. These message artifacts require no key delivery. Cipher invitations and
+not attached. iOS Quick Share and Customize Share use the same composer contract through
+a separate activity; the file-based native Messages activity is excluded. On macOS,
+only the real Messages service callback completes the artwork/rune route, using
+`completedBySystem` or `failed`, never `sentConfirmed`. These message artifacts require
+no key delivery. Cipher invitations and
 explicit key-bearing exports retain their separate completion policy. See
 [ADR-RS-015](ADR-RS-015-encoded-messages-artwork-and-runes.md).
 

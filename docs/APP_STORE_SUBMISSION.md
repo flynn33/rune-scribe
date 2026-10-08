@@ -3,9 +3,9 @@
 Ready-to-paste material for App Store Connect (iOS App Store and Mac App Store).
 Keep this file in sync when shipping a new marketing version.
 
-**Last prepared for:** 1.0.46 (build 46) — 2026-10-04
+**Last prepared for:** 1.0.47 (build 47) — 2026-10-08
 
-> **Publication boundary:** version 1.0.46 build 46 is the current source candidate and
+> **Publication boundary:** version 1.0.47 build 47 is the current source candidate and
 > is not shipped. The
 > [earlier UI/Xcode qualification](verification/ui-xcode-remediation/QualificationSummary.md)
 > and signed Store exports cover the source measured at that time. They predate subsequently merged theme,
@@ -13,7 +13,7 @@ Keep this file in sync when shipping a new marketing version.
 > export qualification is required before upload. Validation, upload, submission,
 > release, and rollout remain owner-operated.
 
-The packet remains aligned to version 1.0.46 build 46, but does not claim that the
+The packet remains aligned to version 1.0.47 build 47, but does not claim that the
 current merged source is upload-ready before fresh qualification.
 
 ---
@@ -22,8 +22,8 @@ current merged source is upload-ready before fresh qualification.
 
 | Field | Value |
 |--------|--------|
-| **Version** | `1.0.46` |
-| **Build** | `46` |
+| **Version** | `1.0.47` |
+| **Build** | `47` |
 | **Bundle ID** | `com.runescribe.app` |
 | **Display name** | Rune Scribe |
 | **Category** | Lifestyle (`public.app-category.lifestyle`) |
@@ -50,7 +50,7 @@ Sources of truth in the repo:
 ### Full
 
 ```
-This patch removes the extra message file from ordinary iOS Messages sends while
+This patch separates ordinary Messages sends on iOS and macOS from file sharing while
 keeping the rendered artwork and rune text. Other file-sharing destinations retain
 the encrypted message package. Separate cipher invitations remain unchanged. The
 first-use Manage Ciphers contacts prompt now includes Skip so you can continue
@@ -76,7 +76,7 @@ HOW TO DEMO
 4. On the main screen, set per-Codex appearance defaults, type a short message → Rune
    Scribe → Quick Share, Customize Share, or Send via iMessage (iOS).
 5. In Customize Share, review the fixed security summary and choose available appearance
-   options. On iOS Messages, Share sends artwork and rune text without a message file;
+   options. In Messages on either platform, Share supplies artwork and rune text without a message file;
    other file-sharing destinations retain the typed package.
 6. On iOS, Cipher Library → Share composes a themed Messages invitation. Customize Share
    opens the appearance builder before composing the same interactive route. The
@@ -259,7 +259,7 @@ team. The remaining steps are owner-operated publication actions.
 
 ### Before upload
 
-- [ ] Version and build match the configured App Store Connect record (`1.0.46` / `46` for this packet)
+- [ ] Version and build match the configured App Store Connect record (`1.0.47` / `47` for this packet)
 - [ ] Complete the full automated package regression against the final source
 - [x] Focused Messages Shared, durable-fingerprint, handoff, and rendered-link tests pass
 - [ ] Re-run iOS Simulator and arm64-only unsigned macOS Release qualification against the final source
@@ -306,7 +306,7 @@ submission, release, and rollout remain external.
 
 ---
 
-## Version 1.0.46 current-source candidate
+## Version 1.0.47 current-source candidate
 
 Internal release summary; this is **not a shipment claim**:
 
@@ -329,18 +329,23 @@ Internal release summary; this is **not a shipment claim**:
    passed, 3 phone-specific skipped by design, and 0 failed. These runs are not
    current-candidate source-bound evidence
 10. The superseded v4.3 package audit is retained as noncontrolling verification history
-11. Ordinary iOS Messages sends use artwork and rune text without a trailing message
-    package. Other file-sharing destinations retain the key-free package. The separate
+11. Ordinary Messages routes use artwork and rune text on both platforms. iOS excludes
+    the native file-based Messages activity and uses a separate composer; macOS forwards
+    artwork and runes through the native Messages service. Other destinations retain
+    the key-free package. The separate
     cipher invitation keeps themed `MSMessage` artwork, caption, and the HTTPS URL in
     `MSMessage.url`, with an empty composer body; Cipher Manager share carries the cipher
 12. Manage Ciphers provides Skip for the optional first-use contacts prompt
-13. Focused Xcode runs before the version bump recorded 31 iPhone and 23 iPad tests
+13. Historical 1.0.46 focused Xcode runs before that version bump recorded 31 iPhone and 23 iPad tests
     passed, with one Messages-composer test skipped on each device. No aggregate suite
     pass is claimed. Fresh unsigned Xcode 27 Release builds for iOS Simulator and arm64
     macOS passed after the version bump; see verification/release-1.0.46/QualificationSummary.md
 14. Physical-device Messages transcript, artwork-tap, deleted-app fallback, and
     green-bubble/SMS behavior remain unrun and unqualified
-15. Marketing version **1.0.46**, build **46** is not shipped; earlier signed Store
+15. Current 1.0.47 checks are recorded separately in
+    verification/release-1.0.47/QualificationSummary.md. The reported screenshot's
+    sending platform and exact runtime path remain unverified
+16. Marketing version **1.0.47**, build **47** is not shipped; earlier signed Store
     packages are retained evidence and must not be uploaded as the current source
 
 Platform-specific import notes: [`platform-notes.md`](platform-notes.md)

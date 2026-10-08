@@ -150,7 +150,13 @@ public struct RuneScribePreparedFileShareLauncher: View {
                 #elseif os(macOS)
                 RuneScribeMacAutomaticShareControl(
                     launchID: launchID,
-                    payload: .file(presentationURL),
+                    payload: messageText.map {
+                        .messageFile(
+                            presentationURL,
+                            messageText: $0,
+                            previewImageData: previewImageData
+                        )
+                    } ?? .file(presentationURL),
                     onPresented: reportPresented,
                     onFinish: finish
                 )
@@ -510,13 +516,19 @@ public struct RuneScribeActivityCompletionGate {
         completed: Bool,
         error: (any Error)?
     ) -> SharePresentationReportDTO? {
-        guard !hasCompleted else { return nil }
-        hasCompleted = true
-        return RuneScribeActivityReportMapper.report(
+        accept(RuneScribeActivityReportMapper.report(
             activityType: activityType,
             completed: completed,
             error: error
-        )
+        ))
+    }
+
+    public mutating func accept(
+        _ report: SharePresentationReportDTO
+    ) -> SharePresentationReportDTO? {
+        guard !hasCompleted else { return nil }
+        hasCompleted = true
+        return report
     }
 }
 
@@ -602,12 +614,8 @@ private enum RuneScribeIOSActivityPayload {
                     subject: nil
                 ),
             ]
-        case let .messageFile(url, messageText, previewImageData):
-            return RuneScribeIOSMessageActivityItemFactory.makeItems(
-                packageURL: url,
-                messageText: messageText,
-                previewImageData: previewImageData
-            )
+        case let .messageFile(url, _, _):
+            return RuneScribeIOSMessageShareFactory.makeFileItems(packageURL: url)
         case .text(let text):
             return [text as NSString]
         case let .link(
@@ -630,71 +638,75 @@ private enum RuneScribeIOSActivityPayload {
     }
 
     @MainActor
-    var excludedActivityTypes: [UIActivity.ActivityType] {
-        guard case .messageFile(_, _, let previewImageData) = self,
-              !RuneScribeIOSMessageActivityItemFactory.canShareToMessages(
-                previewImageData: previewImageData
-              )
-        else { return [] }
-        return [.message]
+    var messageActivity: RuneScribeMessageArtworkActivity? {
+        guard case let .messageFile(_, messageText, previewImageData) = self else { return nil }
+        return RuneScribeIOSMessageShareFactory.makeMessageActivity(
+            messageText: messageText,
+            previewImageData: previewImageData
+        ) as? RuneScribeMessageArtworkActivity
     }
 }
 
-/// Messages receives the rendered artwork and runes. Other destinations retain
-/// the importable package, including Mail, AirDrop, and explicit file export.
+/// Only file destinations receive these items. Messages uses a separate composer;
+/// no destination-dependent item-source omission is needed.
 @_spi(RuntimeTesting)
 @MainActor
-public enum RuneScribeIOSMessageActivityItemFactory {
-    public static func canShareToMessages(previewImageData: Data?) -> Bool {
-        guard let previewImageData else { return false }
-        return RuneScribeMessagePreviewAttachment.validatedPNG(previewImageData) != nil
-    }
+public enum RuneScribeIOSMessageShareFactory {
+    public static let excludedActivityTypes: [UIActivity.ActivityType] = [.message]
+    public static let messageActivityType = RuneScribeMessageArtworkActivity.identifier
 
-    public static func makeItems(
-        packageURL: URL,
-        messageText: String,
-        previewImageData: Data?
-    ) -> [Any] {
-        var items: [Any] = []
-        if let previewImageData,
-           let png = RuneScribeMessagePreviewAttachment.validatedPNG(previewImageData),
-           let image = UIImage(data: png) {
-            items.append(RuneScribeIOSMessageActivityItemSource(item: image))
-            items.append(RuneScribeIOSMessageActivityItemSource(
-                item: messageText as NSString
-            ))
-        }
-        items.append(RuneScribeIOSActivityItemSource(
+    public static func makeFileItems(packageURL: URL) -> [Any] {
+        [RuneScribeIOSActivityItemSource(
             url: packageURL,
             previewTitle: "Rune Scribe message",
             previewSystemImage: "doc.fill",
-            subject: nil,
-            omitFromMessages: true
-        ))
-        return items
-    }
-}
-
-private final class RuneScribeIOSMessageActivityItemSource: NSObject,
-    UIActivityItemSource
-{
-    private let item: Any
-
-    init(item: Any) {
-        self.item = item
+            subject: nil
+        )]
     }
 
-    func activityViewControllerPlaceholderItem(
-        _ activityViewController: UIActivityViewController
-    ) -> Any {
-        item
+    public static func makeMessageActivity(
+        messageText: String,
+        previewImageData: Data?
+    ) -> UIActivity? {
+        guard let configuration = RuneScribeMessageComposerConfiguration(
+            messageText: messageText,
+            previewImageData: previewImageData
+        ) else { return nil }
+        return RuneScribeMessageArtworkActivity(configuration: configuration)
     }
 
-    func activityViewController(
-        _ activityViewController: UIActivityViewController,
-        itemForActivityType activityType: UIActivity.ActivityType?
-    ) -> Any? {
-        activityType == .message ? item : nil
+    public static func makeController(
+        packageURL: URL,
+        messageActivity: UIActivity?
+    ) -> UIActivityViewController {
+        let controller = UIActivityViewController(
+            activityItems: makeFileItems(packageURL: packageURL),
+            applicationActivities: messageActivity.map { [$0] }
+        )
+        controller.excludedActivityTypes = excludedActivityTypes
+        return controller
+    }
+
+    public static func completionReport(
+        storedComposerReport: SharePresentationReportDTO?,
+        activityType: UIActivity.ActivityType?,
+        completed: Bool,
+        error: (any Error)?
+    ) -> SharePresentationReportDTO {
+        // UIKit dismissal can arrive before its activity completion callback.
+        if let storedComposerReport { return storedComposerReport }
+        if activityType == messageActivityType {
+            return MessageComposeReportMapper.report(
+                for: .failed,
+                requiredAttachmentWasPresent: true,
+                requiredAttachmentAccepted: false
+            )
+        }
+        return RuneScribeActivityReportMapper.report(
+            activityType: activityType,
+            completed: completed,
+            error: error
+        )
     }
 }
 
@@ -738,6 +750,7 @@ private final class RuneScribeIOSActivityPresentation: Identifiable {
     let id = UUID()
     let payload: RuneScribeIOSActivityPayload
     let activityItems: [Any]
+    let messageActivity: RuneScribeMessageArtworkActivity?
 
     private var completionGate = RuneScribeActivityCompletionGate()
     private var hasReportedPresentation = false
@@ -751,6 +764,7 @@ private final class RuneScribeIOSActivityPresentation: Identifiable {
     ) {
         self.payload = payload
         activityItems = payload.activityItems
+        messageActivity = payload.messageActivity
         self.onPresented = onPresented
         self.onFinish = onFinish
     }
@@ -766,11 +780,13 @@ private final class RuneScribeIOSActivityPresentation: Identifiable {
         completed: Bool,
         error: (any Error)?
     ) {
-        guard let report = completionGate.accept(
+        let proposedReport = RuneScribeIOSMessageShareFactory.completionReport(
+            storedComposerReport: messageActivity?.terminalReport,
             activityType: activityType,
             completed: completed,
             error: error
-        ) else { return }
+        )
+        guard let report = completionGate.accept(proposedReport) else { return }
         onFinish(report)
     }
 
@@ -874,14 +890,21 @@ private final class RuneScribeIOSActivityPresenterController: UIViewController,
 
         pendingPresentation = nil
 
-        let controller = UIActivityViewController(
-            activityItems: presentation.activityItems,
-            applicationActivities: nil
-        )
-        controller.excludedActivityTypes = presentation.payload.excludedActivityTypes
+        let controller: UIActivityViewController
+        if case .messageFile(let packageURL, _, _) = presentation.payload {
+            controller = RuneScribeIOSMessageShareFactory.makeController(
+                packageURL: packageURL,
+                messageActivity: presentation.messageActivity
+            )
+        } else {
+            controller = UIActivityViewController(
+                activityItems: presentation.activityItems,
+                applicationActivities: nil
+            )
+        }
         controller.completionWithItemsHandler = {
             [weak self, weak controller, presentation] activityType, completed, _, error in
-            guard let controller else {
+            guard let self, let controller else {
                 presentation.complete(
                     activityType: activityType,
                     completed: completed,
@@ -889,7 +912,7 @@ private final class RuneScribeIOSActivityPresenterController: UIViewController,
                 )
                 return
             }
-            self?.finishActivePresentation(
+            self.finishActivePresentation(
                 presentation,
                 controller: controller,
                 activityType: activityType,
@@ -988,22 +1011,19 @@ private final class RuneScribeIOSActivityItemSource: NSObject,
     private let previewSystemImage: String
     private let previewImageData: Data?
     private let subject: String?
-    private let omitFromMessages: Bool
 
     init(
         url: URL,
         previewTitle: String,
         previewSystemImage: String,
         previewImageData: Data? = nil,
-        subject: String?,
-        omitFromMessages: Bool = false
+        subject: String?
     ) {
         self.url = url
         self.previewTitle = previewTitle
         self.previewSystemImage = previewSystemImage
         self.previewImageData = previewImageData
         self.subject = subject
-        self.omitFromMessages = omitFromMessages
     }
 
     func activityViewControllerPlaceholderItem(
@@ -1016,7 +1036,6 @@ private final class RuneScribeIOSActivityItemSource: NSObject,
         _ activityViewController: UIActivityViewController,
         itemForActivityType activityType: UIActivity.ActivityType?
     ) -> Any? {
-        guard !omitFromMessages || activityType != .message else { return nil }
         return url
     }
 
@@ -1047,6 +1066,13 @@ private final class RuneScribeIOSActivityItemSource: NSObject,
 
 #if os(macOS)
 public enum RuneScribeMacSharingServiceReportMapper {
+    public static func result(for error: any Error) -> ShareRouteResultDTO {
+        let error = error as NSError
+        return error.domain == NSCocoaErrorDomain && error.code == NSUserCancelledError
+            ? .cancelled
+            : .failed
+    }
+
     public static func routeClass(
         for sharingService: NSSharingService?
     ) -> ShareRouteClassDTO {
@@ -1070,15 +1096,77 @@ public enum RuneScribeMacSharingServiceReportMapper {
     }
 }
 
+@_spi(RuntimeTesting)
+@MainActor
+public enum RuneScribeMacMessageShareItemFactory {
+    public static func makeItems(
+        packageURL: URL,
+        messageText: String?,
+        previewImageData: Data?,
+        forMessages: Bool
+    ) -> [Any] {
+        guard forMessages else { return [packageURL as NSURL] }
+        guard let messageText else { return [] }
+        guard let previewImageData,
+              previewImageData.starts(with: [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]),
+              let bitmap = NSBitmapImageRep(data: previewImageData),
+              bitmap.pixelsWide > 0,
+              bitmap.pixelsHigh > 0,
+              let image = NSImage(data: previewImageData)
+        else { return [] }
+        return [image, messageText as NSString]
+    }
+
+    public static func makeMessagesService(
+        systemService: NSSharingService,
+        packageURL: URL,
+        messageText: String,
+        previewImageData: Data?,
+        onPerform: @escaping @MainActor ([Any]) -> Void
+    ) -> NSSharingService? {
+        let items = makeItems(
+            packageURL: packageURL,
+            messageText: messageText,
+            previewImageData: previewImageData,
+            forMessages: true
+        )
+        guard !items.isEmpty, systemService.canPerform(withItems: items) else { return nil }
+        return NSSharingService(
+            title: systemService.title,
+            image: systemService.image,
+            alternateImage: systemService.alternateImage
+        ) {
+            onPerform(items)
+        }
+    }
+
+    public static func replacingMessagesService(
+        in proposedServices: [NSSharingService],
+        systemMessagesService: NSSharingService,
+        replacement: NSSharingService?
+    ) -> [NSSharingService] {
+        proposedServices.compactMap { service in
+            service == systemMessagesService ? replacement : service
+        }
+    }
+}
+
+@MainActor
 private enum RuneScribeMacSharePayload {
     case file(URL)
+    case messageFile(URL, messageText: String, previewImageData: Data?)
     case text(String)
     case link(URL, subject: String, message: String)
 
     var items: [Any] {
         switch self {
-        case .file(let url):
-            [url as NSURL]
+        case .file(let url), .messageFile(let url, _, _):
+            RuneScribeMacMessageShareItemFactory.makeItems(
+                packageURL: url,
+                messageText: nil,
+                previewImageData: nil,
+                forMessages: false
+            )
         case .text(let text):
             [text as NSString]
         case .link(let url, _, let message):
@@ -1178,6 +1266,8 @@ private final class RuneScribeMacShareView: NSView,
     private var onPresentation: @MainActor (RuneScribeSharePresentationHandle) -> Void = { _ in }
     private var picker: NSSharingServicePicker?
     private var chosenService: NSSharingService?
+    private var messagesPickerService: NSSharingService?
+    private var forwardedMessagesService: NSSharingService?
     private var presentationHandle: RuneScribeSharePresentationHandle?
     private var didFinish = false
     private var pendingAutomaticLaunchID: UUID?
@@ -1254,6 +1344,8 @@ private final class RuneScribeMacShareView: NSView,
     }
 
     func cancelPresentation() {
+        // A selected Messages service owns its composer and terminal callback.
+        guard forwardedMessagesService == nil else { return }
         guard let picker else { return }
         picker.close()
         finish(result: .cancelled)
@@ -1304,6 +1396,9 @@ private final class RuneScribeMacShareView: NSView,
         )
         picker = nil
         chosenService = nil
+        messagesPickerService = nil
+        forwardedMessagesService?.delegate = nil
+        forwardedMessagesService = nil
         presentationHandle = nil
         onFinish(report)
     }
@@ -1313,8 +1408,32 @@ private final class RuneScribeMacShareView: NSView,
         sharingServicesForItems items: [Any],
         proposedSharingServices: [NSSharingService]
     ) -> [NSSharingService] {
-        presentationHandle?.recordProposedServices(proposedSharingServices.count)
-        return proposedSharingServices
+        guard case let .messageFile(packageURL, messageText, previewImageData) = payload,
+              let messages = NSSharingService(named: .composeMessage)
+        else {
+            presentationHandle?.recordProposedServices(proposedSharingServices.count)
+            return proposedSharingServices
+        }
+        let replacement = RuneScribeMacMessageShareItemFactory.makeMessagesService(
+            systemService: messages,
+            packageURL: packageURL,
+            messageText: messageText,
+            previewImageData: previewImageData
+        ) { [weak self] messageItems in
+            guard let self, !didFinish else { return }
+            forwardedMessagesService = messages
+            chosenService = messages
+            messages.delegate = self
+            messages.perform(withItems: messageItems)
+        }
+        messagesPickerService = replacement
+        let services = RuneScribeMacMessageShareItemFactory.replacingMessagesService(
+            in: proposedSharingServices,
+            systemMessagesService: messages,
+            replacement: replacement
+        )
+        presentationHandle?.recordProposedServices(services.count)
+        return services
     }
 
     func sharingServicePicker(
@@ -1322,6 +1441,7 @@ private final class RuneScribeMacShareView: NSView,
         didChoose service: NSSharingService?
     ) {
         guard let service else {
+            guard forwardedMessagesService == nil else { return }
             finish(result: .cancelled)
             return
         }
@@ -1332,6 +1452,8 @@ private final class RuneScribeMacShareView: NSView,
         _ sharingServicePicker: NSSharingServicePicker,
         delegateFor sharingService: NSSharingService
     ) -> (any NSSharingServiceDelegate)? {
+        // Only the real Messages service may report completion of the composer.
+        if sharingService == messagesPickerService { return nil }
         chosenService = sharingService
         return self
     }
@@ -1344,6 +1466,7 @@ private final class RuneScribeMacShareView: NSView,
     }
 
     func sharingService(_ sharingService: NSSharingService, didShareItems items: [Any]) {
+        guard sharingService != messagesPickerService else { return }
         chosenService = sharingService
         finish(result: .completedBySystem)
     }
@@ -1353,8 +1476,9 @@ private final class RuneScribeMacShareView: NSView,
         didFailToShareItems items: [Any],
         error: any Error
     ) {
+        guard sharingService != messagesPickerService else { return }
         chosenService = sharingService
-        finish(result: .failed)
+        finish(result: RuneScribeMacSharingServiceReportMapper.result(for: error))
     }
 }
 #endif

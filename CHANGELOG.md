@@ -8,6 +8,20 @@ release work and reviewed against the project version before merge. The format f
 <!-- NEW ENTRIES BELOW -->
 ## [Unreleased]
 
+## [1.0.47] - 2026-10-08
+
+- Separate ordinary iOS Messages composition from the file-sharing payload. Quick
+  Share and Customize Share exclude the native file-based Messages activity and use
+  an app-owned Messages activity with only validated artwork PNG and rune text.
+- Add destination-specific macOS Messages sharing: a custom picker service forwards
+  artwork and rune text to the native Messages service. Other destinations retain
+  the importable message package; separate cipher invitations remain unchanged.
+- Retain the visible Skip action for the optional Manage Ciphers contacts prompt.
+- Advance the source candidate to version 1.0.47 build 47. The reported recipient
+  screenshot's sending platform and exact runtime path remain unverified. Current
+  qualification is recorded separately from the retained 1.0.46 results; no actual
+  recipient transcript or shipment is claimed.
+
 ## [1.0.46] - 2026-10-04
 
 - Remove the trailing message file from ordinary iOS Messages sends. Direct Messages,

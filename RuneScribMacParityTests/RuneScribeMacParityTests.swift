@@ -10,7 +10,7 @@ import RuneScribeTestSupport
 import RuneScribeThemeCoordinatorModule
 import RuneScribeThemeMoonleafModule
 @testable import RuneScribeUIModule
-import RuneScribeUIRuntime
+@_spi(RuntimeTesting) import RuneScribeUIRuntime
 import SwiftUI
 import XCTest
 
@@ -1116,6 +1116,120 @@ final class RuneScribeMacParityTests: XCTestCase {
         }
     }
 
+    func testMacShareDistinguishesCancellationFromFailure() {
+        XCTAssertEqual(RuneScribeMacSharingServiceReportMapper.result(for: NSError(
+            domain: NSCocoaErrorDomain, code: NSUserCancelledError
+        )), .cancelled)
+        XCTAssertEqual(RuneScribeMacSharingServiceReportMapper.result(for: NSError(
+            domain: NSCocoaErrorDomain, code: NSFileReadNoSuchFileError
+        )), .failed)
+        XCTAssertEqual(RuneScribeMacSharingServiceReportMapper.result(for: NSError(
+            domain: "fixture", code: NSUserCancelledError
+        )), .failed)
+    }
+
+    func testMacMessageShareForwardsOnlyArtworkAndRunes() throws {
+        let packageURL = URL(fileURLWithPath: "/tmp/message.runescribe")
+        let runes = "ᚠᚢᚦᚨᚱᚲ"
+        let png = try renderPNG(AnyView(Color.indigo), size: CGSize(width: 4, height: 3))
+        let originalBitmap = try XCTUnwrap(NSBitmapImageRep(data: png))
+        let systemService = NSSharingService(
+            title: "Messages fixture",
+            image: NSImage(size: NSSize(width: 4, height: 3)),
+            alternateImage: nil
+        ) {}
+        var forwardedItems: [Any] = []
+        let replacement = try XCTUnwrap(
+            RuneScribeMacMessageShareItemFactory.makeMessagesService(
+                systemService: systemService,
+                packageURL: packageURL,
+                messageText: runes,
+                previewImageData: png
+            ) { forwardedItems = $0 }
+        )
+        let services = RuneScribeMacMessageShareItemFactory.replacingMessagesService(
+            in: [systemService],
+            systemMessagesService: systemService,
+            replacement: replacement
+        )
+        XCTAssertEqual(services.count, 1)
+        XCTAssertTrue(services[0] === replacement)
+        replacement.perform(withItems: [packageURL as NSURL])
+
+        XCTAssertEqual(forwardedItems.count, 2)
+        let image = try XCTUnwrap(forwardedItems.first as? NSImage)
+        let bitmap = try XCTUnwrap(image.representations.first as? NSBitmapImageRep)
+        XCTAssertEqual(bitmap.pixelsWide, originalBitmap.pixelsWide)
+        XCTAssertEqual(bitmap.pixelsHigh, originalBitmap.pixelsHigh)
+        XCTAssertEqual(forwardedItems.last as? NSString, runes as NSString)
+        XCTAssertTrue(forwardedItems.compactMap { $0 as? URL }.isEmpty)
+        XCTAssertFalse(forwardedItems.compactMap { $0 as? NSString }.map(String.init).contains {
+            $0.contains(".runescribe") || $0.contains(".rune-scribe")
+        })
+        XCTAssertEqual(
+            RuneScribeMacSharingServiceReportMapper.report(
+                for: systemService,
+                result: .completedBySystem
+            ).result,
+            .completedBySystem
+        )
+    }
+
+    func testMacMessageShareSuppressesMessagesWhenArtworkIsInvalid() throws {
+        let packageURL = URL(fileURLWithPath: "/tmp/message.runescribe")
+        let png = try renderPNG(AnyView(Color.indigo), size: CGSize(width: 4, height: 3))
+        let bitmap = try XCTUnwrap(NSBitmapImageRep(data: png))
+        let jpeg = try XCTUnwrap(bitmap.representation(using: .jpeg, properties: [:]))
+        let messages = NSSharingService(
+            title: "Messages fixture",
+            image: NSImage(size: NSSize(width: 1, height: 1)),
+            alternateImage: nil
+        ) {}
+        XCTAssertTrue(RuneScribeMacMessageShareItemFactory.makeItems(
+            packageURL: packageURL,
+            messageText: nil,
+            previewImageData: png,
+            forMessages: true
+        ).isEmpty)
+        let otherDestination = NSSharingService(
+            title: "Other destination",
+            image: NSImage(size: NSSize(width: 1, height: 1)),
+            alternateImage: nil
+        ) {}
+        for previewImageData in [nil, Data([0x00, 0x01]), Data(png.prefix(8)), jpeg] as [Data?] {
+            let replacement = RuneScribeMacMessageShareItemFactory.makeMessagesService(
+                systemService: messages,
+                packageURL: packageURL,
+                messageText: "ᚠᚢᚦᚨᚱᚲ",
+                previewImageData: previewImageData
+            ) { _ in XCTFail("Invalid artwork must not reach Messages.") }
+            XCTAssertNil(replacement)
+            let services = RuneScribeMacMessageShareItemFactory.replacingMessagesService(
+                in: [messages, otherDestination],
+                systemMessagesService: messages,
+                replacement: replacement
+            )
+            XCTAssertEqual(services.count, 1)
+            XCTAssertTrue(services[0] === otherDestination)
+        }
+    }
+
+    func testMacFileSharePreservesPackageForOtherDestinationsAndExplicitFiles() throws {
+        let packageURL = URL(fileURLWithPath: "/tmp/message.runescribe")
+        for messageText in ["ᚠᚢᚦᚨᚱᚲ", nil] as [String?] {
+            let items = RuneScribeMacMessageShareItemFactory.makeItems(
+                packageURL: packageURL,
+                messageText: messageText,
+                previewImageData: nil,
+                forMessages: false
+            )
+            XCTAssertEqual(items.count, 1)
+            XCTAssertEqual(items.first as? URL, packageURL)
+            XCTAssertTrue(items.compactMap { $0 as? NSImage }.isEmpty)
+            XCTAssertTrue(items.compactMap { $0 as? NSString }.isEmpty)
+        }
+    }
+
     func testProductionShareControlsRenderAndCoreReleasesScopedArtifacts() async throws {
         try await withHarness { harness in
             let activeCipher = try XCTUnwrap(harness.session.activeCipher)
@@ -1146,12 +1260,16 @@ final class RuneScribeMacParityTests: XCTestCase {
             let fileURL = try await harness.shareURL(for: fileArtifact.id)
             XCTAssertTrue(FileManager.default.fileExists(atPath: fileURL.path))
 
+            let previewPNG = try renderPNG(
+                AnyView(Color.indigo), size: CGSize(width: 4, height: 3)
+            )
             let controlsPNG = try renderPNG(
                 AnyView(
                     VStack(spacing: 12) {
                         RuneScribeCipherLinkShareLink(
                             transfer: transfer,
-                            cipherLabel: activeCipher.label
+                            cipherLabel: activeCipher.label,
+                            previewImageData: previewPNG
                         ) {
                             Label("Share link", systemImage: "link")
                         }
@@ -1281,28 +1399,26 @@ final class RuneScribeMacParityTests: XCTestCase {
                 summary: String
             )] = [
                 (
-                    "first-delivery",
+                    "message",
                     .encryptedMessage(
                         runes: encoded.runes,
                         senderName: "Hosted Sender",
                         cipherID: activeCipher.id,
-                        messageHandle: shareHandle,
-                        requiresKeyDelivery: true
+                        messageHandle: shareHandle
                     ),
-                    "share-builder.security.first-delivery",
-                    "Key included — this first delivery contains the shared cipher."
+                    "share-builder.security.message",
+                    "This message uses your shared cipher. Share the cipher separately from Cipher Manager."
                 ),
                 (
-                    "established",
+                    "repeated-message",
                     .encryptedMessage(
                         runes: encoded.runes,
                         senderName: "Hosted Sender",
                         cipherID: activeCipher.id,
-                        messageHandle: shareHandle,
-                        requiresKeyDelivery: false
+                        messageHandle: shareHandle
                     ),
-                    "share-builder.security.established",
-                    "Uses your shared key — this message does not resend the cipher."
+                    "share-builder.security.message",
+                    "This message uses your shared cipher. Share the cipher separately from Cipher Manager."
                 ),
                 (
                     "cipher-invitation",
@@ -1354,12 +1470,12 @@ final class RuneScribeMacParityTests: XCTestCase {
             }
 
             XCTAssertEqual(
-                previewDigests["first-delivery"],
-                previewDigests["established"],
-                "Security purpose must not fork the shared themed preview renderer."
+                previewDigests["message"],
+                previewDigests["repeated-message"],
+                "Repeated message previews must use the same themed renderer."
             )
             XCTAssertNotEqual(
-                previewDigests["first-delivery"],
+                previewDigests["message"],
                 previewDigests["cipher-invitation"],
                 "Purpose-appropriate preview content must remain visible."
             )
@@ -1380,7 +1496,7 @@ final class RuneScribeMacParityTests: XCTestCase {
             }))
             XCTAssertNotEqual(
                 Self.digestHex(highContrastData),
-                previewDigests["first-delivery"]
+                previewDigests["message"]
             )
             attachPNG(highContrastData, name: "macos-share-builder-high-contrast-preview")
 

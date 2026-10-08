@@ -67,6 +67,107 @@ public struct MessageComposeCompletionGate: Equatable, Sendable {
     }
 }
 
+/// The complete ordinary-message payload. It cannot carry a package or link.
+@_spi(RuntimeTesting)
+@MainActor
+public struct RuneScribeMessageComposerConfiguration {
+    public let body: String
+    public let attachmentData: Data
+    public let attachmentTypeIdentifier = "public.png"
+    public let attachmentFilename = "Rune-Scribe.png"
+
+    public init?(messageText: String, previewImageData: Data?) {
+        guard let previewImageData,
+              let png = RuneScribeMessagePreviewAttachment.validatedPNG(previewImageData)
+        else { return nil }
+        body = messageText
+        attachmentData = png
+    }
+
+    func configure(_ composer: MFMessageComposeViewController) -> Bool {
+        composer.body = body
+        return composer.addAttachmentData(
+            attachmentData,
+            typeIdentifier: attachmentTypeIdentifier,
+            filename: attachmentFilename
+        )
+    }
+}
+
+/// The package sheet excludes Apple's file-based Messages activity. This activity
+/// owns a separate composer whose only inputs are the artwork and rune body.
+@MainActor
+final class RuneScribeMessageArtworkActivity: UIActivity, @unchecked Sendable,
+    @preconcurrency MFMessageComposeViewControllerDelegate
+{
+    nonisolated static let identifier = UIActivity.ActivityType("com.runescribe.share.message-artwork")
+    private let configuration: RuneScribeMessageComposerConfiguration
+    private var requiredAttachmentAccepted = false
+    private(set) var terminalReport: SharePresentationReportDTO?
+
+    init(configuration: RuneScribeMessageComposerConfiguration) {
+        self.configuration = configuration
+        super.init()
+    }
+
+    override class var activityCategory: UIActivity.Category { .share }
+    override var activityType: UIActivity.ActivityType? { Self.identifier }
+    override var activityTitle: String? { "Messages" }
+    override var activityImage: UIImage? {
+        MainActor.assumeIsolated { UIImage(systemName: "message.fill") }
+    }
+
+    override func canPerform(withActivityItems activityItems: [Any]) -> Bool {
+        MainActor.assumeIsolated { MessageComposeView.canSend(requiredAttachment: true) }
+    }
+
+    override func prepare(withActivityItems activityItems: [Any]) {
+        // The typed configuration was captured before the package sheet was created.
+    }
+
+    override var activityViewController: UIViewController? {
+        // UIActivity's SDK overrides predate actor annotations; UIKit invokes them on main.
+        MainActor.assumeIsolated {
+            guard MessageComposeView.canSend(requiredAttachment: true) else { return nil }
+            let composer = MFMessageComposeViewController()
+            composer.messageComposeDelegate = self
+            requiredAttachmentAccepted = configuration.configure(composer)
+            guard requiredAttachmentAccepted else { return nil }
+            return composer
+        }
+    }
+
+    override func perform() {
+        // UIKit calls this only when no composer was returned.
+        MainActor.assumeIsolated { complete(.failed) }
+    }
+
+    func messageComposeViewController(
+        _ controller: MFMessageComposeViewController,
+        didFinishWith result: MessageComposeResult
+    ) {
+        let terminalResult: MessageComposeTerminalResult
+        switch result {
+        case .sent: terminalResult = .sent
+        case .cancelled: terminalResult = .cancelled
+        case .failed: terminalResult = .failed
+        @unknown default: terminalResult = .failed
+        }
+        complete(terminalResult)
+    }
+
+    private func complete(_ result: MessageComposeTerminalResult) {
+        guard terminalReport == nil else { return }
+        terminalReport = MessageComposeReportMapper.report(
+            for: result,
+            requiredAttachmentWasPresent: true,
+            requiredAttachmentAccepted: requiredAttachmentAccepted
+        )
+        // UIActivity dismisses its own composer and share sheet.
+        activityDidFinish(result == .sent && requiredAttachmentAccepted)
+    }
+}
+
 /// Sends the rendered artwork and rune text through Apple's compose sheet.
 /// The scoped Core transfer tracks completion; its package is not attached.
 public struct MessageComposeView: UIViewControllerRepresentable {
@@ -120,22 +221,16 @@ public struct MessageComposeView: UIViewControllerRepresentable {
     public func makeUIViewController(context: Context) -> UIViewController {
         let composer = MFMessageComposeViewController()
         composer.messageComposeDelegate = context.coordinator
-        composer.body = messageText
         if let recipients { composer.recipients = recipients }
 
-        let validatedPreview = previewImageData.flatMap {
-            RuneScribeMessagePreviewAttachment.validatedPNG($0)
-        }
-        let requiredAttachmentAccepted = validatedPreview.map {
-            composer.addAttachmentData(
-                $0,
-                typeIdentifier: "public.png",
-                filename: "Rune-Scribe.png"
-            )
-        } == true
+        let configuration = RuneScribeMessageComposerConfiguration(
+            messageText: messageText,
+            previewImageData: previewImageData
+        )
+        let requiredAttachmentAccepted = configuration?.configure(composer) == true
 
         switch MessageComposeAttachmentSetupPolicy.decide(
-            requiredAttachmentWasPresent: attachmentURL != nil && validatedPreview != nil,
+            requiredAttachmentWasPresent: attachmentURL != nil && configuration != nil,
             requiredAttachmentAccepted: requiredAttachmentAccepted
         ) {
         case .presentComposer(let accepted):

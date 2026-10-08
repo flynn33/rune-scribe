@@ -10,7 +10,7 @@ as a string of Unicode runes. Send a friend your cipher — by QR, iMessage, lin
 or file — and they can read it; without it, the runes are just runes.
 
 ![Platform](https://img.shields.io/badge/platform-macOS%2015%20%7C%20iOS%2017-3A7FD5?style=flat-square)
-![Version](https://img.shields.io/badge/version-1.0.46%20build%2046-3A7FD5?style=flat-square)
+![Version](https://img.shields.io/badge/version-1.0.47%20build%2047-3A7FD5?style=flat-square)
 ![Swift](https://img.shields.io/badge/Swift-6.0-D4971A?style=flat-square)
 ![SwiftUI](https://img.shields.io/badge/UI-SwiftUI%20%2B%20Metal-3A7FD5?style=flat-square)
 ![Tests](https://img.shields.io/badge/tests-focused%20Messages%20%7C%20architecture%20guards-2ea043?style=flat-square)
@@ -37,7 +37,8 @@ A product of **Raven Forge Software**.
   prompt includes **Skip**; importing contacts is optional.
 - **💬 Send over iMessage & Share** — encode a message and send it straight through
   **iMessage** (iOS) or the **system Share sheet** (both platforms). The runes ride
-  alongside the rendered artwork in iOS Messages, without a trailing message file.
+  alongside the rendered artwork in Messages on both platforms, without a trailing
+  message file.
   Other file-sharing destinations retain the sealed `.runescribe` package.
   Share the cipher explicitly from Cipher Manager; Copy Runes remains the compact
   compatibility action.
@@ -195,10 +196,12 @@ the Base Norse fallback without changing admission or decryption of a valid Core
 ## 💬 Sending a message
 
 Encode a message and use **Send via iMessage** (iOS) or **Share** (both platforms).
-On iOS, both the direct Messages action and Messages selected from Share send the
-rendered PNG artwork and the rune text, without the trailing `.runescribe` file.
-**Customize Share** uses the same Messages payload with the selected appearance.
-Messages is unavailable if the required artwork is missing or invalid.
+On both platforms, the Messages route supplies rendered PNG artwork and rune text
+without the `.runescribe` package. **Customize Share** uses the same content with the
+selected appearance. On iOS, the file sheet excludes Apple's file-based Messages
+activity and provides a separate Messages composer. On macOS, the Messages picker
+entry forwards only the artwork and runes to the native service. Messages is
+unavailable if the required artwork is missing or invalid.
 
 Other file-sharing destinations, including Mail and AirDrop, retain the typed message
 package with its sealed envelope and bounded appearance metadata. Message packages
@@ -311,7 +314,7 @@ the current boundary and dependency rules.
 ## 🗺 Implementation roadmap
 
 The previously authorized version 1.0.39 build 39 roadmap-completion baseline remains a
-historical source-complete snapshot that was not shipped. Version 1.0.46 build 46 is the
+historical source-complete snapshot that was not shipped. Version 1.0.47 build 47 is the
 current beta-fix source candidate. The earlier 1.0.41 source-bound qualification,
 device matrix, visual evidence, and known limits are recorded in the
 [UI/Xcode remediation qualification](docs/verification/ui-xcode-remediation/QualificationSummary.md).
@@ -319,7 +322,7 @@ Version 1.0.40 build 40 remains a retained historical repository-qualification r
 that source passed 1,238/1,238 Swift tests, 255/255 Python tests, 60 Norse semantic rules,
 25/25 Norse mutations, 18/18 legacy mutations, 28/28 shipping negative mutations,
 27/27 evidence-hardening tests, and 101/101 local built-product checks. Those historical
-results are not relabeled as source-bound evidence for 1.0.46. The current candidate is
+results are not relabeled as source-bound evidence for 1.0.47. The current candidate is
 **not shipped**. The earlier signed 1.0.41 archives predate the subsequently merged
 theme, Universal Link, tutorial, and workspace changes. Fresh iOS and macOS archive and
 export qualification is required for the current source before upload; validation,
@@ -354,7 +357,11 @@ warning fix passed an unsigned macOS build from the Downloads project. The 1.0.4
 beta fixes have [focused Xcode evidence](docs/verification/release-1.0.46/QualificationSummary.md)
 recorded before the version bump: 31 iPhone tests passed, 23 iPad tests passed, and
 one Messages-composer test was skipped on each device. No current full package
-aggregate or sent-recipient Messages result is claimed. The repository's
+aggregate or sent-recipient Messages result is claimed. The 1.0.47 corrective
+source changes replace the ordinary Messages routes on both platforms; current
+qualification belongs in the [1.0.47 report](docs/verification/release-1.0.47/QualificationSummary.md).
+The sending platform and exact path behind the reported screenshot remain unverified.
+The repository's
 `scripts/qualify-app-store-archives.sh` gate also creates and inspects fresh iOS and
 Mac App Store exports without uploading them. App Store Connect validation, upload,
 submission, and rollout remain owner-operated publication work.
@@ -555,7 +562,14 @@ The [qualification summary](docs/verification/release-1.0.46/QualificationSummar
 records the excluded baseline activation failure and remaining recipient-test limits;
 there is no current aggregate pass to report. Fresh unsigned Xcode 27 Release builds
 for iOS Simulator and arm64 macOS passed after the version bump, with product versions
-reading 1.0.46 (46). The package suite uses deterministic in-memory adapters and does not access the operator's login
+reading 1.0.46 (46). These remain historical results. The current 1.0.47 route
+qualification is recorded separately in the
+[1.0.47 report](docs/verification/release-1.0.47/QualificationSummary.md): 12 iOS and
+5 focused macOS tests passed, and unsigned iOS device/arm64 macOS Release builds
+succeeded with app/extension versions 1.0.47 (47). The report also records broader
+failures reproduced on the previous source. No current aggregate pass or actual
+recipient transcript is claimed. The package suite uses
+deterministic in-memory adapters and does not access the operator's login
 Keychain.
 
 | Suite | What it covers |

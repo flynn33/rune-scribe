@@ -1,6 +1,6 @@
 # Rune Scribe Support
 
-**Current product source:** version 1.0.46 (build 46)
+**Current product source:** version 1.0.47 (build 47)
 **Publication boundary:** Current source requires fresh Store qualification; not shipped
 
 Earlier source-bound results and screenshots are indexed in the
@@ -31,6 +31,12 @@ on iOS 26.5 records 5 passed, 3 phone-specific skipped by design, and 0 failed. 
 runs are not represented as current-candidate source-bound evidence. The
 superseded v4.3 package audit is noncontrolling verification history.
 
+The current 1.0.47 source separates ordinary Messages composition from package sharing
+on both platforms. The reported screenshot's sending platform and runtime path remain
+unverified. Current checks belong in the
+[1.0.47 qualification report](verification/release-1.0.47/QualificationSummary.md),
+separate from the retained historical results above.
+
 ## Import and sharing
 
 - A `.runescribe` file may contain a cipher invitation or an encrypted message. Open it
@@ -45,9 +51,11 @@ superseded v4.3 package audit is noncontrolling verification history.
 - After encoding, **Quick Share** uses the current validated per-Codex defaults. Use
   **Customize Share** to choose a Codex, Relic, optional Seal/Frame, and effects policy
   for that operation without changing the cipher or re-encrypting the message.
-- Ordinary iOS Messages sends provide rendered artwork and rune text without the
-  trailing `.runescribe` file. This includes direct Messages, Quick Share, and Customize
-  Share. Other file-sharing destinations retain the key-free message package. Share
+- Ordinary Messages routes on iOS and macOS supply rendered artwork and rune text
+  without the `.runescribe` package. iOS Quick Share and Customize Share exclude the
+  system file-based Messages activity and use a separate Messages composer. The
+  macOS Messages picker entry forwards only artwork and runes to the native service.
+  Other file-sharing destinations retain the key-free message package. Share
   the cipher explicitly from Cipher Manager before decoding; longer inscriptions
   paginate within the tablet's inscription rect.
 - On the first-use Manage Ciphers contacts prompt, choose **Skip** to continue without
@@ -55,7 +63,7 @@ superseded v4.3 package audit is noncontrolling verification history.
 - Long themed output is presented in the canonical Artifact preview with truthful
   `Page n of m` navigation. Use Previous and Next to review every page; rotating an
   iPhone/iPad or resizing the Mac window preserves the selected page.
-- On iOS, paste the received Messages rune text into Rune Scribe to decode with an
+- Paste the received Messages rune text into Rune Scribe on either platform to decode with an
   imported cipher. Supported message files received through another file route can
   still open in Rune Scribe. macOS does not claim automatic Messages import; use the
   file, Import, or a `runescribe://` link.
