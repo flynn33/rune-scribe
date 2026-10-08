@@ -17,6 +17,11 @@ release work and reviewed against the project version before merge. The format f
   artwork and rune text to the native Messages service. Other destinations retain
   the importable message package; separate cipher invitations remain unchanged.
 - Retain the visible Skip action for the optional Manage Ciphers contacts prompt.
+- Skip unused optional AppIntents metadata extraction while retaining compiler
+  warning diagnostics. Four fresh unsigned Xcode builds for iOS and macOS in Debug
+  and Release succeeded with zero warning or error diagnostics. Record the
+  [build-diagnostic follow-up](docs/verification/release-1.0.47/WarningFreeBuilds.md)
+  separately from the existing message-payload tests and retained baseline failures.
 - Advance the source candidate to version 1.0.47 build 47. The reported recipient
   screenshot's sending platform and exact runtime path remain unverified. Current
   qualification is recorded separately from the retained 1.0.46 results; no actual

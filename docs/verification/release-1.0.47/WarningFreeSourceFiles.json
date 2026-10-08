@@ -1,0 +1,21 @@
+{
+  "baselineCommit": "3699782606ec100566fe46ee814b0a545737cb9b",
+  "version": "1.0.47",
+  "build": "47",
+  "files": {
+    "project.yml": "0cf47eaa045a2db0bb2d5f61712eb2222ad55105f4dd36c52d9a8368a919a66d",
+    "RuneScrib.xcodeproj/project.pbxproj": "c7740d9fd0324907fd58855a531938b5e3dfae9d44e905a5482720f04d23b86f",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/RuntimeMessageComposeView.swift": "24793046970da8b7d26d7e5a5d5904e9084ad05fd1c8f0f3118db6c619eeab88",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIRuntime/RuntimeNativeShareView.swift": "d1cc48cdbc0eb174b0ff46d7a529266284a46acfbcc9d8829931aabfc860bddd",
+    "RuneScribIOSTests/NativeShareOutcomeTests.swift": "88d2b5ec633bd942f3a3da33b81881893bfdbecdc870a93d385c900f40ae1644",
+    "RuneScribMacParityTests/RuneScribeMacParityTests.swift": "d48b366743859a51d82801bb752cc96a8ba32e90037e146dffcabfd5cfe75388",
+    "RuneScribMacParityHost/RuneScribMacParityHostApp.swift": "79fa6b77c14ecae7d6743f696c7f45310a9dab17dd8b0738ea7c108114f98a8a",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/CoreModule.swift": "9ccf4836cfe64407b2bbc2f9953d39df44e63d40d7f60f032a27ac774c22d4c8",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Resources/module-manifest.json": "eb46b99dc429f83283bfb41deeaf45a31a4c5b22d305b2f0420d96b870b9a8b1",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/UIModule.swift": "8300fa9ada5193f4ee48634d7a5b24727ce7ce7341b683984bdd3149b6133dd3",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Resources/module-manifest.json": "7ef3d7c88fcdd41e8e82873a45ab05e4eea82b6c87ad5698a6d2203d5ae7671e",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/ProgressionModule.swift": "ba8674f71b4c961e67cd858b381d6bb49917adca04a0060a9b87ef6ff7e0c438",
+    "Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/Resources/module-manifest.json": "6f8ad4b15e6510c6bc66f9afe7e022bb5248c7c210bf879de53ad7cdc6240f0b",
+    "Packages/RuneScribeArchitecture/Package.swift": "1ca7e756669803459202ecaed2c691a7bc9ba578a62491d4e9b293a4a4e3ad00"
+  }
+}

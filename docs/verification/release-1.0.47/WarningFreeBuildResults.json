@@ -1,0 +1,270 @@
+{
+  "date": "2026-10-08",
+  "xcode": "27.0 (27A266a)",
+  "version": "1.0.47",
+  "build": "47",
+  "baselineCommit": "3699782606ec100566fe46ee814b0a545737cb9b",
+  "signing": "disabled for all builds",
+  "results": [
+    {
+      "label": "ios-debug",
+      "configuration": "Debug",
+      "scheme": "RuneScrib-iOS",
+      "command": [
+        "xcodebuild",
+        "build",
+        "-project",
+        "RuneScrib.xcodeproj",
+        "-scheme",
+        "RuneScrib-iOS",
+        "-configuration",
+        "Debug",
+        "-destination",
+        "generic/platform=iOS",
+        "-derivedDataPath",
+        "/private/tmp/rune-scribe-xcode-warning-free-20261008/ios-debug-derived",
+        "-resultBundlePath",
+        "/private/tmp/rune-scribe-xcode-warning-free-20261008/ios-debug.xcresult",
+        "CODE_SIGNING_ALLOWED=NO",
+        "CODE_SIGNING_REQUIRED=NO",
+        "CODE_SIGN_IDENTITY=",
+        "DEVELOPMENT_TEAM="
+      ],
+      "resultBundle": "/private/tmp/rune-scribe-xcode-warning-free-20261008/ios-debug.xcresult",
+      "log": "/Users/jimdaley/Documents/Rune-Scribe-1.0.47-warning-free-verification/ios-debug.log",
+      "logSHA256": "72df09d3fbcfb3d712fc716e906574bc20e1d71d4ccaac357cb7e0fbe2398fb6",
+      "buildResults": {
+        "actionTitle": "Build \"RuneScrib-iOS\"",
+        "analyzerWarningCount": 0,
+        "analyzerWarnings": [],
+        "destination": {
+          "architecture": "undefined_arch",
+          "deviceId": "dvtdevice-DVTiPhonePlaceholder-iphoneos:placeholder",
+          "deviceName": "Any iOS Device",
+          "modelName": "GenericiOS",
+          "osVersion": "",
+          "platform": "iOS"
+        },
+        "endTime": 1791458759.534,
+        "errorCount": 0,
+        "errors": [],
+        "startTime": 1791458721.362,
+        "status": "succeeded",
+        "warningCount": 0,
+        "warnings": []
+      },
+      "rawDiagnosticCount": 0,
+      "products": [
+        {
+          "bundle": "/private/tmp/rune-scribe-xcode-warning-free-20261008/ios-debug-derived/Build/Products/Debug-iphoneos/RuneScrib.app",
+          "identifier": "com.runescribe.app",
+          "version": "1.0.47",
+          "build": "47",
+          "architectures": [
+            "arm64"
+          ]
+        },
+        {
+          "bundle": "/private/tmp/rune-scribe-xcode-warning-free-20261008/ios-debug-derived/Build/Products/Debug-iphoneos/RuneScrib.app/PlugIns/RuneScribeMessagesExtension.appex",
+          "identifier": "com.runescribe.app.messages",
+          "version": "1.0.47",
+          "build": "47",
+          "architectures": [
+            "arm64"
+          ]
+        }
+      ]
+    },
+    {
+      "label": "ios-release",
+      "configuration": "Release",
+      "scheme": "RuneScrib-iOS",
+      "command": [
+        "xcodebuild",
+        "build",
+        "-project",
+        "RuneScrib.xcodeproj",
+        "-scheme",
+        "RuneScrib-iOS",
+        "-configuration",
+        "Release",
+        "-destination",
+        "generic/platform=iOS",
+        "-derivedDataPath",
+        "/private/tmp/rune-scribe-xcode-warning-free-20261008/ios-release-derived",
+        "-resultBundlePath",
+        "/private/tmp/rune-scribe-xcode-warning-free-20261008/ios-release.xcresult",
+        "CODE_SIGNING_ALLOWED=NO",
+        "CODE_SIGNING_REQUIRED=NO",
+        "CODE_SIGN_IDENTITY=",
+        "DEVELOPMENT_TEAM="
+      ],
+      "resultBundle": "/private/tmp/rune-scribe-xcode-warning-free-20261008/ios-release.xcresult",
+      "log": "/Users/jimdaley/Documents/Rune-Scribe-1.0.47-warning-free-verification/ios-release.log",
+      "logSHA256": "8b696671babcdfdf5a187502aa7fe4555577f2d28c857b0ff43e66116402acc6",
+      "buildResults": {
+        "actionTitle": "Build \"RuneScrib-iOS\"",
+        "analyzerWarningCount": 0,
+        "analyzerWarnings": [],
+        "destination": {
+          "architecture": "undefined_arch",
+          "deviceId": "dvtdevice-DVTiPhonePlaceholder-iphoneos:placeholder",
+          "deviceName": "Any iOS Device",
+          "modelName": "GenericiOS",
+          "osVersion": "",
+          "platform": "iOS"
+        },
+        "endTime": 1791458855.792,
+        "errorCount": 0,
+        "errors": [],
+        "startTime": 1791458721.363,
+        "status": "succeeded",
+        "warningCount": 0,
+        "warnings": []
+      },
+      "rawDiagnosticCount": 0,
+      "products": [
+        {
+          "bundle": "/private/tmp/rune-scribe-xcode-warning-free-20261008/ios-release-derived/Build/Products/Release-iphoneos/RuneScrib.app",
+          "identifier": "com.runescribe.app",
+          "version": "1.0.47",
+          "build": "47",
+          "architectures": [
+            "arm64"
+          ]
+        },
+        {
+          "bundle": "/private/tmp/rune-scribe-xcode-warning-free-20261008/ios-release-derived/Build/Products/Release-iphoneos/RuneScrib.app/PlugIns/RuneScribeMessagesExtension.appex",
+          "identifier": "com.runescribe.app.messages",
+          "version": "1.0.47",
+          "build": "47",
+          "architectures": [
+            "arm64"
+          ]
+        }
+      ]
+    },
+    {
+      "label": "mac-debug",
+      "configuration": "Debug",
+      "scheme": "RuneScrib-macOS",
+      "command": [
+        "xcodebuild",
+        "build",
+        "-project",
+        "RuneScrib.xcodeproj",
+        "-scheme",
+        "RuneScrib-macOS",
+        "-configuration",
+        "Debug",
+        "-destination",
+        "generic/platform=macOS",
+        "-derivedDataPath",
+        "/private/tmp/rune-scribe-xcode-warning-free-20261008/mac-debug-derived",
+        "-resultBundlePath",
+        "/private/tmp/rune-scribe-xcode-warning-free-20261008/mac-debug.xcresult",
+        "CODE_SIGNING_ALLOWED=NO",
+        "CODE_SIGNING_REQUIRED=NO",
+        "CODE_SIGN_IDENTITY=",
+        "DEVELOPMENT_TEAM="
+      ],
+      "resultBundle": "/private/tmp/rune-scribe-xcode-warning-free-20261008/mac-debug.xcresult",
+      "log": "/Users/jimdaley/Documents/Rune-Scribe-1.0.47-warning-free-verification/mac-debug.log",
+      "logSHA256": "0faeb7c7c18edfabb27fcdb76b74e51d9c717107d0aaf3a0735edc59df5a351b",
+      "buildResults": {
+        "actionTitle": "Build \"RuneScrib-macOS\"",
+        "analyzerWarningCount": 0,
+        "analyzerWarnings": [],
+        "destination": {
+          "architecture": "undefined_arch",
+          "deviceId": "dvtdevice-IDEOSXSupportCore.IDEMacPlaceholder-macosx:placeholder",
+          "deviceName": "Any Mac",
+          "modelName": "GenericmacOS",
+          "osVersion": "",
+          "platform": "macOS"
+        },
+        "endTime": 1791458771.468,
+        "errorCount": 0,
+        "errors": [],
+        "startTime": 1791458721.362,
+        "status": "succeeded",
+        "warningCount": 0,
+        "warnings": []
+      },
+      "rawDiagnosticCount": 0,
+      "products": [
+        {
+          "bundle": "/private/tmp/rune-scribe-xcode-warning-free-20261008/mac-debug-derived/Build/Products/Debug/RuneScrib.app",
+          "identifier": "com.runescribe.app",
+          "version": "1.0.47",
+          "build": "47",
+          "architectures": [
+            "x86_64",
+            "arm64"
+          ]
+        }
+      ]
+    },
+    {
+      "label": "mac-release",
+      "configuration": "Release",
+      "scheme": "RuneScrib-macOS",
+      "command": [
+        "xcodebuild",
+        "build",
+        "-project",
+        "RuneScrib.xcodeproj",
+        "-scheme",
+        "RuneScrib-macOS",
+        "-configuration",
+        "Release",
+        "-destination",
+        "generic/platform=macOS",
+        "-derivedDataPath",
+        "/private/tmp/rune-scribe-xcode-warning-free-20261008/mac-release-derived",
+        "-resultBundlePath",
+        "/private/tmp/rune-scribe-xcode-warning-free-20261008/mac-release.xcresult",
+        "CODE_SIGNING_ALLOWED=NO",
+        "CODE_SIGNING_REQUIRED=NO",
+        "CODE_SIGN_IDENTITY=",
+        "DEVELOPMENT_TEAM="
+      ],
+      "resultBundle": "/private/tmp/rune-scribe-xcode-warning-free-20261008/mac-release.xcresult",
+      "log": "/Users/jimdaley/Documents/Rune-Scribe-1.0.47-warning-free-verification/mac-release.log",
+      "logSHA256": "1b9e882391af5d78d5f4beebd687b741aa4efdf458337d011af5b1a513421fde",
+      "buildResults": {
+        "actionTitle": "Build \"RuneScrib-macOS\"",
+        "analyzerWarningCount": 0,
+        "analyzerWarnings": [],
+        "destination": {
+          "architecture": "undefined_arch",
+          "deviceId": "dvtdevice-IDEOSXSupportCore.IDEMacPlaceholder-macosx:placeholder",
+          "deviceName": "Any Mac",
+          "modelName": "GenericmacOS",
+          "osVersion": "",
+          "platform": "macOS"
+        },
+        "endTime": 1791458860.194,
+        "errorCount": 0,
+        "errors": [],
+        "startTime": 1791458721.363,
+        "status": "succeeded",
+        "warningCount": 0,
+        "warnings": []
+      },
+      "rawDiagnosticCount": 0,
+      "products": [
+        {
+          "bundle": "/private/tmp/rune-scribe-xcode-warning-free-20261008/mac-release-derived/Build/Products/Release/RuneScrib.app",
+          "identifier": "com.runescribe.app",
+          "version": "1.0.47",
+          "build": "47",
+          "architectures": [
+            "x86_64",
+            "arm64"
+          ]
+        }
+      ]
+    }
+  ]
+}

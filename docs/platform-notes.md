@@ -92,6 +92,11 @@ repository-controlled macOS hosted, iPhone Simulator, iPad Simulator, and determ
 evidence. The new Messages extension device matrix above is an explicit exception.
 Version 1.0.47 build 47 is the current source candidate and is not shipped. Current
 qualification belongs in the [1.0.47 report](verification/release-1.0.47/QualificationSummary.md).
+The [build-diagnostic follow-up](verification/release-1.0.47/WarningFreeBuilds.md)
+records four fresh unsigned Xcode builds for generic iOS and macOS in Debug and
+Release, all successful with zero warning or error diagnostics. Unused optional
+AppIntents metadata extraction is skipped; compiler warning diagnostics remain enabled.
+Earlier tests and baseline failures remain in the original report.
 The screenshot's sending platform and exact runtime path, and the actual recipient
 transcript, remain unverified. The retained
 [1.0.46 beta-fix qualification](verification/release-1.0.46/QualificationSummary.md)

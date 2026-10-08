@@ -5,6 +5,12 @@ Date: 2026-10-08. Xcode 27.0 (27A266a). Baseline: `79a0059`.
 [Source hashes](SourceFiles.json) identify the tested production adapters, module
 versions, project settings, and test sources. Version 1.0.47 is not shipped.
 
+The later [Xcode build follow-up](WarningFreeBuilds.md) records four fresh unsigned
+Debug/Release iOS/macOS builds with zero errors and warnings after the unused App
+Intents metadata task was disabled. Its source hashes and build results are
+separate. The original hashes and test results here describe the message-payload
+qualification before that build-setting change; they remain unchanged.
+
 ## Change and observed cause
 
 The reported recipient screenshot contains an unwanted `message.runescribe` document

@@ -567,9 +567,13 @@ qualification is recorded separately in the
 [1.0.47 report](docs/verification/release-1.0.47/QualificationSummary.md): 12 iOS and
 5 focused macOS tests passed, and unsigned iOS device/arm64 macOS Release builds
 succeeded with app/extension versions 1.0.47 (47). The report also records broader
-failures reproduced on the previous source. No current aggregate pass or actual
-recipient transcript is claimed. The package suite uses
-deterministic in-memory adapters and does not access the operator's login
+failures reproduced on the previous source. The later
+[build-diagnostic follow-up](docs/verification/release-1.0.47/WarningFreeBuilds.md)
+records four fresh unsigned Xcode builds for generic iOS and macOS in Debug and
+Release. All four succeeded with zero warning or error diagnostics. Unused optional
+AppIntents metadata extraction is skipped; compiler warning diagnostics remain enabled.
+No current aggregate pass or actual recipient transcript is claimed. The package
+suite uses deterministic in-memory adapters and does not access the operator's login
 Keychain.
 
 | Suite | What it covers |

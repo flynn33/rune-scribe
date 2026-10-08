@@ -10,6 +10,8 @@ settings:
   base:
     SWIFT_VERSION: "6.0"
     GENERATE_INFOPLIST_FILE: YES
+    # No target defines App Intents; omit the unused metadata extraction task.
+    LM_SKIP_METADATA_EXTRACTION: YES
     MARKETING_VERSION: "1.0.47"
     CURRENT_PROJECT_VERSION: "47"
     RUNESCRIBE_APP_BUNDLE_IDENTIFIER: com.runescribe.app
