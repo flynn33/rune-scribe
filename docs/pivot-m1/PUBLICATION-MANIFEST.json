@@ -1,0 +1,79 @@
+{
+  "schema": "runescribe.m1.publication-transformation.v1",
+  "date": "2026-10-21",
+  "source_commit": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+  "application_version": "1.0.47",
+  "application_build": "47",
+  "original_reports_preserved": true,
+  "transforms": [
+    "Add historical discovery-snapshot permission annotation to Markdown.",
+    "Convert absolute source links to immutable GitHub baseline links; make report links relative.",
+    "Elide local user/workspace paths and private approval-conversation identifiers.",
+    "Retain source facts, proposal status, unknowns and content identifiers.",
+    "Keep raw local environment/path/status inventories and private authority retrieval external; publish bounded evidence capsule plus original hashes.",
+    "Render elided path placeholders as code and clarify normalized path bindings.",
+    "Normalize published Markdown whitespace and retain checkpoint line separation."
+  ],
+  "files": [
+    {
+      "file": "00-ENVIRONMENT-AND-AUTHORITY.md",
+      "original_sha256": "fa8af3ae843f179df4414b76b67c0200daf4f4868c6eaf18d27180f06a099ebc",
+      "published_sha256": "439cf332563808dfd00d3a7421391b40d7fde9c51f22edf803967a164f776e79",
+      "role": "historical M1 report"
+    },
+    {
+      "file": "01-IMPACT-MAP.md",
+      "original_sha256": "e3799eaf7ecdd83ba560bcfc3290a33d6b569a11b734b3bef4f7ad5aaf40e922",
+      "published_sha256": "b5b6694ced0e5586b530be69d398bb88be5c445e8f3ab00388e64ce63a5413d7",
+      "role": "historical M1 report"
+    },
+    {
+      "file": "02-CONTENT-INVENTORY.json",
+      "original_sha256": "e8a1514011d4185219a1590f378acabf0ed75d72953a9892a86904ae1eefae09",
+      "published_sha256": "e8a1514011d4185219a1590f378acabf0ed75d72953a9892a86904ae1eefae09",
+      "role": "historical M1 report"
+    },
+    {
+      "file": "03-MIGRATION-AND-RETIREMENT-PROPOSAL.md",
+      "original_sha256": "054941798b4fba044d1d6e23c42d8db72d4e8f5d5885d09c09077e3d88ee4bac",
+      "published_sha256": "2f9a71992799adfb93bda075502c91fb23ecedb2aded9b72c5f069537bbe10a5",
+      "role": "historical M1 report"
+    },
+    {
+      "file": "04-CONTRACTS-AND-VERIFICATION-PLAN.md",
+      "original_sha256": "f9d5a64bd72e99b47eae37497a09700406a844271cf9cc212fb1441fe92e206a",
+      "published_sha256": "8163c13f4f3547182a7de7ba5d9ec779c68a1da743c15ecd7e9704fcec388ff5",
+      "role": "historical M1 report"
+    },
+    {
+      "file": "05-HANDOFF.md",
+      "original_sha256": "37b24c3a68b20813ae5fa32627be6b8472792704c9da9a35f266faeac0802895",
+      "published_sha256": "875d28950054cb76ebf87ec3341b0dfe32297e13f468f238b17ce92194065a64",
+      "role": "historical M1 report"
+    },
+    {
+      "file": "content-review-notes.md",
+      "original_sha256": "b476ca18c55c9eee772051e7a36c7d81a0f7c1c8e977c31c09b07b985d9ab6d2",
+      "published_sha256": "f8feb6de20714a8c18cd5dfca3e060b0a0b3ab429b874a55beef1f39faade2a7",
+      "role": "supporting discovery evidence"
+    },
+    {
+      "file": "impact-responsibilities.json",
+      "original_sha256": "2681fcf00d658590a31c88a854d42b16fb23619d1af566d8ed4dae34a855f819",
+      "published_sha256": "2681fcf00d658590a31c88a854d42b16fb23619d1af566d8ed4dae34a855f819",
+      "role": "supporting discovery evidence"
+    },
+    {
+      "file": "contract-source-identities.json",
+      "original_sha256": "e41623bc0f24777fb9ff5e191990a2eaf025f557bba65c550c5bcd33ce6f8ebf",
+      "published_sha256": "19195195683765ec097541b4b68e6eb1b207c6ec27e60ed595ffcc8d05fdaf1d",
+      "role": "supporting discovery evidence"
+    },
+    {
+      "file": "apple-storekit-research.json",
+      "original_sha256": "abf3ecd02fb7d6950fd0a632f3b896e8c251359ac7760778ab72a3c342da380d",
+      "published_sha256": "abf3ecd02fb7d6950fd0a632f3b896e8c251359ac7760778ab72a3c342da380d",
+      "role": "supporting discovery evidence"
+    }
+  ]
+}

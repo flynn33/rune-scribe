@@ -1,0 +1,806 @@
+{
+  "schema": "runescribe.m1.impact-responsibilities.v1",
+  "inspection_baseline": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+  "rows": [
+    {
+      "id": "R01",
+      "baseline": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "disposition": "preserve host; replace ownership composition; retire progression/GC adapters only after replacement",
+      "evidence": [
+        {
+          "path": "RuneScrib/AppHost/AppDelegate.swift",
+          "symbol": "applicationDidFinishLaunching / didFinishLaunchingWithOptions / applicationDidBecomeActive",
+          "lines": "14-24,57-77"
+        },
+        {
+          "path": "RuneScrib/AppHost/RuneScribeRuntimeComposition.swift",
+          "symbol": "init / start / receive(lifecycle:) / configure",
+          "lines": "36-84,93-163,181-226"
+        }
+      ],
+      "upstream": "native launch, scene/foreground callbacks",
+      "downstream": "runtime.start; external-services wake; Messages inbox drainer; five theme provider registration",
+      "state_owner_namespace": "host activationState/generation; no paid ownership provenance",
+      "native_target_resource_membership": "RuneScrib-macOS and RuneScrib-iOS share AppHost; no provider merger",
+      "approved_requirement": "APPROVAL-PIVOT-001; free Norse/tools; complete first Elven Series; prior paid owners included; retire achievements/Game Center; preserve data and incoming reading",
+      "migration_hazard": "Qualification earned-unlock injection at 123-136 and simulator route 115-120 are synthetic, not proof of paid ownership; removing lifecycle callbacks can break inbound delivery.",
+      "proposed_acceptance_evidence": "Future cold/resume/stop tests with real normal composition; qualification flags absent; optional external services absent",
+      "remaining_uncertainty": "Store ownership adapter and authoritative transition evidence do not exist in this composition."
+    },
+    {
+      "id": "R02",
+      "baseline": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "disposition": "preserve runtime lifecycle; replace retired subsystem activation hooks",
+      "evidence": [
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/Runtime.swift",
+          "symbol": "start / stop",
+          "lines": "585-790"
+        }
+      ],
+      "upstream": "host start/stop",
+      "downstream": "dispatcher, I/O, settings, state, availability, ingress, contribution/resources; outbox and handoff lifecycle",
+      "state_owner_namespace": "runtime status/generation and active module order",
+      "native_target_resource_membership": "RuntimeCore -> both apps",
+      "approved_requirement": "APPROVAL-PIVOT-001; free Norse/tools; complete first Elven Series; prior paid owners included; retire achievements/Game Center; preserve data and incoming reading",
+      "migration_hazard": "Stop must quiesce ingress and cancel tasks before resources/state revoke; deleting all outbox hooks loses retained share completion recovery.",
+      "proposed_acceptance_evidence": "Future interrupted-start, foreground and shutdown tests; no retired task after restart",
+      "remaining_uncertainty": "A commercial ownership lifecycle is proposed, not implemented."
+    },
+    {
+      "id": "R03",
+      "baseline": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "disposition": "replace producer; preserve validated DTO boundaries until deliberate contract amendment",
+      "evidence": [
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/ProgressionSnapshotBuilder.swift",
+          "symbol": "entitlements",
+          "lines": "269-283"
+        },
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/ProgressionContracts.swift",
+          "symbol": "ProgressionEntitlementSnapshotDTO",
+          "lines": "1607-1644"
+        },
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/Runtime.swift",
+          "symbol": "startEntitlementObservation",
+          "lines": "988-1004"
+        }
+      ],
+      "upstream": "Progression projection entitlement records .included/.earned",
+      "downstream": "runtime reconciliation -> availability snapshot -> Theme Coordinator; UI",
+      "state_owner_namespace": "Progression repository; DTO revision, capture time and disjoint ID sets",
+      "native_target_resource_membership": "ProgressionModule + Contracts + RuntimeCore in both apps",
+      "approved_requirement": "APPROVAL-PIVOT-001; free Norse/tools; complete first Elven Series; prior paid owners included; retire achievements/Game Center; preserve data and incoming reading",
+      "migration_hazard": "Neither included nor earned classification proves original paid download or new purchase. Old progression grants cannot become paid receipts.",
+      "proposed_acceptance_evidence": "Future legacy-no-progress and complete-series fixture tests; separate provenance for independent sources",
+      "remaining_uncertainty": "Reviewed replacement ownership/restore/revocation contract missing."
+    },
+    {
+      "id": "R04",
+      "baseline": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "disposition": "replace earning-union semantics for commercial rights; preserve free Norse invariant",
+      "evidence": [
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/Runtime.swift",
+          "symbol": "reconcileEntitlements / initialEntitlementSnapshot",
+          "lines": "857-901,1007-1017"
+        }
+      ],
+      "upstream": "Progression entitlement stream / qualification injection",
+      "downstream": "availability publishing and eligible optional activation",
+      "state_owner_namespace": "runtime entitlementSnapshot + lastObservedEntitlementSnapshot",
+      "native_target_resource_membership": "RuntimeCore both apps",
+      "approved_requirement": "APPROVAL-PIVOT-001; free Norse/tools; complete first Elven Series; prior paid owners included; retire achievements/Game Center; preserve data and incoming reading",
+      "migration_hazard": "reconcileEntitlements unions all prior included/earned IDs and ignores lower revisions; this cannot remove one purchase source on revocation. Equal revision differing truth throws conflict.",
+      "proposed_acceptance_evidence": "Future duplicate/stale/conflicting revision, independent legacy+purchase refund, transient outage fixtures",
+      "remaining_uncertainty": "Final account/revocation policy remains reviewed design work; no refund policy selected."
+    },
+    {
+      "id": "R05",
+      "baseline": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "disposition": "replace affected entitlement vocabulary and eligibility; preserve runtime authority",
+      "evidence": [
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/Runtime.swift",
+          "symbol": "isEligible / isThemePreviewPublisher / reconcileEligibleOptionalModules",
+          "lines": "923-986"
+        },
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeMoonleafModule/MoonleafThemeModule.swift",
+          "symbol": "moduleID / unlockID",
+          "lines": "6-18"
+        }
+      ],
+      "upstream": "manifest requirement + theme discovery descriptor + eligibility service",
+      "downstream": "module activation -> contribution/resource publication -> selection and previews",
+      "state_owner_namespace": "runtime module state; individual stable provider identities",
+      "native_target_resource_membership": "four separate Elven package targets and Norse target",
+      "approved_requirement": "APPROVAL-PIVOT-001; free Norse/tools; complete first Elven Series; prior paid owners included; retire achievements/Game Center; preserve data and incoming reading",
+      "migration_hazard": "purchase/composite currently return false; earned providers may activate solely as preview publishers while still locked for selection. One bundle is not a module merger.",
+      "proposed_acceptance_evidence": "Future one series right activates all four providers; free recipient resolution with locked creator access; no direct UI entitlement bypass",
+      "remaining_uncertainty": "Exact series product ID intentionally unspecified."
+    },
+    {
+      "id": "R06",
+      "baseline": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "disposition": "replace ownership input only; preserve validation and selection protocol",
+      "evidence": [
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeCoordinatorModule/ThemeCoordinatorService.swift",
+          "symbol": "selectCodex / reconcilePass",
+          "lines": "155-231,444-625"
+        }
+      ],
+      "upstream": "availability.entitlementSnapshot.allUnlockIDs, contribution registry, resource snapshot, settings",
+      "downstream": "provider records -> settings selectedCodex -> effective theme snapshot",
+      "state_owner_namespace": "Theme Coordinator cache + runtime settings revision",
+      "native_target_resource_membership": "ThemeCoordinatorModule both apps",
+      "approved_requirement": "APPROVAL-PIVOT-001; free Norse/tools; complete first Elven Series; prior paid owners included; retire achievements/Game Center; preserve data and incoming reading",
+      "migration_hazard": "Owned, compatible, live, matching provider and resources are separate facts. A missing resource must not erase rights. Selection revalidates before and after settings write.",
+      "proposed_acceptance_evidence": "Future resource-failure, duplicate-ID, stale reconcile, post-write revocation and fallback checks",
+      "remaining_uncertainty": "No runtime execution performed; exact replacement DTO design unreviewed."
+    },
+    {
+      "id": "R07",
+      "baseline": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "disposition": "replace per-item gates; preserve compatibility filters",
+      "evidence": [
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+ThemeArtifacts.swift",
+          "symbol": "themeRelicItems / themeSealItems / themeFrameItems / ownedThemeArtifactIDs",
+          "lines": "73-154,227-275"
+        }
+      ],
+      "upstream": "effective descriptor + ProgressionSnapshot.ownership",
+      "downstream": "artifact pickers -> runtime settings -> Core share choices",
+      "state_owner_namespace": "UI derived ownership and selected IDs",
+      "native_target_resource_membership": "sole UIModule; provider resources remain in four distinct modules",
+      "approved_requirement": "APPROVAL-PIVOT-001; free Norse/tools; complete first Elven Series; prior paid owners included; retire achievements/Game Center; preserve data and incoming reading",
+      "migration_hazard": "Owning a Codex alone does not unlock mastery artifacts: non-included items still read Progression ownership. Frames also filter static share/compatible relics; do not remove compatibility checks to unlock them.",
+      "proposed_acceptance_evidence": "Future every-inventory-item ownership matrix including mastery/shared items with no achievements; incompatible combinations rejected",
+      "remaining_uncertainty": "Reserved/inactive catalog items and shared rewards classified in 02, not silently excluded."
+    },
+    {
+      "id": "R08",
+      "baseline": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "disposition": "preserve selected IDs/settings; replace earned-lock presentation",
+      "evidence": [
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+ThemeArtifacts.swift",
+          "symbol": "selectThemeArtifact / clearOptionalThemeArtifact",
+          "lines": "157-225"
+        },
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeSettingsGateway.swift",
+          "symbol": "namespace / set / setAtomically",
+          "lines": "207-213,260-394"
+        },
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/RuntimeSettingsContracts.swift",
+          "symbol": "RuneScribeRuntimeSettings appearance keys",
+          "lines": "186-205"
+        }
+      ],
+      "upstream": "artifact picker commands",
+      "downstream": "runtime revision-checked persisted preferences; consumers rendering/creating shares",
+      "state_owner_namespace": "com.runescribe.runtime.settings / settings.values / schema1; selected-codex/relic/seal/frame/effects",
+      "native_target_resource_membership": "RuntimeCore Contracts UIModule both apps",
+      "approved_requirement": "APPROVAL-PIVOT-001; free Norse/tools; complete first Elven Series; prior paid owners included; retire achievements/Game Center; preserve data and incoming reading",
+      "migration_hazard": "Do not purge whole settings namespace with retired feedback preferences; keep stable maps and safe fallback without overwriting preference on temporary provider failure.",
+      "proposed_acceptance_evidence": "Future upgrade preserves valid selection; missing provider falls back and recovers preference; stale write rejected",
+      "remaining_uncertainty": "Final treatment of actually revoked creator preference awaits ownership contract."
+    },
+    {
+      "id": "R09",
+      "baseline": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "disposition": "preserve purpose-separated incoming access and resource integrity",
+      "evidence": [
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeCoordinatorModule/ThemeCoordinatorService.swift",
+          "symbol": "providerDescriptor / resolveResource / supportsReceivedPresentationResolution / canResolve",
+          "lines": "233-348,574-596,1152-1199"
+        }
+      ],
+      "upstream": "validated received SharePresentationSelection or creator selection purpose",
+      "downstream": "received presentation resolver vs active/share rendering consumers",
+      "state_owner_namespace": "provider live contribution/resource validation key; no recipient ownership grant",
+      "native_target_resource_membership": "ThemeCoordinatorModule + provider modules both apps",
+      "approved_requirement": "APPROVAL-PIVOT-001; free Norse/tools; complete first Elven Series; prior paid owners included; retire achievements/Game Center; preserve data and incoming reading",
+      "migration_hazard": "Received purpose allows available/locked provider only when current registered contribution and resources validate; share rendering requires owned available provider. UI may intentionally render safe fallback when locked; plaintext reading must remain free.",
+      "proposed_acceptance_evidence": "Future unowned recipient AEAD decode + safe fallback, exact selected resource allowlist and no creator grant",
+      "remaining_uncertainty": "Rendered unowned appearance is not guaranteed by this static read; preserve the free reading requirement independently."
+    },
+    {
+      "id": "R10",
+      "baseline": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "disposition": "preserve optional failure isolation and emergency base behavior",
+      "evidence": [
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/Runtime.swift",
+          "symbol": "start activation error handling",
+          "lines": "650-667"
+        },
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeThemeCoordinatorModule/ThemeCoordinatorService.swift",
+          "symbol": "reconcilePass / resolveResource",
+          "lines": "291-342,494-625"
+        }
+      ],
+      "upstream": "invalid optional module/contribution/resource",
+      "downstream": "base Norse/effective fallback and sole UI remain available",
+      "state_owner_namespace": "runtime lifecycle and coordinator diagnostic state",
+      "native_target_resource_membership": "all providers + RuntimeCore",
+      "approved_requirement": "APPROVAL-PIVOT-001; free Norse/tools; complete first Elven Series; prior paid owners included; retire achievements/Game Center; preserve data and incoming reading",
+      "migration_hazard": "Removing earning machinery does not justify fail-open resource/identity checks; base required resource failure has separate emergency presentation.",
+      "proposed_acceptance_evidence": "Future optional provider throws, missing font/resource and stable collision fixtures",
+      "remaining_uncertainty": "No app behavior claimed tested in M1."
+    },
+    {
+      "id": "R11",
+      "baseline": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "disposition": "preserve compatibility; retire active progression migration only after Core decoupling",
+      "evidence": [
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeExistingUserMigrationHandoff.swift",
+          "symbol": "namespace / lifecycle / deliver",
+          "lines": "84-159,444-497"
+        },
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/ProgressionServiceActor.swift",
+          "symbol": "bootstrap / applyExistingUserMigration",
+          "lines": "66-139,165-265"
+        }
+      ],
+      "upstream": "Core existing cipher snapshot",
+      "downstream": "durable runtime migration delivery -> Progression generation staging -> entitlement/reveal publish",
+      "state_owner_namespace": "com.runescribe.runtime.existing-user-migration-handoff; progression.existing-user-migration; schema-v1 / schema-v2-manifest; schema1",
+      "native_target_resource_membership": "Core RuntimeCore ProgressionModule both apps",
+      "approved_requirement": "APPROVAL-PIVOT-001; free Norse/tools; complete first Elven Series; prior paid owners included; retire achievements/Game Center; preserve data and incoming reading",
+      "migration_hazard": "Existing-user means cipher-library activity migration, not verified original paid-app ownership. Pending snapshot, pages, deferred errors and terminal receipts can outlive current process.",
+      "proposed_acceptance_evidence": "Future empty/large/corrupt library, repeated migration, before/after commit and interrupted pages with no fabricated achievement history",
+      "remaining_uncertainty": "Which compatibility readers ship through rollback window must be reviewed."
+    },
+    {
+      "id": "R12",
+      "baseline": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "disposition": "retain inert/read compatibility; retire active evaluators/reveal writes",
+      "evidence": [
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/ProgressionRepository.swift",
+          "symbol": "ProgressionRepositoryIDs / commit / promoteStagedGeneration / promoteExistingUserMigration",
+          "lines": "5-120,371,885-990,1320-1428,1694-1800"
+        },
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/ProgressionDomainRecords.swift",
+          "symbol": "ProgressionMetadataRecord",
+          "lines": "21-107"
+        }
+      ],
+      "upstream": "Core facts / commands / migration snapshots",
+      "downstream": "generation metadata, shards, events, grants, ownership, reveal queue, recovery diagnostics",
+      "state_owner_namespace": "module com.runescribe.module.progression; metadata/projection/distinct/reveal-queue/seeds/quarantine plus generation event, event-order, semantic, recovery-event, reveal-ack and command collections; schema1",
+      "native_target_resource_membership": "ProgressionModule Resources/module-manifest.json both apps",
+      "approved_requirement": "APPROVAL-PIVOT-001; free Norse/tools; complete first Elven Series; prior paid owners included; retire achievements/Game Center; preserve data and incoming reading",
+      "migration_hazard": "Promotion verifies staged shards, seed digest and metadata generation/revision before atomic metadata switch. Do not delete markers or infer a half-stage is complete. Retiring achievement evaluation does not require erasing its storage.",
+      "proposed_acceptance_evidence": "Future compatibility decode and inertness, staged upgrade interruption and ambiguous commit recovery; no automatic old evaluator on replay",
+      "remaining_uncertainty": "Whole 7454-line repository was not read end to end; cited storage/commit/promotion slices support bounded proposal, final deletion audit still required."
+    },
+    {
+      "id": "R13",
+      "baseline": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "disposition": "preserve/replace share completion journal and replay",
+      "evidence": [
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeProgressionOutbox.swift",
+          "symbol": "namespace / runtimeDidStart / outstandingShareCompletionArtifactIDs / deactivateRuntime",
+          "lines": "179-204,229-289"
+        },
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeProgressionOutbox.swift",
+          "symbol": "replayShareCompletions / deliverShareCompletion",
+          "lines": "806-890"
+        }
+      ],
+      "upstream": "normalized terminal native share callback",
+      "downstream": "Core completeShareArtifact replay and exact terminal receipt",
+      "state_owner_namespace": "com.runescribe.runtime.progression-outbox / share-completion-journal schema1; maximum 64 completions",
+      "native_target_resource_membership": "RuntimeCore used by both apps",
+      "approved_requirement": "APPROVAL-PIVOT-001; free Norse/tools; complete first Elven Series; prior paid owners included; retire achievements/Game Center; preserve data and incoming reading",
+      "migration_hazard": "The same file owns non-achievement crash-window closure. Deleting it strands successful delivery before Core key-delivery update.",
+      "proposed_acceptance_evidence": "Retain future equivalent of testShareCompletionJournalSurvivesRelaunchBeforeCoreReceipt and before/after commit reservation tests",
+      "remaining_uncertainty": "Final relocation/name not selected; preserve behavior first."
+    },
+    {
+      "id": "R14",
+      "baseline": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "disposition": "preserve/replace operation context authentication",
+      "evidence": [
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeProgressionOutbox.swift",
+          "symbol": "context authority namespace / activateRuntime / deactivateRuntime",
+          "lines": "179-204,229-252,276-289"
+        }
+      ],
+      "upstream": "runtime dispatcher operation ID/correlation/generation",
+      "downstream": "Core evidence/terminal callbacks and replay verification",
+      "state_owner_namespace": "com.runescribe.runtime.operation-context-authority / operation-context-authority / authority-key-v1 / schema1",
+      "native_target_resource_membership": "RuntimeCore both apps",
+      "approved_requirement": "APPROVAL-PIVOT-001; free Norse/tools; complete first Elven Series; prior paid owners included; retire achievements/Game Center; preserve data and incoming reading",
+      "migration_hazard": "Authority key persistence/recovery is independent of earning. An unavailable store gets ephemeral authority; no accepted durable context should be replaced merely for reservation cleanup.",
+      "proposed_acceptance_evidence": "Future forged context rejected; persisted context replay remains valid after relaunch; generation-scoped context expires",
+      "remaining_uncertainty": "Need reviewed replacement context contract before removal of old entrypoints."
+    },
+    {
+      "id": "R15",
+      "baseline": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "disposition": "retire active earning event outbox after retained journal/context consumers replaced; retain legacy records inert",
+      "evidence": [
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeProgressionOutbox.swift",
+          "symbol": "submitBatch / acknowledgeBatch / replayReady / deliver",
+          "lines": "578-805,892-1014"
+        }
+      ],
+      "upstream": "Core committed sanitized fact batches",
+      "downstream": "Progression apply endpoint + runtime receipt ack; external sync through Progression",
+      "state_owner_namespace": "progression.outbox + progression.outbox-receipts schema1",
+      "native_target_resource_membership": "RuntimeCore and Progression contracts both apps",
+      "approved_requirement": "APPROVAL-PIVOT-001; free Norse/tools; complete first Elven Series; prior paid owners included; retire achievements/Game Center; preserve data and incoming reading",
+      "migration_hazard": "Removing only Progression subscriber leaves deferred retry queues. Removing the whole outbox loses R13/R14. Stale queued facts must never produce renewed rewards after pivot.",
+      "proposed_acceptance_evidence": "Future no earning scheduler after launch/foreground/connectivity/retry; old durable events stay inert; share journal independently drains",
+      "remaining_uncertainty": "Legacy retention duration/deletion authority not approved."
+    },
+    {
+      "id": "R16",
+      "baseline": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "disposition": "retire active achievement sync/report projection; preserve bounded schemas for compatibility if required",
+      "evidence": [
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeProgressionExternalSync.swift",
+          "symbol": "RuntimeProgressionExternalProjection",
+          "lines": "136-210"
+        },
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionSyncDomain/CloudProgressionSchema.swift",
+          "symbol": "CloudProgressionReplica",
+          "lines": "354-383"
+        }
+      ],
+      "upstream": "Progression local authoritative projection",
+      "downstream": "Cloud merge and Game Center candidates",
+      "state_owner_namespace": "replica schema1 includes counters, completions, grants, ownedContentIDs, unlockIDs, encounters, selectedCodex/Title and pending GC reports",
+      "native_target_resource_membership": "ProgressionSyncDomain + CloudSyncModule + RuntimeCore",
+      "approved_requirement": "APPROVAL-PIVOT-001; free Norse/tools; complete first Elven Series; prior paid owners included; retire achievements/Game Center; preserve data and incoming reading",
+      "migration_hazard": "Cloud grants/unlocks are old progression facts, not Apple verified purchase evidence. Never import them as new commercial rights or revive them as locks.",
+      "proposed_acceptance_evidence": "Future stale replica replay cannot change commercial right, schedule achievement evaluator or authenticate/report GC",
+      "remaining_uncertainty": "Only named schema/projection fields inspected, no live Cloud data read."
+    },
+    {
+      "id": "R17",
+      "baseline": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "disposition": "unresolved retained consumer: preserve/replace selected-Codex sync before broad Cloud removal",
+      "evidence": [
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeCloudGameCenterCoordinator.swift",
+          "symbol": "selectedCodexProjection / adoptSelectedCodexAfterProgressionApply / startSettingsObservation",
+          "lines": "1757-1801,1872-2009"
+        }
+      ],
+      "upstream": "setting.appearance.selected-codex changes; remote replica.selectedCodex",
+      "downstream": "Cloud upload; runtime settings adoption -> Theme Coordinator preference",
+      "state_owner_namespace": "runtime.settings selectedCodex; coordinator durable progressionCodexSelection tracker",
+      "native_target_resource_membership": "RuntimeCore -> both apps; CloudKit platform adapter",
+      "approved_requirement": "APPROVAL-PIVOT-001; free Norse/tools; complete first Elven Series; prior paid owners included; retire achievements/Game Center; preserve data and incoming reading",
+      "migration_hazard": "This is an independent appearance preference consumer within the progression sync machinery. Current remote adoption checks old codexGates.unlockedAt and falls back to Norse; that gate must not overwrite valid new-series choices.",
+      "proposed_acceptance_evidence": "Future selection-only sync under new ownership; stale old selection cannot relock; account mismatch preserves local preference",
+      "remaining_uncertainty": "Review how to retain this free behavior; no silent retirement of appearance sync authorized by achievement removal."
+    },
+    {
+      "id": "R18",
+      "baseline": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "disposition": "retain inert legacy title selection; retire achievement title UI/evaluation subject to complete content reconciliation",
+      "evidence": [
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeCloudGameCenterCoordinator.swift",
+          "symbol": "selectedTitleProjection / adoptSelectedTitleAfterProgressionApply",
+          "lines": "1803-1871"
+        },
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+Progression.swift",
+          "symbol": "selectProgressionTitle",
+          "lines": "413-426"
+        }
+      ],
+      "upstream": "Progression selected title / replica.selectedTitle",
+      "downstream": "title selection tracker and vault/title UI",
+      "state_owner_namespace": "Progression TitleSelectionRecord, not a RuntimeSettings key",
+      "native_target_resource_membership": "ProgressionModule UIModule RuntimeCore",
+      "approved_requirement": "APPROVAL-PIVOT-001; free Norse/tools; complete first Elven Series; prior paid owners included; retire achievements/Game Center; preserve data and incoming reading",
+      "migration_hazard": "Do not confuse selectedTitle with selectedCodex or drop stable content merely for old reward origin. Shared title content accounted in 02.",
+      "proposed_acceptance_evidence": "Future no title achievement requirements; inert old records decode; complete-content proposal covers shared title items",
+      "remaining_uncertainty": "Exact retained presentation of old titles is design review work, not a new achievement feature."
+    },
+    {
+      "id": "R19",
+      "baseline": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "disposition": "retire progression cloud work; preserve independent selection consumer per R17; no live record deletion",
+      "evidence": [
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeCloudGameCenterCoordinator.swift",
+          "symbol": "namespace / processCloudIfPossible / rebindCloudAccount / wake / deactivateRuntime",
+          "lines": "417-424,567-615,976-1156"
+        },
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribePlatform/Cloud/AppleCloudKitProgressionTransport.swift",
+          "symbol": "record constants / fetchPrivateProgression",
+          "lines": "7-12,65-124"
+        }
+      ],
+      "upstream": "local progression or selectedCodex change; foreground/retry/poll",
+      "downstream": "Cloud transport fetch/merge -> pending local apply -> ack -> upload",
+      "state_owner_namespace": "com.runescribe.runtime.cloud-game-center / external-services.state / orchestration schema1; Cloud container iCloud.com.runescribe.app record RuneScribeProgressionReplica private-progression-v1 payload",
+      "native_target_resource_membership": "Platform CloudKit + RuntimeCore CloudSyncModule both apps",
+      "approved_requirement": "APPROVAL-PIVOT-001; free Norse/tools; complete first Elven Series; prior paid owners included; retire achievements/Game Center; preserve data and incoming reading",
+      "migration_hazard": "Old cloud pending work, account bindings, retry timers/polls can revive on restart. Whole Cloud capability cannot be removed while R17 retained path remains unresolved.",
+      "proposed_acceptance_evidence": "Future stale remote account/retry/merge tests; local secrets never enter payload; no old earning jobs",
+      "remaining_uncertainty": "No actual Cloud account, record contents or publisher configuration inspected."
+    },
+    {
+      "id": "R20",
+      "baseline": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "disposition": "retire active Game Center auth/report/outbox scheduling; retain durable state inert",
+      "evidence": [
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeCloudGameCenterCoordinator.swift",
+          "symbol": "activateRuntime / submit participation / processGameCenterIfPossible / wake",
+          "lines": "520-565,643-706,999-1055,1287-1398"
+        },
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribePlatform/GameCenter/AppleGameCenterReportingAdapter.swift",
+          "symbol": "authenticationState / requestAuthentication / report / run",
+          "lines": "14-59,116-187"
+        },
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeGameCenterModule/GameCenterReportingPolicy.swift",
+          "symbol": "GameCenterAuthorityPolicy",
+          "lines": "12-17"
+        }
+      ],
+      "upstream": "saved opt-in + local candidates; user Settings intent; lifecycle/retry",
+      "downstream": "GameKit authenticateHandler, GKAchievement.report; one-way local progress mirror",
+      "state_owner_namespace": "coordinator durable gameCenterOptedIn, account binding and GameCenterReportOutbox",
+      "native_target_resource_membership": "GameCenterModule + Platform/GameCenter; both apps",
+      "approved_requirement": "APPROVAL-PIVOT-001; free Norse/tools; complete first Elven Series; prior paid owners included; retire achievements/Game Center; preserve data and incoming reading",
+      "migration_hazard": "A saved opt-in schedules automatic auth on new launch; hiding button alone leaves it running. Opt-out preserves queue for later replay, so retiring by opt-out alone is insufficient. GC has no authority to grant/revoke rights.",
+      "proposed_acceptance_evidence": "Future adapter spy sees zero auth/report/session requests through cold/resume/retry/relaunch with legacy opt-in/pending queue",
+      "remaining_uncertainty": "Live Apple GC records/capabilities cleanup needs separate publisher authorization."
+    },
+    {
+      "id": "R21",
+      "baseline": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "disposition": "retire journey/achievements/statistics/reveals and their navigation; preserve useful theme browsing",
+      "evidence": [
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/SettingsView.swift",
+          "symbol": "progressAndFeedbackPanel / cloudAndGameCenterPanel",
+          "lines": "632-800"
+        },
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/VaultProgressView.swift",
+          "symbol": "section switch",
+          "lines": "475-496"
+        },
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Views/RootView.swift",
+          "symbol": "activeReveal overlay",
+          "lines": "195-199"
+        },
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession.swift",
+          "symbol": "submitGameCenterParticipation / rebindCloudAccount",
+          "lines": "349-383"
+        }
+      ],
+      "upstream": "progression/status snapshots and settings navigation",
+      "downstream": "VaultProgressView Journey/Achievements/Statistics/Vault/Archive; unlock overlay and GC actions",
+      "state_owner_namespace": "sole UI observable state and tasks",
+      "native_target_resource_membership": "RuneScribeUIModule both apps",
+      "approved_requirement": "APPROVAL-PIVOT-001; free Norse/tools; complete first Elven Series; prior paid owners included; retire achievements/Game Center; preserve data and incoming reading",
+      "migration_hazard": "Vault mixes collectible appearance content with retired progress, so deleting all vault content can lose paid assets. Preserve free tools/app lock panel immediately following external panel.",
+      "proposed_acceptance_evidence": "Future no achievement counters/prompts/screens/GC controls; owned content browsing remains; inaccessible Progression does not gate tools",
+      "remaining_uncertainty": "Final non-progression content selection layout not selected in M1."
+    },
+    {
+      "id": "R22",
+      "baseline": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "disposition": "retire active achievement reveal feedback; preserve any content resource independently included by inventory",
+      "evidence": [
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Presentation/RuneScribeUISession+Progression.swift",
+          "symbol": "optional observation / feedback / reveal commands",
+          "lines": "352-455,520-594"
+        },
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/RuntimeSettingsContracts.swift",
+          "symbol": "unlock feedback keys",
+          "lines": "177-185"
+        },
+        {
+          "path": "RuneScrib/AppHost/RuneScribeRuntimeComposition.swift",
+          "symbol": "configure feedback adapter",
+          "lines": "225"
+        }
+      ],
+      "upstream": "Progression reveal queue + feedback preferences",
+      "downstream": "mark-presented/ack commands; animation/audio/haptics adapter",
+      "state_owner_namespace": "setting.unlock-feedback.sound-enabled / haptics-enabled / animation-enabled; inert settings rows",
+      "native_target_resource_membership": "UIModule + Platform Feedback resource bundle",
+      "approved_requirement": "APPROVAL-PIVOT-001; free Norse/tools; complete first Elven Series; prior paid owners included; retire achievements/Game Center; preserve data and incoming reading",
+      "migration_hazard": "Do not delete reusable included effects/animation art because formerly used during rewards. No active earning prompt may survive by leaving observer/task alone.",
+      "proposed_acceptance_evidence": "Future no reveal queue observation/presentation; every inventoried included visual preserved; accessibility/effects preferences still honored where useful",
+      "remaining_uncertainty": "Root/content inventory determine complete resource usage; no broad resource deletion approved."
+    },
+    {
+      "id": "R23",
+      "baseline": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "disposition": "preserve generic storage/security; no namespace-wide purge",
+      "evidence": [
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribePlatform/Storage/AppleSQLiteModuleStateStore.swift",
+          "symbol": "store constants / production initializer / prepareNamespace",
+          "lines": "1-135"
+        },
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeRuntimeCore/RuntimeSettingsGateway.swift",
+          "symbol": "namespace / lifecycle / set",
+          "lines": "207-302"
+        }
+      ],
+      "upstream": "all runtime module state owners",
+      "downstream": "namespaced bytes, transactions, settings and share journals",
+      "state_owner_namespace": "Application Support/RuneScribe/RuntimeModuleState/module-state.sqlite and -wal/-shm; protected 0600/iOS protection; generic schemas",
+      "native_target_resource_membership": "Platform storage used by both apps",
+      "approved_requirement": "APPROVAL-PIVOT-001; free Norse/tools; complete first Elven Series; prior paid owners included; retire achievements/Game Center; preserve data and incoming reading",
+      "migration_hazard": "Database is shared by retained settings/share context/journals and retired records. Deleting database to retire achievements damages retained state.",
+      "proposed_acceptance_evidence": "Future synthetic DB upgrade integrity; unrelated namespace digests unchanged; interruption tests",
+      "remaining_uncertainty": "No actual customer database or secrets accessed."
+    },
+    {
+      "id": "R24",
+      "baseline": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "disposition": "preserve four providers and Core/UI/extension linkage; retire only reviewed obsolete products/resources later",
+      "evidence": [
+        {
+          "path": "Packages/RuneScribeArchitecture/Package.swift",
+          "symbol": "products / target dependencies / resources",
+          "lines": "6-165"
+        },
+        {
+          "path": "project.yml",
+          "symbol": "macOS/iOS/extension target dependencies",
+          "lines": "35-74,148-189,268-300"
+        },
+        {
+          "path": "RuneScrib.xcodeproj/project.pbxproj",
+          "symbol": "PBXBuildFile/framework product references",
+          "lines": "27-115,258-296,708-813,1990-2017"
+        }
+      ],
+      "upstream": "SwiftPM targets + XcodeGen native manifest",
+      "downstream": "native Frameworks phases; module resource bundles; Messages extension embedding",
+      "state_owner_namespace": "stable target/product names; no dependency additions",
+      "native_target_resource_membership": "both native apps link all providers/Progression/Cloud/GC; extension links MessagesShared + Messages.framework",
+      "approved_requirement": "APPROVAL-PIVOT-001; free Norse/tools; complete first Elven Series; prior paid owners included; retire achievements/Game Center; preserve data and incoming reading",
+      "migration_hazard": "Removing GC source import alone leaves package product/native refs. RuntimeCore itself depends on GC/Cloud/SyncDomain; changing app dependencies alone cannot retire compiled code.",
+      "proposed_acceptance_evidence": "Future exact package/native dependency diff, no external Forsetti, no GC framework/API references; all provider resource membership preserved; native build only when authorized",
+      "remaining_uncertainty": "No package resolution, generator, compiler or product scripts executed."
+    },
+    {
+      "id": "R25",
+      "baseline": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "disposition": "retire Game Center entitlement only in later authorized implementation; Cloud decision separate; preserve app group/links/keychain",
+      "evidence": [
+        {
+          "path": "project.yml",
+          "symbol": "app/extension entitlements",
+          "lines": "105-115,239-254,287-300"
+        },
+        {
+          "path": "Config/RuneScrib-macOS.entitlements",
+          "symbol": "plist",
+          "lines": "1-24"
+        },
+        {
+          "path": "Config/RuneScrib-iOS.entitlements",
+          "symbol": "plist",
+          "lines": "1-30"
+        },
+        {
+          "path": "Config/RuneScribeMessagesExtension.entitlements",
+          "symbol": "plist",
+          "lines": "1-10"
+        }
+      ],
+      "upstream": "native target CODE_SIGN_ENTITLEMENTS",
+      "downstream": "app capabilities; Messages App Group handoff; secure storage",
+      "state_owner_namespace": "GC=true both apps; iCloud container/service/ubiquity; iOS associated domains/app group/keychain",
+      "native_target_resource_membership": "macOS, iOS and iOS Messages extension distinct capability scopes",
+      "approved_requirement": "APPROVAL-PIVOT-001; free Norse/tools; complete first Elven Series; prior paid owners included; retire achievements/Game Center; preserve data and incoming reading",
+      "migration_hazard": "Do not remove app group/keychain/associated domains while removing GC; CloudKit removal awaits selectedCodex consumer review. Source entitlement presence is not portal or signing evidence.",
+      "proposed_acceptance_evidence": "Future source/project/capability parity and no-GC runtime verification; independently verify signed candidate if later authorized",
+      "remaining_uncertainty": "Live provisioning, store and signing capability states uninspected."
+    },
+    {
+      "id": "R26",
+      "baseline": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "disposition": "propose focused policy/docs amendment; retain runtime architecture and permanent external dependency ban",
+      "evidence": [
+        {
+          "path": "docs/architecture/FORSETTI_CONTROLLING_POLICY.md",
+          "symbol": "Theme Module rule / dependency prohibition",
+          "lines": "140-165"
+        },
+        {
+          "path": "README.md",
+          "symbol": "Codex/progression descriptions and cloud authority",
+          "lines": "58-71,402-431"
+        }
+      ],
+      "upstream": "owner APPROVAL-PIVOT-001 supersedes earned-only acquisition",
+      "downstream": "future contract/test/copy revisions",
+      "state_owner_namespace": "documentation contracts, not live ownership evidence",
+      "native_target_resource_membership": "no runtime/module merger; app-owned framework only",
+      "approved_requirement": "APPROVAL-PIVOT-001; free Norse/tools; complete first Elven Series; prior paid owners included; retire achievements/Game Center; preserve data and incoming reading",
+      "migration_hazard": "Current policy requires completed Progression gate; README promises local-first usability and bounded optional sync. Amend eligibility to approved ownership, preserve lifecycle/resource checks and local data safety.",
+      "proposed_acceptance_evidence": "Future reviewed policy diff plus relevant test amendments; no broad architecture changes",
+      "remaining_uncertainty": "M1 does not amend or approve product contracts."
+    },
+    {
+      "id": "R27",
+      "baseline": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "disposition": "preserve/replace Core delivery semantics before earning retirement",
+      "evidence": [
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Application/RuneScribeCoreApplicationService.swift",
+          "symbol": "completeShareArtifact",
+          "lines": "1081-1142,1204-1349"
+        },
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/CoreProgressionCoordinator.swift",
+          "symbol": "drain / acknowledgeRetainedReceipts",
+          "lines": "223-306"
+        }
+      ],
+      "upstream": "native required-attachment acceptance + runtime terminal journal",
+      "downstream": "Core registry durable intent -> terminal repository commit -> key delivery/relationship mutation -> receipt/cleanup",
+      "state_owner_namespace": "encrypted Core library progression ledger; durable ShareArtifactRegistry terminal state",
+      "native_target_resource_membership": "CoreModule+RuntimeCore+UIModule both apps",
+      "approved_requirement": "APPROVAL-PIVOT-001: preserved Core/data/free reading and complete owned visual access; retired achievements",
+      "migration_hazard": "Core currently checks progression evidence readiness before completing delivery. The commit simultaneously records first delivery/bidirectional facts and key-delivery transition. Retire counters without losing completion evidence, required attachment acceptance, exactly-once terminal handling or contact relationship behavior.",
+      "proposed_acceptance_evidence": "Future equivalent of terminal-intent crash/relaunch tests with no Progression module; key-free messages never consume key-delivery rights; cancelled/unaccepted attachment never records delivery",
+      "remaining_uncertainty": "Exact replacement schema/migration requires review; detailed Core namespaces and constraints in 03."
+    },
+    {
+      "id": "R28",
+      "baseline": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "disposition": "retain current library decoding; propose separately versioned compatible migration if needed",
+      "evidence": [
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Domain/CipherLibrary.swift",
+          "symbol": "validatedProgressionLedger / validateStoredShape",
+          "lines": "183-210"
+        },
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/CoreProgressionCoordinator.swift",
+          "symbol": "migrateEvidenceIfNeeded",
+          "lines": "148-178"
+        }
+      ],
+      "upstream": "stored v1/v2 cipher library and encrypted evidence",
+      "downstream": "Core startup/repository validation, cipher selection and sharing",
+      "state_owner_namespace": "CipherLibrary v2 requires progressionLedger; Core coordinator migrates evidence",
+      "native_target_resource_membership": "CoreModule both apps",
+      "approved_requirement": "APPROVAL-PIVOT-001: preserved Core/data/free reading and complete owned visual access; retired achievements",
+      "migration_hazard": "Removing the ledger field without a compatible version change invalidates current stored libraries. Existing activity seeds do not prove paid-app purchase.",
+      "proposed_acceptance_evidence": "Future decode historical v1/v2/absent/corrupt/empty/large fixtures; data/key digests preserved; no fabricated achievement completion",
+      "remaining_uncertainty": "No customer data inspected; new storage shape not approved."
+    },
+    {
+      "id": "R29",
+      "baseline": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "disposition": "preserve input validation/AEAD/free plaintext reading and safe fallback; retire only optional encounter earning",
+      "evidence": [
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Application/RuneScribeCoreApplicationService.swift",
+          "symbol": "ingestFileData package admission before AEAD",
+          "lines": "2429-2501"
+        },
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Import/FileRouter.swift",
+          "symbol": "decode / decodePackage",
+          "lines": "67-146"
+        },
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Messages/MessageImportUseCase.swift",
+          "symbol": "ingest / receivedMessage",
+          "lines": "15-83,296-338"
+        },
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeCoreModule/Messages/SharePresentationLifecycle.swift",
+          "symbol": "SharePresentationResolver.resolve",
+          "lines": "4-39"
+        },
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/ReceivedPresentationAvailabilityBinding.swift",
+          "symbol": "resolve / providerAvailability",
+          "lines": "21-71"
+        }
+      ],
+      "upstream": "admitted legacy/package data -> exact wire decoder -> candidate cipher",
+      "downstream": "authenticated plaintext -> ReceivedMessageDTO -> UI compatibility resolver and requested/Norse presentation",
+      "state_owner_namespace": "Core library and transient incoming metadata; no recipient series grant",
+      "native_target_resource_membership": "Core+Contracts+UIModule both apps; iOS Messages ingress separately retained",
+      "approved_requirement": "APPROVAL-PIVOT-001: preserved Core/data/free reading and complete owned visual access; retired achievements",
+      "migration_hazard": "MessageImportUseCase.ingest authenticates before changing cipher/contact/relationship data. The outer CoreApplicationService.ingestFileData path may first persist optional package-admission facts and encounter metadata before AEAD (2429-2501); that metadata write is not authenticated plaintext or sender-identity proof. Core returns decoded plaintext independently of series ownership; optional earning must not become admission/paywall. Locked/unavailable appearance can render Norse fallback while message remains readable.",
+      "proposed_acceptance_evidence": "Future unowned recipient with valid/invalid ciphertext, unknown/locked/missing provider, static preview, legacy links/package and cipher confirmation; tampering must not mutate cipher, key, contact relationship or message content; optional pre-decode admission metadata is assessed separately",
+      "remaining_uncertainty": "Not a claim that every sender appearance renders for an unowned recipient; no native path executed."
+    },
+    {
+      "id": "R30",
+      "baseline": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "disposition": "replace share creator item ownership feed; preserve authorization and composition validation",
+      "evidence": [
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/OutboundSharePresentationBuilder.swift",
+          "symbol": "requestedSelectionValidated",
+          "lines": "291-309"
+        },
+        {
+          "path": "Packages/RuneScribeArchitecture/Sources/RuneScribeUIModule/Sharing/ShareBuilderModel.swift",
+          "symbol": "ShareBuilderDraft.selection / resolveDefaults",
+          "lines": "151-174,370-394"
+        }
+      ],
+      "upstream": "provider isOwned/state + ownedThemeArtifactIDs + selected relic/seal/frame",
+      "downstream": "ShareBuilderPolicy selection -> static renderer metadata/resource resolution -> Core artifact",
+      "state_owner_namespace": "UI draft/settings plus progression-derived owned artifact IDs",
+      "native_target_resource_membership": "sole UIModule and provider resources both apps",
+      "approved_requirement": "APPROVAL-PIVOT-001: preserved Core/data/free reading and complete owned visual access; retired achievements",
+      "migration_hazard": "Share creation has a separate item ownership check from Codex selection. Replacing only provider ownership leaves mastery visuals unavailable. Keep static-share, compatibility, exact selection equality, integrity and resource allowlists.",
+      "proposed_acceptance_evidence": "Future new or legacy whole-series owner can create with every compatible inventoried item, without mastery; recipient access still cannot grant creation",
+      "remaining_uncertainty": "02 explicitly distinguishes five deferred shared visual catalog entries from shipped provider items; no new artwork promise."
+    },
+    {
+      "id": "R31",
+      "baseline": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "disposition": "preserve Messages handoff lifecycle and App Group",
+      "evidence": [
+        {
+          "path": "RuneScribeMessagesExtension/MessagesViewController.swift",
+          "symbol": "continueToRuneScribe / openContainingApp / recordOpenResult",
+          "lines": "103-164"
+        },
+        {
+          "path": "RuneScrib/AppHost/AppDelegate.swift",
+          "symbol": "startup / foreground / drainMessagesInbox",
+          "lines": "59-109"
+        },
+        {
+          "path": "RuneScrib/AppHost/MessagesImportInboxDrainer.swift",
+          "symbol": "drain / acknowledgeDirectDelivery / recordTerminalState",
+          "lines": "17-69"
+        }
+      ],
+      "upstream": "validated incoming Messages invitation and user confirmation",
+      "downstream": "App Group durable confirmation/open result -> containing app ingress -> presented/completed/declined terminal status",
+      "state_owner_namespace": "group.com.runescribe.app inbox; per-handoff state and process dedupe",
+      "native_target_resource_membership": "iOS Messages extension + iOS AppHost + MessagesShared; not a GC capability",
+      "approved_requirement": "APPROVAL-PIVOT-001: retain tools and free incoming reading/decoding",
+      "migration_hazard": "Deleting App Group or foreground drain with Game Center cleanup strands invitations. Open accepted is not import complete; presented and completed/declined remain distinct. No purchase prerequisite belongs in this route.",
+      "proposed_acceptance_evidence": "Future valid/invalid invitation, open rejection, foreground retry, duplicate handoff and terminal confirmation fixtures without owned series",
+      "remaining_uncertainty": "No Messages app or native simulation launched; exact live invitation behavior remains unverified"
+    }
+  ]
+}

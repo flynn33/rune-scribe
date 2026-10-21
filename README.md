@@ -22,6 +22,23 @@ A product of **Raven Forge Software**.
 
 ---
 
+## Pivot discovery — documentation only
+
+[RS-PIVOT-M1 discovery](docs/pivot-m1/README.md) records the approved next product
+outcome: free Norse and all retained tools; one one-time **$1.99 purchase for the
+complete first Elven Series**, including Moonleaf, Sunspire, Wildwood, and Gloamthorn
+with all included content unlocked; the complete first series included for original
+paid-app owners; and removal of achievements and Game Center. The four theme modules,
+user data, and free reading/decoding of incoming themed messages remain protected.
+
+This publishes discovery findings and a proposed migration sequence. Application
+behavior remains **1.0.47 build 47**, including its existing progression and Game
+Center paths. No pivot implementation, Store change, technical-contract acceptance,
+or release is established. See the [M1 handoff](docs/pivot-m1/05-HANDOFF.md) for evidence,
+unresolved authority and purchase-history inputs, and the next review step.
+The [documentation publication checks](docs/pivot-m1/PUBLICATION-VERIFICATION.md) record
+four fresh unsigned iOS/macOS Debug and Release builds with zero errors or warnings.
+
 ## ✨ Features
 
 - **🔐 Real encryption, runic skin** — every message is sealed with **AES-256-GCM**

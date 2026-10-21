@@ -194,8 +194,10 @@
 
 /* Begin PBXFileReference section */
 		002F7864AE4DEA2BBD03D1E7 /* AppHostRoutingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppHostRoutingTests.swift; sourceTree = "<group>"; };
+		0249B287B888B0EAD62BC355 /* 03-MIGRATION-AND-RETIREMENT-PROPOSAL.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "03-MIGRATION-AND-RETIREMENT-PROPOSAL.md"; sourceTree = "<group>"; };
 		0691B53984A2F145E83175B4 /* RuneScribArchitectureTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RuneScribArchitectureTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		09E0D1BAFC49BAB116BBE7B6 /* ThemeCanonicalRenderHarness.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeCanonicalRenderHarness.swift; sourceTree = "<group>"; };
+		0CF6CEF5E16A2133D1843A7A /* contract-source-identities.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "contract-source-identities.json"; sourceTree = "<group>"; };
 		1806EBDCAE409D6A29FAAD4F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		1B43D8CCE7DAD248C5D613D8 /* RuneScribIOSTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = RuneScribIOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		1E4FF66651C4BB9C0C94DB4B /* RuneScrib.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RuneScrib.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -204,20 +206,29 @@
 		33965AD6B626161B2307C925 /* RuneScribTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RuneScribTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		382C041081C83DEB0A9B75DE /* ThemeFidelityMatrixTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeFidelityMatrixTests.swift; sourceTree = "<group>"; };
 		3BCFD8F3AD00A68AB9A548DF /* ThemeFidelityAuthorityUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeFidelityAuthorityUITests.swift; sourceTree = "<group>"; };
+		3C63B81882F5D86D8A233382 /* 01-IMPACT-MAP.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "01-IMPACT-MAP.md"; sourceTree = "<group>"; };
+		40B856C7B9E77BDD2E9C3C47 /* content-review-notes.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "content-review-notes.md"; sourceTree = "<group>"; };
 		41643CC6ABB57EE5DEE33F09 /* NativeShareOutcomeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeShareOutcomeTests.swift; sourceTree = "<group>"; };
 		445DADDDA8C13560D0CA9E86 /* Responsive-Candidate-Catalog-v1.3.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "Responsive-Candidate-Catalog-v1.3.json"; sourceTree = "<group>"; };
 		4B31D2BF5EC1E6D84B23D71C /* RuneScribMacParityTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RuneScribMacParityTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4FB98D2047D98487CA5D043D /* RuneScribIOSUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = RuneScribIOSUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		51CE0B6CA2B2FBDB70249458 /* RuneScribeArchitecture */ = {isa = PBXFileReference; lastKnownFileType = folder; name = RuneScribeArchitecture; path = Packages/RuneScribeArchitecture; sourceTree = SOURCE_ROOT; };
+		57AFE7BB465E1391BA64F0D1 /* BuildResults.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = BuildResults.json; sourceTree = "<group>"; };
 		6130DE995C4AA7EC41BAF902 /* KeychainMigrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainMigrationTests.swift; sourceTree = "<group>"; };
+		6A42927EC72FCED3417922B5 /* 02-CONTENT-INVENTORY.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "02-CONTENT-INVENTORY.json"; sourceTree = "<group>"; };
+		6EF483F1E74EAAA579E1E61F /* PUBLICATION-VERIFICATION.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "PUBLICATION-VERIFICATION.md"; sourceTree = "<group>"; };
 		70806C8FC5D83F211738FAAD /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		73480FBCDA99CED16BC695D5 /* raven-forge-spp-splash.mp4 */ = {isa = PBXFileReference; path = "raven-forge-spp-splash.mp4"; sourceTree = "<group>"; };
+		734AE5A3F997ACC74262A5F1 /* 00-ENVIRONMENT-AND-AUTHORITY.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "00-ENVIRONMENT-AND-AUTHORITY.md"; sourceTree = "<group>"; };
 		791540D5125ABD137F556B58 /* MessagesImportInboxDrainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessagesImportInboxDrainer.swift; sourceTree = "<group>"; };
 		7952D2A1D45641B3A3BC79F4 /* Messages.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Messages.framework; path = System/Library/Frameworks/Messages.framework; sourceTree = SDKROOT; };
 		8208DAC0E11E112FE53A2CF4 /* ArchitectureGuardrailTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArchitectureGuardrailTests.swift; sourceTree = "<group>"; };
+		840BAD20217892ECA513EDBF /* 04-CONTRACTS-AND-VERIFICATION-PLAN.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "04-CONTRACTS-AND-VERIFICATION-PLAN.md"; sourceTree = "<group>"; };
 		84D3A9AA89B94306C6B926AB /* RuntimeCompositionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuntimeCompositionTests.swift; sourceTree = "<group>"; };
 		88D90CA91E41675F50F2F0E4 /* CompatibilityBaselineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompatibilityBaselineTests.swift; sourceTree = "<group>"; };
 		8FCE189DF2AC76174C2C5171 /* RuneScribeMessagesExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = RuneScribeMessagesExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		912FF61289AD03D2129F2151 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		94366A037C8DD6FC32C2C7B4 /* impact-responsibilities.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "impact-responsibilities.json"; sourceTree = "<group>"; };
 		94EBA085D60AFAD558BC69CD /* RuneScribeParityUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneScribeParityUITests.swift; sourceTree = "<group>"; };
 		97A0B111339796FA899F60FA /* MessagesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MessagesViewController.swift; sourceTree = "<group>"; };
 		9B9CA154D72FA203A0E62B33 /* DestinationCompatibilityMatrixTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DestinationCompatibilityMatrixTests.swift; path = Packages/RuneScribeArchitecture/Tests/RuneScribeCoreModuleTests/Domain/DestinationCompatibilityMatrixTests.swift; sourceTree = "<group>"; };
@@ -226,6 +237,7 @@
 		AD68AA25BC0ABFFEAFE20CF9 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		ADD2BEB44E13EC5A004F6636 /* RuneScribMacParityHostApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneScribMacParityHostApp.swift; sourceTree = "<group>"; };
 		AF3A31BA4896C83FECD82430 /* Comparison-Authority-v1.3.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "Comparison-Authority-v1.3.json"; sourceTree = "<group>"; };
+		B4F4CF80EA20C02736FBFF53 /* DISCOVERY-EVIDENCE.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "DISCOVERY-EVIDENCE.json"; sourceTree = "<group>"; };
 		B6164CCB0C4A4342270DC5CA /* OFL.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = OFL.txt; sourceTree = "<group>"; };
 		BA4DDCBBBBC405F5414582E7 /* RuneScribeMacAppUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneScribeMacAppUITests.swift; sourceTree = "<group>"; };
 		BD88036C0FE8E9BFB419B68D /* RuneScribMacParityHost.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RuneScribMacParityHost.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -236,10 +248,13 @@
 		C8794218367CD5682362E58C /* ComplianceGuardTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComplianceGuardTests.swift; sourceTree = "<group>"; };
 		CFAA78FECCD4D76A157BC566 /* RuneScribeMacParityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneScribeMacParityTests.swift; sourceTree = "<group>"; };
 		D2F5EA4DE2C44E252CBAD296 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		DA604CA200FBE60CB2ACC5BB /* apple-storekit-research.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "apple-storekit-research.json"; sourceTree = "<group>"; };
+		E557803747530D5C8845C1BA /* 05-HANDOFF.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "05-HANDOFF.md"; sourceTree = "<group>"; };
 		EABB1C71C46954CA9C22995F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		F19B0376ECBEEEFF33C99731 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		F9D4EC5C62BEDD1A51E12CAC /* RuneScribApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuneScribApp.swift; sourceTree = "<group>"; };
 		FA608DAC88F63B1040378BDD /* RuneScribMacParityUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RuneScribMacParityUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		FBCDA649FCFD776750ACBE9F /* PUBLICATION-MANIFEST.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "PUBLICATION-MANIFEST.json"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -375,6 +390,7 @@
 		2B9A530DB883B542FF1AFEE7 /* docs */ = {
 			isa = PBXGroup;
 			children = (
+				7E519B972A696337069F7426 /* pivot-m1 */,
 				E268278AC6A3BE6AE91E6399 /* verification */,
 			);
 			path = docs;
@@ -460,6 +476,28 @@
 				B6164CCB0C4A4342270DC5CA /* OFL.txt */,
 			);
 			path = Fonts;
+			sourceTree = "<group>";
+		};
+		7E519B972A696337069F7426 /* pivot-m1 */ = {
+			isa = PBXGroup;
+			children = (
+				734AE5A3F997ACC74262A5F1 /* 00-ENVIRONMENT-AND-AUTHORITY.md */,
+				3C63B81882F5D86D8A233382 /* 01-IMPACT-MAP.md */,
+				6A42927EC72FCED3417922B5 /* 02-CONTENT-INVENTORY.json */,
+				0249B287B888B0EAD62BC355 /* 03-MIGRATION-AND-RETIREMENT-PROPOSAL.md */,
+				840BAD20217892ECA513EDBF /* 04-CONTRACTS-AND-VERIFICATION-PLAN.md */,
+				E557803747530D5C8845C1BA /* 05-HANDOFF.md */,
+				DA604CA200FBE60CB2ACC5BB /* apple-storekit-research.json */,
+				57AFE7BB465E1391BA64F0D1 /* BuildResults.json */,
+				40B856C7B9E77BDD2E9C3C47 /* content-review-notes.md */,
+				0CF6CEF5E16A2133D1843A7A /* contract-source-identities.json */,
+				B4F4CF80EA20C02736FBFF53 /* DISCOVERY-EVIDENCE.json */,
+				94366A037C8DD6FC32C2C7B4 /* impact-responsibilities.json */,
+				FBCDA649FCFD776750ACBE9F /* PUBLICATION-MANIFEST.json */,
+				6EF483F1E74EAAA579E1E61F /* PUBLICATION-VERIFICATION.md */,
+				912FF61289AD03D2129F2151 /* README.md */,
+			);
+			path = "pivot-m1";
 			sourceTree = "<group>";
 		};
 		917F1CC541DE4CFD534B6D18 /* authority */ = {

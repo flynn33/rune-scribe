@@ -1,0 +1,136 @@
+{
+  "schema": "runescribe.m1.contract-source-identities.v1",
+  "selected_realization_profile_set": null,
+  "adopted_method_pin": null,
+  "rows": [
+    {
+      "path": "<product-checkout>/docs/architecture/FORSETTI_CONTROLLING_POLICY.md",
+      "source_commit": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "sha256": "2e7c3729d51724929838269d29c71bb2dd92caa4976167cb4275f9ece6d55db6",
+      "independent_pivot_review_evidence": "not located"
+    },
+    {
+      "path": "<product-checkout>/docs/architecture/ContractsAndCapabilities.md",
+      "source_commit": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "sha256": "63a08287dfc848db11e7e05d674d04cb75e543b14ea46611f06ff45061867234",
+      "independent_pivot_review_evidence": "not located"
+    },
+    {
+      "path": "<product-checkout>/docs/architecture/decisions/ADR-RS-008-progression-persistence.md",
+      "source_commit": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "sha256": "ffdac018d373a117512c4a95bbb40e0cd90685cc34b477853b8a8bc1b8e73025",
+      "independent_pivot_review_evidence": "not located"
+    },
+    {
+      "path": "<product-checkout>/docs/architecture/decisions/ADR-RS-011-game-center-records.md",
+      "source_commit": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "sha256": "b58a3e932212f226856ca59fef5d072c2dbc7f99a033d980f3fd04afa8e56f6e",
+      "independent_pivot_review_evidence": "not located"
+    },
+    {
+      "path": "<product-checkout>/Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/ProgressionContracts.swift",
+      "source_commit": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "sha256": "1e32ae4d46e7cc0f81bc9402e64bd4a21b96f1328be4625703403a009c5e5a09",
+      "independent_pivot_review_evidence": "not located"
+    },
+    {
+      "path": "<product-checkout>/Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/ExistingUserMigrationContracts.swift",
+      "source_commit": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "sha256": "f6a7875773059e2bc76e893e7ef0109ad872e45733f9bd124618769ec0db9ab4",
+      "independent_pivot_review_evidence": "not located"
+    },
+    {
+      "path": "<product-checkout>/Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/ShareCompletionContracts.swift",
+      "source_commit": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "sha256": "95f9cd1a25398ae1aae12f9971f6aba5be48da58f65325d186e24eca7f0853fb",
+      "independent_pivot_review_evidence": "not located"
+    },
+    {
+      "path": "<product-checkout>/Packages/RuneScribeArchitecture/Sources/RuneScribeContracts/ThemeCoordinatorContracts.swift",
+      "source_commit": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "sha256": "b4f78504fdce3daed49a98a8ee518e440da57270441ff1b626afe47d6a22fcbc",
+      "independent_pivot_review_evidence": "not located"
+    },
+    {
+      "path": "<product-checkout>/Packages/RuneScribeArchitecture/Sources/RuneScribeProgressionModule/Resources/Rune-Scribe-Progression-Future-Theme-Binding-Contract-v1.0.json",
+      "source_commit": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "sha256": "83349a52999a9e78f5ffa0e3c557cb3d9d2c67b88cfd10d86f777d38b6a12d91",
+      "independent_pivot_review_evidence": "not located"
+    },
+    {
+      "path": "<product-checkout>/Packages/RuneScribeArchitecture/Package.swift",
+      "source_commit": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "sha256": "1ca7e756669803459202ecaed2c691a7bc9ba578a62491d4e9b293a4a4e3ad00",
+      "independent_pivot_review_evidence": "not located"
+    },
+    {
+      "path": "<product-checkout>/project.yml",
+      "source_commit": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "sha256": "0cf47eaa045a2db0bb2d5f61712eb2222ad55105f4dd36c52d9a8368a919a66d",
+      "independent_pivot_review_evidence": "not located"
+    },
+    {
+      "path": "<product-checkout>/scripts/architecture-ratchet.json",
+      "source_commit": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "sha256": "495fb0820cf11eb026c30e10d3b810a5225274a498d26252a4ca06eae49c61e7",
+      "independent_pivot_review_evidence": "not located"
+    },
+    {
+      "path": "<product-checkout>/scripts/check-architecture.sh",
+      "source_commit": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "sha256": "1757f2b586802873c334a1e30d0bad6ceefed9794e264d264beb4648fdbf2962",
+      "independent_pivot_review_evidence": "not located"
+    },
+    {
+      "path": "<product-checkout>/scripts/check-forsetti-compliance.sh",
+      "source_commit": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "sha256": "ef56adf9b845bf123706a1d87be187187621f14c064ab75ac76f3684c22555b9",
+      "independent_pivot_review_evidence": "not located"
+    },
+    {
+      "path": "<product-checkout>/docs/PRIVACY.md",
+      "source_commit": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "sha256": "ebc98c36680db327dddbe72150634032a1e824eac0ee50f615b6417f2cc61a3d",
+      "independent_pivot_review_evidence": "not located"
+    },
+    {
+      "path": "<product-checkout>/docs/SUPPORT.md",
+      "source_commit": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "sha256": "6d8f6a9d03ff32adce979b68e17c4bd6f4df77be13bba70595f498ec25b1f1ac",
+      "independent_pivot_review_evidence": "not located"
+    },
+    {
+      "path": "<product-checkout>/docs/APP_STORE_SUBMISSION.md",
+      "source_commit": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "sha256": "054f159895d9431d6980faad613cd1330f0bcca2795b0411dda02800627dde8c",
+      "independent_pivot_review_evidence": "not located"
+    },
+    {
+      "path": "<product-checkout>/README.md",
+      "source_commit": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "sha256": "377938e7d359087e073182587353cc5294172cebeb393d8f7cf7974fb8a8d704",
+      "independent_pivot_review_evidence": "not located"
+    },
+    {
+      "path": "<product-checkout>/EULA.md",
+      "source_commit": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+      "sha256": "a4076fe63aa2ac3ffb8bd26bbd776631a9eda42b602e35f01e294612b55553f2",
+      "independent_pivot_review_evidence": "not located"
+    },
+    {
+      "path": "<external-M1-package>/TASK-CONTRACT.json",
+      "sha256": "45192aa85f5f3ffb6281e3efe4fba61552d7c05d0a79b8ab931ccca0f7f9bef4",
+      "role": "read-only package input; not accepted implementation realization contract"
+    },
+    {
+      "path": "<external-M1-package>/records/Project-Record.md",
+      "sha256": "49c823e7ab12593f05614dfc2ddd5104c0483c7bcf87029e348d57fc91e66dff",
+      "role": "read-only package input; not accepted implementation realization contract"
+    },
+    {
+      "path": "<external-M1-package>/evidence/Playbook-Intake-Receipt.md",
+      "sha256": "01da20d0b134f0edfb22bf07dd18870aad1c75b414138babbb574b83913365b4",
+      "role": "read-only package input; not accepted implementation realization contract"
+    }
+  ]
+}

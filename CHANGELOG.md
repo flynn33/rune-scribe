@@ -8,6 +8,18 @@ release work and reviewed against the project version before merge. The format f
 <!-- NEW ENTRIES BELOW -->
 ## [Unreleased]
 
+- Publish the [RS-PIVOT-M1 discovery findings](docs/pivot-m1/README.md), covering
+  ownership and content gates, all five theme providers, data-safe migration,
+  achievement/Game Center retirement, and proposed verification. Record
+  APPROVAL-PIVOT-001: free Norse/tools, one one-time $1.99 complete first Elven Series
+  purchase with all included content unlocked, and first-series inclusion for
+  original paid-app owners. This is documentation only; application version
+  **1.0.47 build 47** and behavior remain unchanged. No pivot implementation,
+  accepted technical contract, Store change, or release is claimed.
+- Verify the documentation-linked Xcode project with fresh unsigned iOS/macOS Debug
+  and Release builds: all four passed with zero warning/error diagnostics. Keep
+  the application at 1.0.47 build 47; the M1 documents have no target membership.
+
 ## [1.0.47] - 2026-10-08
 
 - Separate ordinary iOS Messages composition from the file-sharing payload. Quick

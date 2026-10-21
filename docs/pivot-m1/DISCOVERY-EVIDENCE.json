@@ -1,0 +1,100 @@
+{
+  "schema": "runescribe.m1.published-evidence.v1",
+  "source_commit": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+  "application_version": "1.0.47",
+  "application_build": "47",
+  "discovery_status": "COMPLETE_FOR_M1_REVIEW",
+  "host": {
+    "os": "Darwin",
+    "architecture": "arm64",
+    "python": "3.9.6"
+  },
+  "simulators": {
+    "query_status": "ok",
+    "exit_code": 0,
+    "output_truncated": false,
+    "destinations": [
+      {
+        "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-26-5",
+        "name": "Rune Scribe App Store iPhone 17 Pro",
+        "state": "Shutdown"
+      },
+      {
+        "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-26-5",
+        "name": "Rune Scribe App Store iPhone 17 Pro Max",
+        "state": "Shutdown"
+      },
+      {
+        "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-26-5",
+        "name": "Rune Scribe Beta Fixes iPhone",
+        "state": "Shutdown"
+      },
+      {
+        "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-26-5",
+        "name": "Rune Scribe App Store iPad Pro 13",
+        "state": "Shutdown"
+      },
+      {
+        "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-26-5",
+        "name": "Rune Scribe Beta Fixes iPad",
+        "state": "Shutdown"
+      },
+      {
+        "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-27-0",
+        "name": "Rune Scribe App Store iPhone 17 Pro iOS 27",
+        "state": "Shutdown"
+      },
+      {
+        "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-27-0",
+        "name": "Rune Scribe App Store iPhone-Pro-Max iOS 27",
+        "state": "Shutdown"
+      },
+      {
+        "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-27-0",
+        "name": "Rune Scribe App Store iPad iOS 27",
+        "state": "Shutdown"
+      }
+    ]
+  },
+  "opening_worktree_empty": true,
+  "closing_worktree_empty": true,
+  "tracked_paths_compared": 1784,
+  "tracked_content_changed": [],
+  "tracked_mode_changed": [],
+  "head_unchanged": true,
+  "limitations": [
+    "Content baseline began after initial metadata/read-only navigation, not before the first file read.",
+    "Ignored files, .git object files/cache bytes, access times and normal host tool caches not fully hashed.",
+    "No reset/revert/clean/stash/checkouts or product commands used to make comparison clean."
+  ],
+  "authoritative_record_route": "unresolved; no authoritative record overwritten",
+  "adopted_method_binding": "unresolved; inspected method reference is not an adopted pin",
+  "reviewed_pivot_realization_contracts": "not located in bounded discovery",
+  "approval_provenance": "APPROVAL-PIVOT-001 preserved in original external package and owner conversation; private conversation identifiers omitted",
+  "local_only_evidence": [
+    {
+      "file": "authority-retrieval.json",
+      "sha256": "20b6fdd19d341b44c888ab9d64c5a17b0278e1d0ec7a23d68bfa92e683f05067"
+    },
+    {
+      "file": "source-baseline-start.json",
+      "sha256": "b6aff257bf2065243c80be2480899bbc7087b97c408796fb180318f9d156a52c"
+    },
+    {
+      "file": "source-boundary-closeout.json",
+      "sha256": "76b7f53f0e71c09545df2362bdbb2182dab6d347b07d9d374280f724f7412d8c"
+    },
+    {
+      "file": "report-validation.json",
+      "sha256": "a5f5748da22b7c160dabed723dd2b0cf95af3bca545bbc9a03ecf767c86d4f5b"
+    },
+    {
+      "file": "environment-start/environment.json",
+      "sha256": "b8b453a7434ceb637186d083be5cb29fbeee2ddeaf83d0b39131ee639f1138dc"
+    },
+    {
+      "file": "environment-end/environment.json",
+      "sha256": "e73c0543f20e24ff93e4f6f3709e5cdc6c7d203fd67a0241408944f6ba640f2b"
+    }
+  ]
+}

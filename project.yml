@@ -6,6 +6,8 @@ options:
     macOS: "15.0"
     iOS: "17.0"
   createIntermediateGroups: true
+fileGroups:
+  - docs/pivot-m1
 settings:
   base:
     SWIFT_VERSION: "6.0"

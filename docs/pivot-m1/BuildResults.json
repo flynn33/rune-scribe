@@ -1,0 +1,159 @@
+{
+  "schema": "runescribe.m1.publication-builds.v1",
+  "date": "2026-10-21",
+  "xcode": "27.0 (27A266a)",
+  "source_baseline_commit": "d33fa227b3bad4cdd49c0f6f10e97a8f060b4f54",
+  "scope": "documentation publication plus Xcode documentation references; application code/dependencies/capabilities unchanged",
+  "application_version": "1.0.47",
+  "application_build": "47",
+  "signing": "disabled for all builds",
+  "command_template": [
+    "xcodebuild",
+    "build",
+    "-project",
+    "RuneScrib.xcodeproj",
+    "-scheme",
+    "<platform-scheme>",
+    "-configuration",
+    "<Debug-or-Release>",
+    "-destination",
+    "generic/platform=<iOS-or-macOS>",
+    "-derivedDataPath",
+    "<fresh-external-directory>",
+    "-resultBundlePath",
+    "<fresh-external-result>",
+    "CODE_SIGNING_ALLOWED=NO",
+    "CODE_SIGNING_REQUIRED=NO",
+    "CODE_SIGN_IDENTITY=",
+    "DEVELOPMENT_TEAM="
+  ],
+  "build_input_sha256": {
+    "project.yml": "6c2b2185c4b41737f6992bccc1e0fc450f0bce1a7d2b3ae8b89760e7ba93830e",
+    "RuneScrib.xcodeproj/project.pbxproj": "3e2f8718d53b06bff6dc7df705143313fdf9a3118daec50cac8d3fa72204f6d2",
+    "Packages/RuneScribeArchitecture/Package.swift": "1ca7e756669803459202ecaed2c691a7bc9ba578a62491d4e9b293a4a4e3ad00"
+  },
+  "results": [
+    {
+      "label": "ios-debug",
+      "platform": "ios",
+      "configuration": "Debug",
+      "exit_code": 0,
+      "status": "succeeded",
+      "errors": 0,
+      "warnings": 0,
+      "analyzer_warnings": 0,
+      "raw_diagnostics": 0,
+      "log_sha256": "198f01f5ef8b61e7c72b41f167914bdddb35bf03826aab1afb40f9396b2bb628",
+      "products": [
+        {
+          "bundle": "RuneScrib.app",
+          "identifier": "com.runescribe.app",
+          "version": "1.0.47",
+          "build": "47",
+          "architectures": [
+            "arm64"
+          ]
+        },
+        {
+          "bundle": "RuneScribeMessagesExtension.appex",
+          "identifier": "com.runescribe.app.messages",
+          "version": "1.0.47",
+          "build": "47",
+          "architectures": [
+            "arm64"
+          ]
+        }
+      ],
+      "m1_reports_in_product": false
+    },
+    {
+      "label": "ios-release",
+      "platform": "ios",
+      "configuration": "Release",
+      "exit_code": 0,
+      "status": "succeeded",
+      "errors": 0,
+      "warnings": 0,
+      "analyzer_warnings": 0,
+      "raw_diagnostics": 0,
+      "log_sha256": "815caa6733a41a38d446269a17f5c111bbc48ab4a7aa86e1d2b8f05ee7814e9c",
+      "products": [
+        {
+          "bundle": "RuneScrib.app",
+          "identifier": "com.runescribe.app",
+          "version": "1.0.47",
+          "build": "47",
+          "architectures": [
+            "arm64"
+          ]
+        },
+        {
+          "bundle": "RuneScribeMessagesExtension.appex",
+          "identifier": "com.runescribe.app.messages",
+          "version": "1.0.47",
+          "build": "47",
+          "architectures": [
+            "arm64"
+          ]
+        }
+      ],
+      "m1_reports_in_product": false
+    },
+    {
+      "label": "macos-debug",
+      "platform": "macos",
+      "configuration": "Debug",
+      "exit_code": 0,
+      "status": "succeeded",
+      "errors": 0,
+      "warnings": 0,
+      "analyzer_warnings": 0,
+      "raw_diagnostics": 0,
+      "log_sha256": "5f0d0b9ebfeba5a32953592598088ccd734a0d88e37d5ef40973cebad888696d",
+      "products": [
+        {
+          "bundle": "RuneScrib.app",
+          "identifier": "com.runescribe.app",
+          "version": "1.0.47",
+          "build": "47",
+          "architectures": [
+            "x86_64",
+            "arm64"
+          ]
+        }
+      ],
+      "m1_reports_in_product": false
+    },
+    {
+      "label": "macos-release",
+      "platform": "macos",
+      "configuration": "Release",
+      "exit_code": 0,
+      "status": "succeeded",
+      "errors": 0,
+      "warnings": 0,
+      "analyzer_warnings": 0,
+      "raw_diagnostics": 0,
+      "log_sha256": "5e7b5ad8454a7cd2da9d98a131bde8438ca0a6df3844706b89ab3d627ab5c494",
+      "products": [
+        {
+          "bundle": "RuneScrib.app",
+          "identifier": "com.runescribe.app",
+          "version": "1.0.47",
+          "build": "47",
+          "architectures": [
+            "x86_64",
+            "arm64"
+          ]
+        }
+      ],
+      "m1_reports_in_product": false
+    }
+  ],
+  "limits": [
+    "No app launch or runtime tests.",
+    "No StoreKit purchase/restore, App Store action, archive, signing, upload or release.",
+    "Generic unsigned builds do not establish device/recipient or production migration acceptance.",
+    "Exact logs, commands, DerivedData and xcresult bundles remain in the external publication evidence directory."
+  ]
+}

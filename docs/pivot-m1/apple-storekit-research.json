@@ -1,0 +1,175 @@
+{
+  "retrieved_on_client_date": "2026-10-21",
+  "scope": "Public primary documentation only; no app transactions, Store account records, receipts or secrets read.",
+  "sources": [
+    {
+      "url": "https://developer.apple.com/documentation/storekit/supporting-business-model-changes-by-using-the-app-transaction",
+      "retrieval_url": "https://developer.apple.com/documentation/storekit/supporting-business-model-changes-by-using-the-app-transaction.md",
+      "status": "retrieved_read_only",
+      "sha256": "fc69ffe115b17389a5c39be9f0a474b6b2ccd934672ea09dc0d2aa4c88076d59",
+      "availability": null,
+      "title": "Supporting business model changes by using the app transaction",
+      "copyright_text_copied": false
+    },
+    {
+      "url": "https://developer.apple.com/documentation/storekit/apptransaction",
+      "retrieval_url": "https://developer.apple.com/documentation/storekit/apptransaction.md",
+      "status": "retrieved_read_only",
+      "sha256": "221e3d60a571d9ba3ef4d2df9497490ce51042751bd78b01bfb35a971de3f641",
+      "availability": [
+        "iOS: 16.0.0 -",
+        "iPadOS: 16.0.0 -",
+        "macOS: 13.0.0 -",
+        "tvOS: 16.0.0 -",
+        "visionOS: 1.0.0 -",
+        "watchOS: 9.0.0 -"
+      ],
+      "title": "AppTransaction",
+      "copyright_text_copied": false
+    },
+    {
+      "url": "https://developer.apple.com/documentation/storekit/apptransaction/shared",
+      "retrieval_url": "https://developer.apple.com/documentation/storekit/apptransaction/shared.md",
+      "status": "retrieved_read_only",
+      "sha256": "a766f6883ae32fdc0c7fa601399d4cfdd35836386f9c1cd5dd9c0d2f3220ca0b",
+      "availability": [
+        "iOS: 16.0.0 -",
+        "iPadOS: 16.0.0 -",
+        "macOS: 13.0.0 -",
+        "tvOS: 16.0.0 -",
+        "visionOS: 1.0.0 -",
+        "watchOS: 9.0.0 -"
+      ],
+      "title": "shared",
+      "copyright_text_copied": false
+    },
+    {
+      "url": "https://developer.apple.com/documentation/storekit/apptransaction/refresh()",
+      "retrieval_url": "https://developer.apple.com/documentation/storekit/apptransaction/refresh().md",
+      "status": "retrieved_read_only",
+      "sha256": "12ecbf211caee0114364b3d202de51d34be17c207ef53973ff5caa17515f9abb",
+      "availability": [
+        "iOS: 16.0.0 -",
+        "iPadOS: 16.0.0 -",
+        "macOS: 13.0.0 -",
+        "tvOS: 16.0.0 -",
+        "visionOS: 1.0.0 -",
+        "watchOS: 9.0.0 -"
+      ],
+      "title": "refresh()",
+      "copyright_text_copied": false
+    },
+    {
+      "url": "https://developer.apple.com/documentation/storekit/apptransaction/originalappversion",
+      "retrieval_url": "https://developer.apple.com/documentation/storekit/apptransaction/originalappversion.md",
+      "status": "retrieved_read_only",
+      "sha256": "d2119eda60a7d6a1b2efde64f8a65d9e826ecc9e3e80aafa390d509c8bc0a9a5",
+      "availability": [
+        "iOS: 16.0.0 -",
+        "iPadOS: 16.0.0 -",
+        "macOS: 13.0.0 -",
+        "tvOS: 16.0.0 -",
+        "visionOS: 1.0.0 -",
+        "watchOS: 9.0.0 -"
+      ],
+      "title": "originalAppVersion",
+      "copyright_text_copied": false
+    },
+    {
+      "url": "https://developer.apple.com/documentation/storekit/apptransaction/originalpurchasedate",
+      "retrieval_url": "https://developer.apple.com/documentation/storekit/apptransaction/originalpurchasedate.md",
+      "status": "retrieved_read_only",
+      "sha256": "987552b039055c895dfb00e82dd9531083eeb2ab8a3f979da804961672cba65d",
+      "availability": [
+        "iOS: 16.0.0 -",
+        "iPadOS: 16.0.0 -",
+        "macOS: 13.0.0 -",
+        "tvOS: 16.0.0 -",
+        "visionOS: 1.0.0 -",
+        "watchOS: 9.0.0 -"
+      ],
+      "title": "originalPurchaseDate",
+      "copyright_text_copied": false
+    },
+    {
+      "url": "https://developer.apple.com/documentation/storekit/transaction/currententitlements",
+      "retrieval_url": "https://developer.apple.com/documentation/storekit/transaction/currententitlements.md",
+      "status": "retrieved_read_only",
+      "sha256": "ebc3c880321005cc4331969df272362571ceafbfb5ede68eb347c213bc96b84b",
+      "availability": [
+        "iOS: 15.0.0 -",
+        "iPadOS: 15.0.0 -",
+        "macOS: 12.0.0 -",
+        "tvOS: 15.0.0 -",
+        "visionOS: 1.0.0 -",
+        "watchOS: 8.0.0 -"
+      ],
+      "title": "currentEntitlements",
+      "copyright_text_copied": false
+    },
+    {
+      "url": "https://developer.apple.com/documentation/storekit/appstore/sync()",
+      "retrieval_url": "https://developer.apple.com/documentation/storekit/appstore/sync().md",
+      "status": "retrieved_read_only",
+      "sha256": "c896019fc436927058acc1b5b74838fac0c4a868655f9d4fc82537bd78eb003e",
+      "availability": [
+        "iOS: 15.0.0 -",
+        "iPadOS: 15.0.0 -",
+        "macOS: 12.0.0 -",
+        "tvOS: 15.0.0 -",
+        "visionOS: 1.0.0 -",
+        "watchOS: 8.0.0 -"
+      ],
+      "title": "sync()",
+      "copyright_text_copied": false
+    },
+    {
+      "url": "https://developer.apple.com/documentation/storekit/product/purchaseresult",
+      "retrieval_url": "https://developer.apple.com/documentation/storekit/product/purchaseresult.md",
+      "status": "retrieved_read_only",
+      "sha256": "1b79ea77ce2af7415f53c65078ae81cf98b9b7a41eb335674de83e5ff3d4e617",
+      "availability": [
+        "iOS: 15.0.0 -",
+        "iPadOS: 15.0.0 -",
+        "macOS: 12.0.0 -",
+        "tvOS: 15.0.0 -",
+        "visionOS: 1.0.0 -",
+        "watchOS: 8.0.0 -"
+      ],
+      "title": "Product.PurchaseResult",
+      "copyright_text_copied": false
+    },
+    {
+      "url": "https://developer.apple.com/documentation/storekit/transaction/finish()",
+      "retrieval_url": "https://developer.apple.com/documentation/storekit/transaction/finish().md",
+      "status": "retrieved_read_only",
+      "sha256": "d4c3298884086e83c66c6c6b30bae5514a2d4f81e0018f30c9345b0e5dd0575a",
+      "availability": [
+        "iOS: 15.0.0 -",
+        "iPadOS: 15.0.0 -",
+        "macOS: 12.0.0 -",
+        "tvOS: 15.0.0 -",
+        "visionOS: 1.0.0 -",
+        "watchOS: 8.0.0 -"
+      ],
+      "title": "finish()",
+      "copyright_text_copied": false
+    },
+    {
+      "url": "https://developer.apple.com/documentation/storekit/verificationresult",
+      "retrieval_url": "https://developer.apple.com/documentation/storekit/verificationresult.md",
+      "status": "retrieved_read_only",
+      "sha256": "6c200411ca87d8cc7fe85938876139f1bc1d2da3c618dde28bd5544adc054edd",
+      "availability": [
+        "iOS: 15.0.0 -",
+        "iPadOS: 15.0.0 -",
+        "macOS: 12.0.0 -",
+        "tvOS: 15.0.0 -",
+        "visionOS: 1.0.0 -",
+        "watchOS: 8.0.0 -"
+      ],
+      "title": "VerificationResult",
+      "copyright_text_copied": false
+    }
+  ]
+}
