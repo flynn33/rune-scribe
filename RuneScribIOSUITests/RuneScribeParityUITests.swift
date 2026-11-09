@@ -709,7 +709,7 @@ final class RuneScribeParityUITests: XCTestCase {
         let licenseAgreement = app.staticTexts.matching(
             NSPredicate(
                 format: "label BEGINSWITH %@",
-                "RUNE SCRIBE\nEND-USER LICENSE AGREEMENT"
+                "RUNE SCRIBE\nAPACHE LICENSE, VERSION 2.0"
             )
         ).firstMatch
         XCTAssertTrue(licenseAgreement.waitForExistence(timeout: 5))

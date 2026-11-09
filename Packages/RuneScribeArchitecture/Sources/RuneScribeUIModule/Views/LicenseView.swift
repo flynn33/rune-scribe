@@ -2,7 +2,7 @@
 
 import SwiftUI
 
-/// Displays the proprietary End-User License Agreement (Settings → View License).
+/// Displays the Apache License 2.0 notice (Settings → View License).
 struct LicenseView: View {
 
     @Environment(\.dismiss) private var dismiss

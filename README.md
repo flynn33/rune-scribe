@@ -14,7 +14,7 @@ or file — and they can read it; without it, the runes are just runes.
 ![Swift](https://img.shields.io/badge/Swift-6.0-D4971A?style=flat-square)
 ![SwiftUI](https://img.shields.io/badge/UI-SwiftUI%20%2B%20Metal-3A7FD5?style=flat-square)
 ![Tests](https://img.shields.io/badge/tests-focused%20Messages%20%7C%20architecture%20guards-2ea043?style=flat-square)
-![License](https://img.shields.io/badge/license-Proprietary-A0A8B8?style=flat-square)
+![License](https://img.shields.io/badge/license-Apache%202.0-2ea043?style=flat-square)
 
 A product of **Raven Forge Software**.
 
@@ -624,9 +624,9 @@ labeled by the environment in which it was observed.
 
 ## 📜 License
 
-Rune Scribe is **proprietary** software, licensed (not sold) under the
-[End-User License Agreement](EULA.md). The bundled *Noto Sans Runic* font is used
-under the SIL Open Font License. © Raven Forge Software. All rights reserved.
+Rune Scribe is licensed under the [Apache License, Version 2.0](LICENSE).
+The bundled *Noto Sans Runic* font remains under the SIL Open Font License.
+Copyright 2026 Raven Forge Software.
 
 ---
 
